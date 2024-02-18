@@ -4,11 +4,11 @@ from DataReader import DataReader
  
 def test_OHM():
 
-    NBitsIn = 4
-    NBitsOut = 5
+    NBitsIn = 7
+    NBitsOut = 8
     input = [5, -2]
     D = len(input)
-    NSteps = 15
+    NSteps = 20
     resultStart = 10
     resultEnd = 15
 
@@ -22,7 +22,10 @@ def test_OHM():
 
     print(f"== {0} ============================")
 
-    ohm.Calc(data)
+    x = data.Output()
+    lsb = data.isLsb()
+    msb = data.isMsb()        
+    ohm.Calc(x, lsb, msb)
     result.append(ohm.Output())
     
     data.Print()
@@ -35,8 +38,15 @@ def test_OHM():
         print(f"== {bi+1} ============================")
         data.Step()
         data.Print()
-        ohm.Calc(data)
+        x = data.Output()
+        lsb = data.isLsb()
+        msb = data.isMsb()        
+        ohm.Calc(x, lsb, msb)
+
+        print(f"---> Output lsb at: {ohm.isLSB()}")
+
         result.append(ohm.Output())
+        
         ohm.Print("", 1)
         ohm.Step(data.isLsb(), data.isMsb())
     

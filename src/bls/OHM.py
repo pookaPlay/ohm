@@ -60,17 +60,15 @@ class OHM:
         self.msb2lsb.Reset()        
                 
 
+    def isLSB(self) -> int:
+        return self.lsbAtPBF.Output()
 
     def Output(self) -> int:
         return self.msb2lsb.Output()
         
     # Combinatorial stuff goes here
-    def Calc(self, data) -> None:        
+    def Calc(self, x, lsb, msb) -> None:        
         
-        x = data.Output()
-        lsb = data.isLsb()
-        msb = data.isMsb()
-
         nx = [1-x[i] for i in range(len(x))]
 
         for i in range(self.d):
