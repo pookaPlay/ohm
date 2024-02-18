@@ -6,29 +6,26 @@ def test_OHM():
 
     NBitsIn = 4
     NBitsOut = 5
-    input = [5, 2]
+    input = [5, -2]
     D = len(input)
     NSteps = 15
     resultStart = 10
     resultEnd = 15
 
     data = DataReader(input, NBitsIn, NBitsOut)
-    #result = DataWriter(input, NBitsIn, NBitsOut)
-    data.Reset()    
-    
-    #print(inputs)
+    print(data.data)
+    ohm = OHM(D, NBitsIn, NBitsOut)    
     result = list()   
     
-    ohm = OHM(D, NBitsIn, NBitsOut)    
-    ohm.Reset(data.Output())    
-    
-    ohm.Calc(data.Output())
-    output = ohm.Output()    
-    result.append(output)
+    data.Reset()        
+    ohm.Reset(data.Output())        
 
     print(f"== {0} ============================")
+
+    ohm.Calc(data.Output())    
+    result.append(ohm.Output())
+    
     data.Print()
-    print(f"----------------------")
     ohm.Print("", 1)
 
     ohm.Step(data.isMsb())
@@ -43,7 +40,6 @@ def test_OHM():
         ohm.Print("", 1)
         ohm.Step(data.isMsb())
     
-    #print(result) 
     result = result[resultStart:resultEnd]
     print(result) 
     output = DeserializeLSBOffset(result)    
