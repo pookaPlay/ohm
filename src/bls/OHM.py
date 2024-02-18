@@ -33,6 +33,7 @@ class OHM:
 
         self.msbAtPBF = SRL(1)
         self.flags = list(self.d2 * [0])                        
+        self.latchInput = list(self.d2 * [0])
         self.pbf = PBF(self.d2)                
         
         self.msb2lsb = msb2lsb(self.Nout)
@@ -53,7 +54,7 @@ class OHM:
                     
         self.msbAtPBF.Reset()
         self.flags = list(self.d2 * [0])                        
-
+        self.latchInput = list(self.d2 * [0])
         self.pbf.Reset([self.lsb2msb[i].Output() for i in range(self.d2)])
         self.msb2lsb.Reset()        
         
@@ -77,9 +78,17 @@ class OHM:
         if self.msbAtPBF.Output() == 1:            
             inputs = [1-x for x in inputs]
             # print(f"Negated inputs: {inputs}")
-
+        else:
+            for i in range(self.d2):    
+                if self.flags[i] == 1:
+                    inputs[i] = self.latchInput[i]
+                    
         self.pbf.Calc(inputs)
-        self.flags = [1 if inputs[i] != self.pbf.Output() else 0 for i in range(self.d2)]
+        for i in range(self.d2):
+            if self.flags[i] == 0:
+                if inputs[i] != self.pbf.Output():
+                    self.flags[i] = 1
+                    self.latchInput[i] = inputs[i]                    
         
     # State stuff goes here
     def Step(self, isMsb) -> None:        

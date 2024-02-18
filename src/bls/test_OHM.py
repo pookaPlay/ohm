@@ -10,7 +10,7 @@ def test_OHM():
     D = len(input)
     NSteps = 15
     resultStart = 10
-    resultEnd = 14
+    resultEnd = 15
 
     data = DataReader(input, NBitsIn, NBitsOut)
     #result = DataWriter(input, NBitsIn, NBitsOut)
