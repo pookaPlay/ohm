@@ -1,3 +1,4 @@
 # OHM: Ordered Hypothesis Machines
 
-Digital neuromorphic hardware by design. 
+A new approach to digital neuromorphic computing based on Bit-Serial Ordered Hypothesis Machines. 
+
