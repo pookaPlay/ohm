@@ -22,23 +22,23 @@ def test_OHM():
 
     print(f"== {0} ============================")
 
-    ohm.Calc(data.Output())    
+    ohm.Calc(data)
     result.append(ohm.Output())
     
     data.Print()
     ohm.Print("", 1)
 
-    ohm.Step(data.isMsb())
+    ohm.Step(data.isLsb(), data.isMsb())
         
 
     for bi in range(NSteps):
         print(f"== {bi+1} ============================")
         data.Step()
         data.Print()
-        ohm.Calc(data.Output())                
+        ohm.Calc(data)
         result.append(ohm.Output())
         ohm.Print("", 1)
-        ohm.Step(data.isMsb())
+        ohm.Step(data.isLsb(), data.isMsb())
     
     result = result[resultStart:resultEnd]
     print(result) 

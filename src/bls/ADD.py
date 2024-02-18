@@ -12,12 +12,13 @@ class ADD:
     def Output(self) -> int:
         return self.sum
 
-    def Reset(self, a, b) -> None:
-        self.sum = 0
-        self.cin = 0
-        self.Calc(a, b)
+    def Reset(self) -> None:        
+        self.cin = 0        
 
-    def Calc(self, a, b) -> None:                
+    def Calc(self, a, b, lsb=0) -> None:                
+        if lsb == 1:
+            self.cin = 0
+
         self.a = a
         self.b = b
         self.sum  = (a+b+self.cin) % 2
