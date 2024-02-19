@@ -50,6 +50,7 @@ class OHM:
             self.pbf.SetMedian()
 
         self.msb2lsb = msb2lsb(self.Nout)
+        self.g2g = 0
         
     def Reset(self) -> None:
         
@@ -70,8 +71,10 @@ class OHM:
         self.msbAtOut.Reset()
         self.flags = list(self.d2 * [0])                        
         self.latchInput = list(self.d2 * [0])
-        self.pbf.Reset([self.lsb2msb[i].Output() for i in range(self.d2)])
+        self.pbf.Reset([self.lsb2msb[i].Output() for i in range(self.d2)])        
         self.msb2lsb.Reset()        
+
+        self.g2g = 0
                 
     def msbOut(self) -> int:
         return self.msbAtOut.Output()
@@ -110,7 +113,11 @@ class OHM:
             if self.flags[i] == 0:
                 if inputs[i] != self.pbf.Output():
                     self.flags[i] = 1
-                    self.latchInput[i] = inputs[i]                    
+                    self.latchInput[i] = inputs[i]
+        
+        if (sum(self.flags) == (self.d2-1)):
+            #print(self.flags)
+            self.g2g = 1            
         
     # State stuff goes here
     def Step(self, isLsb, isMsb) -> None:        
@@ -140,7 +147,7 @@ class OHM:
     def Print(self, prefix="", showInput=1) -> None:
         #print(f"==============================")
         #print(f"OHM: {self.d2} inputs")
-
+        #print(prefix + f"################### G2G: {self.g2g} ###################")
         if showInput:            
             print(f" +ve ------------------------")
             for i in range(self.d):                

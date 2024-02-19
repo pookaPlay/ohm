@@ -1,18 +1,18 @@
 from DataReader import DataReader
 from DataWriter import DataWriter
-from OHM import OHM
+from OhmNet import OhmNet1
 
-
-def runTest(input, ptf):
+def RunOhmNet():
     
-    NBitsIn = 8
-    NBitsOut = 9
+    ptf = "min"
+    NBitsIn = 4
+    NBitsOut = 5
                 
     D = len(input[0])
-    NSteps = 85
+    NSteps = 45
 
     data = DataReader(input, NBitsIn, NBitsOut)    
-    ohm = OHM(D, NBitsIn, NBitsOut, ptf=ptf)        
+    ohm = OHMNet1(D, NBitsIn, NBitsOut, ptf=ptf)        
     output = DataWriter()    
     
     data.Reset()        
@@ -33,7 +33,7 @@ def runTest(input, ptf):
         
         ohm.Calc(data.Output(), data.lsbIn(), data.msbIn())
         print(f"OHM: {ohm.Output()}      lsb: {ohm.lsbOut()} msb: {ohm.msbOut()}")
-        #ohm.Print("", 1)
+        ohm.Print()
         output.Step(ohm.Output(), ohm.lsbOut(), ohm.msbOut())            
         output.Print()
 
@@ -43,16 +43,3 @@ def runTest(input, ptf):
     
     return output.Output()
 
-def test_OHM():
-    ptf = "median"
-    input = [[7, -2, -6], [7, 0, -3], [1, 3, 5], [-6, 1, 2]]    
-    expected = [2, 0, 1, 1, 2, 0, 1]    
-    ret = runTest(input, ptf)    
-    
-    if ret != expected:
-        print(f"Expected: {expected}")
-        print(f"Got: {ret}")   
-        assert False    
-
-
-test_OHM()

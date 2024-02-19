@@ -43,7 +43,7 @@ def runTest(input, ptf):
     
     return output.Output()
 
-def test_OHM():
+def test_OHM_WOS8():
     ptf = "median"
     input = [[7, -2, -6], [7, 0, -3], [1, 3, 5], [-6, 1, 2]]    
     expected = [2, 0, 1, 1, 2, 0, 1]    
@@ -55,4 +55,4 @@ def test_OHM():
         assert False    
 
 
-test_OHM()
+test_OHM_WOS8()
