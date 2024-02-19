@@ -105,18 +105,17 @@ class OHM:
     # State stuff goes here
     def Step(self, isLsb, isMsb) -> None:        
 
-        #if isLsb == 1:
-        #    for i in range(self.d):
-        #        self.addp[i].ResetCarry()
-        #        self.addn[i].ResetCarry()
+        # Negate MSB to convert from offset back to twos complement
+        if self.msbAtPBF.Output() == 1:
+            self.msb2lsb.Step(1-self.pbf.Output())
+        else:
+            self.msb2lsb.Step(self.pbf.Output())
 
-        self.msb2lsb.Step(self.pbf.Output())
-        
         self.lsbAtPBF.Step(isLsb)
         self.msbAtPBF.Step(isMsb)
         
         self.lsbAtOut.Step(self.lsbAtPBF.Output())
-        self.msbAtOut.Step(self.msbAtPBF.Output())
+        self.msbAtOut.Step(self.msbAtPBF.Output())        
 
         for i in range(self.d):
             self.lsb2msb[i].Step(self.addp[i].Output(), self.flags[i])

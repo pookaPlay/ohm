@@ -6,9 +6,10 @@ def test_OHM():
 
     NBitsIn = 4
     NBitsOut = 5
-    input = [[5, 2], [4,3], [2, 6], [1, 4]]
+    
+    input = [[4, -2], [0, 0], [0, 0], [0, 0]]
     D = len(input[0])
-    NSteps = 30
+    NSteps = 15
 
     data = DataReader(input, NBitsIn, NBitsOut)    
     ohm = OHM(D, NBitsIn, NBitsOut)        

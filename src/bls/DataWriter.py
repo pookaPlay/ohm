@@ -1,4 +1,4 @@
-from DataIO import DeserializeLSBOffset
+from DataIO import DeserializeLSBTwos
 
 class DataWriter():
     def __init__(self):
@@ -33,7 +33,8 @@ class DataWriter():
         self.result.append(x)
 
         if (msb == 1):        
-            self.lastResult = DeserializeLSBOffset(self.result)                
+            self.lastResult = DeserializeLSBTwos(self.result)                
+            print(f"   Writer: {self.lastResult} from {self.result}")
             self.finalResult.append(self.lastResult)
 
         

@@ -37,45 +37,6 @@ def SerializeMSBTwosSignExtend(input, NBits=8, extend=1):
         
     return(result)
 
-def SerializeMSB(input, NBits=8):
-    thresholds = [2**i for i in range(NBits)]
-    thresholds.reverse()
-    
-    output = list()
-    for i in range(NBits):        
-        #print(f"Step {i} : Input {input}")
-        if input >= thresholds[i]:            
-            output.append(1)
-            input -= thresholds[i]
-            #print("Bigger than " + str(thresholds[i]))
-        else:
-            output.append(0)
-
-    return(output)            
-
-def DeserializeMSB(input):
-    NBits= len(input)
-    
-    thresholds = [2**i for i in range(NBits)]
-    thresholds.reverse()
-    
-    result = sum([input[i] * thresholds[i] for i in range(NBits)])
-
-    return(result)
-
-def DeserializeLSBTwos(input):
-    NBits= len(input)
-    offset = 2**(NBits-1)
-    # flip MSB
-    input[NBits-1] = 1 - input[NBits-1]
-    thresholds = [2**i for i in range(NBits)]   
-    #print("Decode")
-    #print(input)
-    #print(thresholds)
-    result = sum([input[i] * thresholds[i] for i in range(NBits)])
-    result -= offset
-    return(result)
-
 def DeserializeMSBTwos(input):
     NBits= len(input)
     offset = 2**(NBits-1)
@@ -108,4 +69,17 @@ def DeserializeLSBOffset(input):
     result = sum([input[i] * thresholds[i] for i in range(NBits)])
     result -= offset
 
+    return(result)
+
+def DeserializeLSBTwos(input):
+    NBits= len(input)
+    offset = 2**(NBits-1)
+    # flip MSB
+    input[NBits-1] = 1 - input[NBits-1]
+    thresholds = [2**i for i in range(NBits)]   
+    #print("Decode")
+    #print(input)
+    #print(thresholds)
+    result = sum([input[i] * thresholds[i] for i in range(NBits)])
+    result -= offset
     return(result)
