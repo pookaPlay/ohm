@@ -45,22 +45,20 @@ class DataReader():
             print(f"Serializing next")                      
             self.bi = 0                        
             self.ni = self.ni + 1
-            if self.ni < self.N:
-                self.data = [SerializeMSBTwos(self.input[self.ni][d], self.NIn) for d in range(self.D)]
-                for d in range(self.D):
-                    self.data[d].reverse()                
-            else:
-                self.data = [SerializeMSBTwos(0, self.NIn) for d in range(self.D)]
-                for d in range(self.D):
-                    self.data[d].reverse()                
-                self.ni = 0            
+
+            if self.ni == self.N:
+                self.ni = 0
+
+            self.data = [SerializeMSBTwos(self.input[self.ni][d], self.NIn) for d in range(self.D)]
+            for d in range(self.D):
+                self.data[d].reverse()                
         else:
             self.bi = self.bi + 1
         
         if self.bi < self.NIn:
             self.slice = [self.data[d][self.bi] for d in range(self.D)]
         elif self.bi < self.NOut:
-            # sign extend
+            # sign extend twos complement
             self.slice = [self.data[d][self.NIn-1] for d in range(self.D)]
         else:            
             self.slice = self.D * [0]

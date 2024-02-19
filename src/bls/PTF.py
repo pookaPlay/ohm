@@ -1,6 +1,6 @@
 import math
 
-class PBF:
+class PTF:
     def __init__(self, D=3) -> None:
         self.D = D
         self.weights = list(self.D * [1])
@@ -31,7 +31,7 @@ class PBF:
         self.y = 1 if temp >= self.threshold else 0        
 
     def Print(self, prefix=""):
-        print(f"{prefix} PBF: {self.lastx} -> {self.y}")
+        print(f"{prefix} PTF: {self.lastx} -> {self.y}")
 
     def Step(self, x) -> None:
         pass

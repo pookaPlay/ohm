@@ -1,25 +1,27 @@
 from CCSRL import CCSRL
 from ADD import ADD
-from PBF import PBF
+from PTF import PTF
 from SRL import SRL
 from msb2lsb import msb2lsb
 from lsb2msb import lsb2msb
 
 class OHM:
     
-    def __init__(self, D=2, Nin = 4, Nout = 5) -> None:
+    def __init__(self, D=2, Nin = 4, Nout = 5, ptf="") -> None:
         ## Nin is the stored precision of weights
         ## NOut is the sign extened precision
         ## Input should be two's complement with NOut bits
+        ## Weights are two's complement Nin and sign extened to NOut 
 
         self.d = D
         self.d2 = D*2        
         self.Nin = Nin
         self.Nout = Nout
-        # default weights
+        
+        # default weights        
         self.zeros = list(self.Nin * [0])
         self.one = self.zeros.copy()
-        self.one[self.Nin-1] = 1
+        self.one[self.Nin-1] = 1                
 
         self.wp = [CCSRL(self.Nin, self.Nout) for _ in range(self.d)]
         self.wn = [CCSRL(self.Nin, self.Nout) for _ in range(self.d)]        
@@ -37,20 +39,28 @@ class OHM:
         self.flags = list(self.d2 * [0])                        
         # This is a hack - i dont think I actually need to store latchInput
         self.latchInput = list(self.d2 * [0])
-        self.pbf = PBF(self.d2)                
-        
+
+        self.pbf = PTF(self.d2)                
+        # Some presets for debugging
+        if ptf == "min":
+            self.pbf.SetMin()
+        elif ptf == "max":          
+            self.pbf.SetMax()                           
+        else:       
+            self.pbf.SetMedian()
+
         self.msb2lsb = msb2lsb(self.Nout)
         
-    def Reset(self, x) -> None:
+    def Reset(self) -> None:
         
         for i in range(self.d):
 
             self.wp[i].Reset(self.zeros)
             self.addp[i].Reset()
-
+ 
             self.wn[i].Reset(self.one)
             self.addn[i].Reset()
-                            
+
             self.lsb2msb[i].Reset()
             self.lsb2msb[i+self.d].Reset()
             
