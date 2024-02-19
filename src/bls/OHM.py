@@ -27,13 +27,15 @@ class OHM:
         self.addn = [ADD() for _ in range(self.d)]
         
         self.lsb2msb = [lsb2msb(self.Nout) for _ in range(self.d2)]
-        
-        ## NBits+1 is the input precision for the PBF
-        ## Need to flip NBits+1 MSB to convert twos' to offset binary
+               
         self.lsbAtPBF = SRL(Nout*2)
         self.msbAtPBF = SRL(1)
+
+        self.lsbAtOut = SRL(1)
+        self.msbAtOut = SRL(Nout*2)
+
         self.flags = list(self.d2 * [0])                        
-        # This is a hack - i dont think I actually need to store anything
+        # This is a hack - i dont think I actually need to store latchInput
         self.latchInput = list(self.d2 * [0])
         self.pbf = PBF(self.d2)                
         
@@ -54,21 +56,26 @@ class OHM:
             
         self.lsbAtPBF.Reset()            
         self.msbAtPBF.Reset()
+        self.lsbAtOut.Reset()            
+        self.msbAtOut.Reset()
         self.flags = list(self.d2 * [0])                        
         self.latchInput = list(self.d2 * [0])
         self.pbf.Reset([self.lsb2msb[i].Output() for i in range(self.d2)])
         self.msb2lsb.Reset()        
                 
+    def msbOut(self) -> int:
+        return self.msbAtOut.Output()
 
-    def isLSB(self) -> int:
-        return self.lsbAtPBF.Output()
+    def lsbOut(self) -> int:
+        return self.lsbAtOut.Output()
+        #return self.lsbAtPBF.Output()
 
     def Output(self) -> int:
         return self.msb2lsb.Output()
         
     # Combinatorial stuff goes here
     def Calc(self, x, lsb, msb) -> None:        
-        
+
         nx = [1-x[i] for i in range(len(x))]
 
         for i in range(self.d):
@@ -107,6 +114,9 @@ class OHM:
         
         self.lsbAtPBF.Step(isLsb)
         self.msbAtPBF.Step(isMsb)
+        
+        self.lsbAtOut.Step(self.lsbAtPBF.Output())
+        self.msbAtOut.Step(self.msbAtPBF.Output())
 
         for i in range(self.d):
             self.lsb2msb[i].Step(self.addp[i].Output(), self.flags[i])
@@ -140,9 +150,11 @@ class OHM:
         prefix = "  "
         #inputs = [self.lsb2msb[i].Output() for i in range(self.d2)]
         print(f" =Output =====")
-        self.lsbAtPBF.Print("LSB-")        
-        self.msbAtPBF.Print("MSB-")        
+        self.lsbAtPBF.Print("   lsbAtPBF-")        
+        self.msbAtPBF.Print("   msbAtPBF-")
         self.pbf.Print(" ")
         #print(f"  PBF: {str(inputs)} -> {self.pbf.Output()}")        
         self.msb2lsb.Print(prefix)
+        self.lsbAtOut.Print("LSB-OUT-")        
+        self.msbAtOut.Print("MSB-OUT-")
 

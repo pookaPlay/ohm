@@ -1,59 +1,49 @@
 from OHM import OHM
 from DataIO import DeserializeLSBTwos, DeserializeLSBOffset
 from DataReader import DataReader
+from DataWriter import DataWriter
  
 def test_OHM():
 
-    NBitsIn = 7
-    NBitsOut = 8
-    input = [5, -2]
-    D = len(input)
-    NSteps = 20
-    resultStart = 10
-    resultEnd = 15
+    NBitsIn = 4
+    NBitsOut = 5
+    input = [[5, 2], [4,3], [2, 6], [1, 4]]
+    D = len(input[0])
+    NSteps = 30
 
-    data = DataReader(input, NBitsIn, NBitsOut)
-    print(data.data)
-    ohm = OHM(D, NBitsIn, NBitsOut)    
-    result = list()   
+    data = DataReader(input, NBitsIn, NBitsOut)    
+    ohm = OHM(D, NBitsIn, NBitsOut)        
+    output = DataWriter()    
     
     data.Reset()        
     ohm.Reset(data.Output())        
+    output.Reset()
 
     print(f"== {0} ============================")
-
-    x = data.Output()
-    lsb = data.isLsb()
-    msb = data.isMsb()        
-    ohm.Calc(x, lsb, msb)
-    result.append(ohm.Output())
-    
     data.Print()
-    ohm.Print("", 1)
 
-    ohm.Step(data.isLsb(), data.isMsb())
-        
+    ohm.Calc(data.Output(), data.lsbIn(), data.msbIn())
+    #ohm.Print("", 1)        
+
+    output.Step(ohm.Output(), ohm.lsbOut(), ohm.msbOut())    
+    ohm.Step(data.lsbIn(), data.msbIn())                    
 
     for bi in range(NSteps):
         print(f"== {bi+1} ============================")
         data.Step()
         data.Print()
-        x = data.Output()
-        lsb = data.isLsb()
-        msb = data.isMsb()        
-        ohm.Calc(x, lsb, msb)
-
-        print(f"---> Output lsb at: {ohm.isLSB()}")
-
-        result.append(ohm.Output())
         
-        ohm.Print("", 1)
-        ohm.Step(data.isLsb(), data.isMsb())
-    
-    result = result[resultStart:resultEnd]
-    print(result) 
-    output = DeserializeLSBOffset(result)    
-    print(output)
+        ohm.Calc(data.Output(), data.lsbIn(), data.msbIn())
+        print(f"OHM: {ohm.Output()}      lsb: {ohm.lsbOut()} msb: {ohm.msbOut()}")
+        #ohm.Print("", 1)
+        
+        output.Step(ohm.Output(), ohm.lsbOut(), ohm.msbOut())            
+        output.Print()
+
+        ohm.Step(data.lsbIn(), data.msbIn())
+        
+   
+    output.PrintAll()
     
     return
         
