@@ -26,13 +26,15 @@ def runTest(input, ptf):
     output.Step(ohm.Output(), ohm.lsbOut(), ohm.msbOut())    
     ohm.Step(data.lsbIn(), data.msbIn())                    
 
+    ci = 0
     for bi in range(NSteps):
         print(f"== {bi+1} ============================")
         data.Step()
         data.Print()
         
         ohm.Calc(data.Output(), data.lsbIn(), data.msbIn())
-        print(f"OHM: {ohm.Output()}      lsb: {ohm.lsbOut()} msb: {ohm.msbOut()}")
+        
+        print(f"OHM: {ohm.Output()}      lsb: {ohm.lsbOut()} msb: {ohm.msbOut()}  done: {ohm.done}")
         #ohm.Print("", 1)
         output.Step(ohm.Output(), ohm.lsbOut(), ohm.msbOut())            
         output.Print()

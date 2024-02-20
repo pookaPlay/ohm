@@ -1,10 +1,12 @@
 from DataReader import DataReader
 from DataWriter import DataWriter
-from OhmNet import OhmNet1
+from OhmNet import OhmNet
 
 def RunOhmNet():
     
-    ptf = "min"
+    ptf = "median"
+    input = [[7, -2, -6], [7, 0, -3], [1, 3, 5], [-6, 1, 2]]    
+    
     NBitsIn = 4
     NBitsOut = 5
                 
@@ -12,7 +14,7 @@ def RunOhmNet():
     NSteps = 45
 
     data = DataReader(input, NBitsIn, NBitsOut)    
-    ohm = OHMNet1(D, NBitsIn, NBitsOut, ptf=ptf)        
+    ohm = OhmNet(D, NBitsIn, NBitsOut, ptf=ptf)        
     output = DataWriter()    
     
     data.Reset()        
@@ -32,7 +34,8 @@ def RunOhmNet():
         data.Print()
         
         ohm.Calc(data.Output(), data.lsbIn(), data.msbIn())
-        print(f"OHM: {ohm.Output()}      lsb: {ohm.lsbOut()} msb: {ohm.msbOut()}")
+        
+        print(f"OHM: {ohm.Output()} lsb: {ohm.lsbOut()} msb: {ohm.msbOut()}  done: {ohm.done()}")
         ohm.Print()
         output.Step(ohm.Output(), ohm.lsbOut(), ohm.msbOut())            
         output.Print()
@@ -43,3 +46,5 @@ def RunOhmNet():
     
     return output.Output()
 
+
+RunOhmNet()
