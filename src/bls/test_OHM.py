@@ -4,6 +4,7 @@ from OHM import OHM
 
 
 def runTest(input, ptf):
+    verbose = 1
     
     NBitsIn = 8
     NBitsOut = 9
@@ -35,7 +36,7 @@ def runTest(input, ptf):
         ohm.Calc(data.Output(), data.lsbIn(), data.msbIn())
         
         print(f"OHM: {ohm.Output()}      lsb: {ohm.lsbOut()} msb: {ohm.msbOut()}  done: {ohm.done}")
-        #ohm.Print("", 1)
+        ohm.Print("", verbose)
         output.Step(ohm.Output(), ohm.lsbOut(), ohm.msbOut())            
         output.Print()
 

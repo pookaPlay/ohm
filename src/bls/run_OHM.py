@@ -4,12 +4,14 @@ from OhmNet import OhmNet
 
 def RunOhmNet():
     
+    verbose = 1
+
     ptf = "median"
     input = [[7, -2, -6], [7, 0, -3], [1, 3, 5], [-6, 1, 2]]    
     
     NBitsIn = 4
     NBitsOut = 5
-                
+
     D = len(input[0])
     NSteps = 45
 
@@ -36,7 +38,7 @@ def RunOhmNet():
         ohm.Calc(data.Output(), data.lsbIn(), data.msbIn())
         
         print(f"OHM: {ohm.Output()} lsb: {ohm.lsbOut()} msb: {ohm.msbOut()}  done: {ohm.done()}")
-        ohm.Print()
+        ohm.Print("", verbose)
         output.Step(ohm.Output(), ohm.lsbOut(), ohm.msbOut())            
         output.Print()
 

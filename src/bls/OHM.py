@@ -51,6 +51,7 @@ class OHM:
 
         self.msb2lsb = msb2lsb(self.Nout)
         self.done = 0
+        self.doneAtInput = 0
         
     def Reset(self) -> None:
         
@@ -75,6 +76,7 @@ class OHM:
         self.msb2lsb.Reset()        
 
         self.done = 0
+        self.doneAtInput = 0
                 
     def msbOut(self) -> int:
         return self.msbAtOut.Output()
@@ -122,6 +124,7 @@ class OHM:
     # State stuff goes here
     def Step(self, isLsb, isMsb) -> None:        
 
+        self.doneAtInput = self.done
         # Negate MSB to convert from offset back to twos complement
         if self.msbAtPBF.Output() == 1:
             self.msb2lsb.Step(1-self.pbf.Output())
