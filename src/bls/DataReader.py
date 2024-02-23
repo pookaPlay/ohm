@@ -27,7 +27,7 @@ class DataReader():
         self.lsb = 1
         self.msb = 0
  
-    def Print(self):                
+    def Print(self, prefix="", verbose=1):                
         print(f"Data Reader: {self.slice} from {self.input[self.ni]} ")
         print(f"Data Reader: lsb({self.lsb}) msb({self.msb})")
 
