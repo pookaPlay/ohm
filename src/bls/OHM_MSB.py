@@ -3,11 +3,8 @@ from BSMEM import BSMEM
 
 class OHM_MSB:
 
-    def __init__(self, msbMem: BSMEM, lsbMem: BSMEM) -> None:
-    
-        self.lsb = lsbMem
-        self.msb = msbMem        
-        
+    def __init__(self, N) -> None:    
+        self.N = N                
         
     
     def Reset(self) -> None:
