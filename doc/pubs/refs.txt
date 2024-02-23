@@ -1,0 +1,4 @@
+"Weighted order statistic classifiers with large rank-order margin", R. Porter, D. Hush, D. Eads, J. Theiler, International Conference on Machine Learning, ICML-2003.
+"Stack Filter Classifiers", R. Porter, D. Hush, and B.G. Zimmer. in International Symposium on Mathematical Morphology. 2009. 
+"Ordered Hypothesis Machines", B.G. Zimmer, D. Hush, and R. Porter, Journal of Mathematical Image and Vision, DOI:10.1007/s10851-011-0293-z, 2011.
+"Links Between Binary Classification and the Assignment Problem in Ordered Hypothesis Machines", Reid Porter, Beate G. Zimmer, Proceedings of SPIE, Image Processing: Machine Vision Applications VIII, 2014.
