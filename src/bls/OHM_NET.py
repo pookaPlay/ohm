@@ -57,5 +57,9 @@ class OHM_NET:
         return self.net.Output()
                 
     def Print(self, prefix="", showInput=1) -> None:        
-        print(prefix + f"OHM_NET:")
-        
+        if showInput > 0:
+            print(prefix + f"OHM_NET:")
+            if showInput > 1:
+                print(prefix + f"  DataMem({self.dataIndex}) ParamMem({self.paramIndex}) Output({self.outputIndex})")
+
+        self.ohmLSB.Print(prefix + "  ", showInput)

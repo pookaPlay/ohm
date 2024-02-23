@@ -1,11 +1,11 @@
-from DataReader import DataReader
+from DataReader import SingleDataReader
 from DataWriter import DataWriter
 from OHM_NET import OHM_NET
 from BSMEM import BSMEM
 
 def RunOhmNet():
     
-    verbose = 1
+    verbose = 2
 
     NSteps = 4
     NN = 2      # number of parallel nodes
@@ -13,30 +13,23 @@ def RunOhmNet():
     DK = 7      # input data precision
     WK = 7      # input weight precision
 
-    input = [[7, -2, -6], [7, 0, -3], [1, 3, 5], [-6, 1, 2]]    
-    N = len(input)   
-    D = len(input[0])
+    #input = [[7, -2, -6], [7, 0, -3], [1, 3, 5], [-6, 1, 2]]    
+    input = [[7, 7, 1, -6], [-2, 0, 3, 1], [-6, -3, 5, 2]]
+    D = len(input)   
     
-    # separate inputs 
-    inputs = [[input[ni][di] for ni in range(len(input))] for di in range(len(input[0]))]
-
-    print(inputs)    
-    dataMem = [DataReader([inputs[ni]], DK, K) for ni in range(len(inputs))]       
+    dataMem = [SingleDataReader(input[ni], DK, K) for ni in range(D)]
+    
     [dataMem[p].Print() for p in range(len(dataMem))]
 
-    weights = [[0, 1, 0, 1, 0, 1], [0, 1, 0, 1, 0, 1]]
-    
-    assert len(weights) == NN
-    assert len(weights[0]) == 2*D
-
-    paramMem = [DataReader([weights[ni]], DK, K) for ni in range(len(weights))]  
-    [paramMem[p].Print() for p in range(len(paramMem))]
+    #weights = [[4, -3, 4, -3], [0, 1, 0, 1, 0, 1]]
+    #paramMem = [DataReader([weights[ni]], DK, K) for ni in range(len(weights))]  
+    #[paramMem[p].Print() for p in range(len(paramMem))]
     
     msbMem = BSMEM(D, K)    
     lsbMem = BSMEM(D, K)
             
-    ohm = OHM_NET(dataMem, paramMem, lsbMem, msbMem)
-    ohm.Print()
+    #ohm = OHM_NET(dataMem, paramMem, lsbMem, msbMem)
+    #ohm.Print("", 2)
 
     return
 

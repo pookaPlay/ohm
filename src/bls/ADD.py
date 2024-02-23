@@ -8,8 +8,9 @@ class ADD:
         self.a = 0
         self.b = 0
 
-    def Print(self, prefix="") -> None:        
-        print(prefix + f"ADD : {self.sum}, {self.cin} from {self.a} and {self.b}")
+    def Print(self, prefix="", verbose=1) -> None:
+        if verbose > 0:
+            print(prefix + f"ADD : {self.sum}, {self.cin} from {self.a} and {self.b}")
     
     def Output(self) -> int:
         return self.sum

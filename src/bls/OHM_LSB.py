@@ -32,5 +32,7 @@ class OHM_LSB:
         pass
                 
     def Print(self, prefix="", verbose=1) -> None:        
-        print(f"{prefix}OHM_LSB: {self.Output()}")
+        print(f"{prefix}OHM_LSB: {self.N} adders")
+        for ai in range(len(self.adders)):
+            self.adders[ai].Print(prefix + "  ", verbose)
         
