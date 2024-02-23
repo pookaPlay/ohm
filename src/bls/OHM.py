@@ -1,3 +1,6 @@
+##################################################
+## Bit Serial OHM Node with both LSB and MSB paths
+
 from CCSRL import CCSRL
 from ADD import ADD
 from PTF import PTF

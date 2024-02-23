@@ -1,3 +1,5 @@
+###################
+## Bit Serial Adder
 
 class ADD:
     def __init__(self) -> None:        
