@@ -10,6 +10,7 @@ class lsb2msb:
         self.mode = 0
         self.wi = self.N-1
         self.ri = 0
+        self.done = 0
 
     def Print(self, prefix="") -> None:        
         temps = prefix + "L2M: "

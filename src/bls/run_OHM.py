@@ -6,7 +6,7 @@ def RunOhmNet():
     
     verbose = 1
 
-    ptf = "median"
+    
     input = [[7, -2, -6], [7, 0, -3], [1, 3, 5], [-6, 1, 2]]    
     
     NBitsIn = 4
@@ -16,7 +16,7 @@ def RunOhmNet():
     NSteps = 45
 
     data = DataReader(input, NBitsIn, NBitsOut)    
-    ohm = OhmNet(D, NBitsIn, NBitsOut, ptf=ptf)        
+    ohm = OhmNet(D, NBitsIn, NBitsOut)        
     output = DataWriter()    
     
     data.Reset()        

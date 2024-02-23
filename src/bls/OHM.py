@@ -123,14 +123,17 @@ class OHM:
         
     # State stuff goes here
     def Step(self, isLsb, isMsb) -> None:        
-
-        self.doneAtInput = self.done
+                
         # Negate MSB to convert from offset back to twos complement
         if self.msbAtPBF.Output() == 1:
             self.msb2lsb.Step(1-self.pbf.Output())
         else:
             self.msb2lsb.Step(self.pbf.Output())
 
+        if self.done == 1:
+            pass
+            # reset lsb 
+            
         self.lsbAtPBF.Step(isLsb)
         self.msbAtPBF.Step(isMsb)
         
@@ -169,11 +172,11 @@ class OHM:
         prefix = "  "
         #inputs = [self.lsb2msb[i].Output() for i in range(self.d2)]
         print(f" =Output =====")
-        self.lsbAtPBF.Print("   lsbAtPBF-")        
-        self.msbAtPBF.Print("   msbAtPBF-")
+        self.lsbAtPBF.Print(" LSB-atPBF-")        
+        self.msbAtPBF.Print(" MSB-atPBF-")
         self.pbf.Print(" ")
         #print(f"  PBF: {str(inputs)} -> {self.pbf.Output()}")        
         self.msb2lsb.Print(prefix)
-        self.lsbAtOut.Print("LSB-OUT-")        
-        self.msbAtOut.Print("MSB-OUT-")
+        self.lsbAtOut.Print(" LSB-OUT-")        
+        self.msbAtOut.Print(" MSB-OUT-")
 

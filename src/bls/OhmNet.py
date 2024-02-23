@@ -2,9 +2,13 @@ from OHM import OHM
 
 class OhmNet:
 
-    def __init__(self, D=2, NBitsIn=4, NBitsOut=5, ptf="") -> None:
+    def __init__(self, D=2, NBitsIn=4, NBitsOut=5, netW = 1, netD=2) -> None:
     
-        self.net = OHM(D, NBitsIn, NBitsOut, ptf=ptf)                
+        ptf="median"
+        netW = 1
+        netD = 2        
+        #self.net = [OHM(D, NBitsIn, NBitsOut, ptf) for _ in range(netD)]        
+        self.net = OHM(D, NBitsIn, NBitsOut, ptf)
     
     def Reset(self) -> None:
         self.net.Reset()                    
