@@ -33,6 +33,8 @@ class OHM_NET:
         self.outputIndex = list(range(self.N))        
         self.dataInputs = list([0] * self.N)
         self.paramInputs = list([0] * self.N)
+
+        self.denseOutput = list(self.msbMem.D * [0])
         #self.lsbIndex = list([0] * self.N)
         #self.msbIndex = list([0] * self.N)        
         
@@ -51,8 +53,15 @@ class OHM_NET:
     def Step(self) -> None:        
         pass
 
-    def Output(self) -> int:
-        return self.net.Output()
+    def Output(self):
+        
+        self.denseOutput = list(self.msbMem.D * [0])
+        sparseOutput = self.ohmLSB.Output()        
+        
+        for ni in range(len(sparseOutput)):
+            self.denseOutput[self.outputIndex[ni]] = sparseOutput[ni]
+
+        return self.denseOutput
                 
     def Print(self, prefix="", showInput=1) -> None:        
         if showInput > 0:

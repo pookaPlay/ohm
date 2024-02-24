@@ -42,6 +42,7 @@ class SingleDataReader():
         return self.msb
 
     def Step(self):
+        
         if self.msb == 1:  
             print(f"Serializing next")                      
             self.bi = 0                        

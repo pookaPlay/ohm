@@ -3,10 +3,11 @@ from DataIO import SerializeMSBTwos
 # Bit Serial Memory
 class BSMEM():
 
-    def __init__(self, D, K):
+    def __init__(self, D, K, writeMode=1):
         self.D = D
         self.K = K
-        
+        self.mode = writeMode
+
         self.Reset()
         
 
@@ -14,10 +15,16 @@ class BSMEM():
         self.ri = 0
         self.wi = 0
         self.nextInput = list(self.D * [0])
-        self.mem = list(self.D * list(self.K * [0]))
+        self.mem = [list(self.K * [0]) for _ in range(self.D)]        
+    
+    def ClearInput(self):
+        self.nextInput = list(self.D * [0])
 
     def SetInput(self, di, input):
         self.nextInput[di] = input
+
+    def SetInputs(self, input):
+        self.nextInput = input
 
     def GetOutput(self, di):
         return self.mem[di]
@@ -26,7 +33,20 @@ class BSMEM():
         return self.mem
     
     def Step(self):
-        self.ri += 1
+        # write
+        if self.mode == 1:
+            print("####################################")
+            print(self.nextInput)
+            print(self.mem)
+            for di in range(self.D):
+                print(self.mem[di])
+                self.mem[di][self.wi] = self.nextInput[di]
+
+            self.wi += 1
+            if self.wi == self.K:
+                self.wi = 0
+        # read 
+        self.ri += 1        
         if self.ri == self.K:
             self.ri = 0
 
