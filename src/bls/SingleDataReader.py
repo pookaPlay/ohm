@@ -1,21 +1,22 @@
 from DataIO import SerializeMSBTwos
 
 class SingleDataReader():
-    def __init__(self, input=[[5, 7, 6]], NBitsIn=7, NBitsOut=8):
+    def __init__(self, input=[5, 7, 6], NBitsIn=7, NBitsOut=8):
+        
+        if isinstance(input, int):
+            input = [input]
         
         self.NIn = NBitsIn
-        self.NOut = NBitsOut
-        self.input = input
+        self.NOut = NBitsOut        
         self.N = len(input)
-        self.D = len(input[0])
         self.bi = 0
         self.ni = 0
 
-        self.data = [SerializeMSBTwos(input[self.ni][d], self.NIn) for d in range(self.D)]
-        for d in range(self.D):
-            self.data[d].reverse()
+        self.input = input[self.ni]
+        self.data = SerializeMSBTwos(self.input, self.NIn)
+        self.data.reverse()
 
-        self.slice = [self.data[d][self.bi] for d in range(self.D)]        
+        self.slice = self.data[self.bi]
         self.lsb = 1
         self.msb = 0
 
@@ -23,13 +24,13 @@ class SingleDataReader():
     def Reset(self):
         self.bi = 0
         self.ni = 0
-        self.slice = [self.data[d][self.bi] for d in range(self.D)]        
+        self.slice = self.data[self.bi]
         self.lsb = 1
         self.msb = 0
  
     def Print(self, prefix="", verbose=1):                
-        print(f"Data Reader: {self.slice} from {self.input[self.ni]} ")
-        print(f"Data Reader: lsb({self.lsb}) msb({self.msb})")
+        print(f"Single Reader: {self.slice} from {self.input} ")
+        print(f"Single Reader: lsb({self.lsb}) msb({self.msb})")
 
     def Output(self):
         return self.slice
@@ -48,20 +49,18 @@ class SingleDataReader():
 
             if self.ni == self.N:
                 self.ni = 0
-
-            self.data = [SerializeMSBTwos(self.input[self.ni][d], self.NIn) for d in range(self.D)]
-            for d in range(self.D):
-                self.data[d].reverse()                
+            self.data = SerializeMSBTwos(self.input[self.ni], self.NIn)
+            self.data.reverse()                
         else:
             self.bi = self.bi + 1
         
         if self.bi < self.NIn:
-            self.slice = [self.data[d][self.bi] for d in range(self.D)]
+            self.slice = self.data[self.bi]
         elif self.bi < self.NOut:
             # sign extend twos complement
-            self.slice = [self.data[d][self.NIn-1] for d in range(self.D)]
+            self.slice = self.data[self.NIn-1]
         else:            
-            self.slice = self.D * [0]
+            self.slice = [0]
 
         self.msb = 0
         self.lsb = 0

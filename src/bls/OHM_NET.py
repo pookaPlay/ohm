@@ -31,12 +31,10 @@ class OHM_NET:
         self.dataIndex = list(range(self.N))
         self.paramIndex = list(range(self.N))
         self.outputIndex = list(range(self.N))        
-
+        self.dataInputs = list([0] * self.N)
+        self.paramInputs = list([0] * self.N)
         #self.lsbIndex = list([0] * self.N)
         #self.msbIndex = list([0] * self.N)        
-
-        self.dataInputs = [self.dataMem[self.dataIndex[ni]] for ni in range(self.N)]
-        self.paramInputs = [self.paramMem[self.paramIndex[ni]] for ni in range(self.N)]
         
         self.ohmLSB.Reset()        
         
@@ -46,8 +44,8 @@ class OHM_NET:
 
     def Calc(self) -> None:
 
-        self.dataInputs = [self.dataMem[self.dataIndex[ni]] for ni in range(self.N)]
-        self.paramInputs = [self.paramMem[self.paramIndex[ni]] for ni in range(self.N)]
+        self.dataInputs = [self.dataMem[self.dataIndex[ni]].Output() for ni in range(self.N)]
+        self.paramInputs = [self.paramMem[self.paramIndex[ni]].Output() for ni in range(self.N)]
         self.ohmLSB.Calc(self.dataInputs, self.paramInputs)        
             
     def Step(self) -> None:        
@@ -60,6 +58,7 @@ class OHM_NET:
         if showInput > 0:
             print(prefix + f"OHM_NET:")
             if showInput > 1:
-                print(prefix + f"  DataMem({self.dataIndex}) ParamMem({self.paramIndex}) Output({self.outputIndex})")
+                print(prefix + f"  DataMemIndex({self.dataIndex}) ParamMemIndex({self.paramIndex}) Output({self.outputIndex})")
+                print(prefix + f"  DataMemValue({self.dataInputs}) ParamMemValue({self.paramInputs}) Output({self.outputIndex})")
 
         self.ohmLSB.Print(prefix + "  ", showInput)

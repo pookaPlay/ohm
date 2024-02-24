@@ -1,4 +1,4 @@
-from DataReader import SingleDataReader
+from SingleDataReader import SingleDataReader
 from DataWriter import DataWriter
 from OHM_NET import OHM_NET
 from BSMEM import BSMEM
@@ -21,33 +21,35 @@ def RunOhmNet():
     
     [dataMem[p].Print() for p in range(len(dataMem))]
 
-    #weights = [[4, -3, 4, -3], [0, 1, 0, 1, 0, 1]]
-    #paramMem = [DataReader([weights[ni]], DK, K) for ni in range(len(weights))]  
-    #[paramMem[p].Print() for p in range(len(paramMem))]
+    weights = NN * [0]
+    paramMem = [SingleDataReader(weights[ni], DK, K) for ni in range(len(weights))]
+    [paramMem[p].Print() for p in range(len(paramMem))]
     
     msbMem = BSMEM(D, K)    
     lsbMem = BSMEM(D, K)
-            
-    #ohm = OHM_NET(dataMem, paramMem, lsbMem, msbMem)
-    #ohm.Print("", 2)
 
-    return
+    ohm = OHM_NET(dataMem, paramMem, lsbMem, msbMem)
 
     ti = 0
     print(f"== {ti} ============================")
-    lsbOHM.Calc()
+
+    ohm.Calc()
+    ohm.Print("", 2)
         
     for ti in range(NSteps):
         print(f"== {ti+1} ============================")
-        
+
         [dataMem[p].Step() for p in range(len(dataMem))]
         [paramMem[p].Step() for p in range(len(paramMem))]
 
+        print(f"DATA")
         [dataMem[p].Print() for p in range(len(dataMem))]
+        print(f"PARAMS")
         [paramMem[p].Print() for p in range(len(paramMem))]
 
-        lsbOHM.Calc()
-        lsbOHM.Step()
+        ohm.Calc()
+        ohm.Print("", 2)    
+        ohm.Step()
 
         #output.Step(ohm.Output(), ohm.lsbOut(), ohm.msbOut())            
         #output.Print()
