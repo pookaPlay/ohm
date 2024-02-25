@@ -1,4 +1,4 @@
-from DataIO import SerializeMSBTwos,  DeserializeMSBTwos
+from DataIO import SerializeMSBTwos,  DeserializeMSBTwos, DeserializeLSBTwos
 
 # Bit Serial Memory
 class BSMEM():
@@ -55,7 +55,7 @@ class BSMEM():
     def GetInts(self):
         result = list()
         for di in range(len(self.mem)):
-            result.append(DeserializeMSBTwos(self.mem[di]))
+            result.append(DeserializeLSBTwos(self.mem[di]))
         
         return result
     

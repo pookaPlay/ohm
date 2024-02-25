@@ -7,7 +7,7 @@ def RunOhmNet():
     
     verbose = 2
 
-    NSteps = 2
+    NSteps = 8
     NN = 2      # number of parallel nodes
     K = 8       # target precision
     DK = 7      # input data precision
@@ -53,8 +53,11 @@ def RunOhmNet():
             [paramMem[p].Print() for p in range(len(paramMem))]
 
         ohm.Calc()
-        ohm.Print("", 2)                    
+        #ohm.Print("", 2)                    
         msbMem.Step(ohm.Output())        
+        #msbMem.Print("  ")
+        #result = msbMem.GetInts()
+        #print(f"RESULT: {result}")
 
     
     msbMem.Print("  ")
