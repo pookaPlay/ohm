@@ -51,7 +51,7 @@ class OHM_NET:
         self.ohmLSB.Calc(self.dataInputs, self.paramInputs)        
             
     def Step(self) -> None:        
-        pass
+        self.ohmLSB.Step()        
 
     def Output(self):
         

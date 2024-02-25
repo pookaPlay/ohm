@@ -1,12 +1,12 @@
 from DataIO import SerializeMSBTwos
 
 class SingleDataReader():
-    def __init__(self, input=[5, 7, 6], NBitsIn=7, NBitsOut=8):
+    def __init__(self, input=[5, 7, 6], NBitsIn=8, NBitsOut=8):
         
         if isinstance(input, int):
             self.input = [input]
         else:
-            self.input = input
+            self.input = input.copy()
 
         self.N = len(self.input)
         #print(f"Single: {self.input} has {self.N}")

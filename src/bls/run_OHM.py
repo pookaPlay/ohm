@@ -7,11 +7,11 @@ def RunOhmNet():
     
     verbose = 2
 
-    NSteps = 8
+    NSteps = 5
     NN = 2      # number of parallel nodes
-    K = 8       # target precision
-    DK = 7      # input data precision
-    WK = 7      # input weight precision
+    K = 5       # target precision
+    DK = 5      # input data precision
+    WK = 5      # input weight precision
     MEM_WIDTH = 8
 
     #input = [[7, -2, -6], [7, 0, -3], [1, 3, 5], [-6, 1, 2]]    
@@ -22,7 +22,7 @@ def RunOhmNet():
     
     [dataMem[p].Print() for p in range(len(dataMem))]
 
-    weights = NN * [0]
+    weights = NN * [1]
     paramMem = [SingleDataReader(weights[ni], DK, K) for ni in range(len(weights))]
     [paramMem[p].Print() for p in range(len(paramMem))]
     
@@ -38,6 +38,7 @@ def RunOhmNet():
     ohm.Print("", 2)
             
     msbMem.Step(ohm.Output())        
+    ohm.Step()
 
     for ti in range(NSteps):
         print(f"== {ti+1} ============================")
@@ -54,10 +55,15 @@ def RunOhmNet():
 
         ohm.Calc()
         #ohm.Print("", 2)                    
+        
         msbMem.Step(ohm.Output())        
+        ohm.Step()
+
         #msbMem.Print("  ")
         #result = msbMem.GetInts()
         #print(f"RESULT: {result}")
+
+        
 
     
     msbMem.Print("  ")
