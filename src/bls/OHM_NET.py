@@ -30,44 +30,56 @@ class OHM_NET:
         # Connectivity
         self.dataIndex = list(range(self.N))
         self.paramIndex = list(range(self.N))
-        self.outputIndex = list(range(self.N))        
         self.dataInputs = list([0] * self.N)
         self.paramInputs = list([0] * self.N)
 
-        self.denseOutput = list(self.msbMem.D * [0])
-        #self.lsbIndex = list([0] * self.N)
-        #self.msbIndex = list([0] * self.N)        
+        self.msbIndex = list(range(self.N))        
+        self.lsbIndex = list(range(self.N))              
+        self.msbDenseOut = list(self.msbMem.D * [0])
+        self.lsbDenseOut = list(self.lsbMem.D * [0])        
         
         self.ohmLSB.Reset()        
+        self.ohmMSB.Reset()        
         
-        #lsbOHM = OHM_LSB(dataMem, paramMem, msbMem)
-        #msbOHM = OHM_MSB(msbMem, lsbMem)                        
-    
 
     def Calc(self) -> None:
 
         self.dataInputs = [self.dataMem[self.dataIndex[ni]].Output() for ni in range(self.N)]
         self.paramInputs = [self.paramMem[self.paramIndex[ni]].Output() for ni in range(self.N)]
         self.ohmLSB.Calc(self.dataInputs, self.paramInputs)        
+
+        self.msbInputs = [self.msbMem.GetOutput(self.msbIndex[ni]) for ni in range(self.N)]
+        self.ohmMSB.Calc(self.msbInputs)
             
     def Step(self) -> None:        
         self.ohmLSB.Step()        
+        self.ohmMSB.Step()
 
-    def Output(self):
+    def LSBOutputPass(self):
         
-        self.denseOutput = list(self.msbMem.D * [0])
+        self.msbDenseOut = list(self.msbMem.D * [0])
         sparseOutput = self.ohmLSB.Output()        
         
         for ni in range(len(sparseOutput)):
-            self.denseOutput[self.outputIndex[ni]] = sparseOutput[ni]
+            self.msbDenseOut[self.msbIndex[ni]] = sparseOutput[ni]
         #print(f"OHM_NET: Output({self.denseOutput})")
-        return self.denseOutput
-                
+        return self.msbDenseOut
+
+    def MSBOutputPass(self):
+        
+        self.denseOutput = list(self.msbMem.D * [0])
+        sparseOutput = self.ohmMSB.Output()        
+        
+        for ni in range(len(sparseOutput)):
+            self.lsbDenseOut[self.lsbIndex[ni]] = sparseOutput[ni]
+        #print(f"OHM_NET: Output({self.denseOutput})")
+        return self.lsbDenseOut
+
     def Print(self, prefix="", showInput=1) -> None:        
         if showInput > 0:
             print(prefix + f"OHM_NET:")
             if showInput > 1:
-                print(prefix + f"  DataMemIndex({self.dataIndex}) ParamMemIndex({self.paramIndex}) Output({self.outputIndex})")
-                print(prefix + f"  DataMemValue({self.dataInputs}) ParamMemValue({self.paramInputs}) Output({self.outputIndex})")
+                print(prefix + f"  DataMemIndex({self.dataIndex}) ParamMemIndex({self.paramIndex}) Output({self.msbIndex})")
+                print(prefix + f"  DataMemValue({self.dataInputs}) ParamMemValue({self.paramInputs}) Output({self.msbIndex})")
 
         self.ohmLSB.Print(prefix + "  ", showInput)

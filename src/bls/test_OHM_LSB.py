@@ -37,9 +37,7 @@ def RunOhmNet():
     ohm.Calc()
     ohm.Print("", 2)
             
-    msbMem.Step(ohm.LSBOutputPass())
-    lsbMem.Step(ohm.MSBOutputPass())        
-
+    msbMem.Step(ohm.LSBOutputPass())        
     ohm.Step()
 
     for ti in range(NSteps):
@@ -58,8 +56,7 @@ def RunOhmNet():
         ohm.Calc()
         #ohm.Print("", 2)                    
         
-        msbMem.Step(ohm.LSBOutputPass())
-        lsbMem.Step(ohm.MSBOutputPass())        
+        msbMem.Step(ohm.LSBOutputPass())        
         ohm.Step()
 
         #msbMem.Print("  ")
@@ -69,14 +66,10 @@ def RunOhmNet():
         
 
     
-    msbMem.Print("MSB")
-    msbResult = msbMem.GetInts()
-    print(f"RESULT: {msbResult}")
-
-    lsbMem.Print("LSB")
-    lsbResult = lsbMem.GetInts()
-    print(f"RESULT: {lsbResult}")
- 
+    msbMem.Print("  ")
+    result = msbMem.GetInts()
+    print(f"RESULT: {result}")
+    
     return
 
 RunOhmNet()

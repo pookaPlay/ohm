@@ -16,7 +16,7 @@ class OHM_LSB:
         for ai in range(self.N):
             self.adders[ai].Reset()
         
-    def Output(self) -> None:
+    def Output(self):
         result = [self.adders[ai].Output() for ai in range(self.N)]
         return result            
 

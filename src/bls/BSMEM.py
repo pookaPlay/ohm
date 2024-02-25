@@ -26,7 +26,7 @@ class BSMEM():
     def GetOutput(self, di):
         return self.mem[di]
 
-    def GetOutput(self):
+    def GetOutputs(self):
         return self.mem
     
     def Step(self, input):
