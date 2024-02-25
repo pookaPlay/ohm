@@ -4,16 +4,18 @@ class SingleDataReader():
     def __init__(self, input=[5, 7, 6], NBitsIn=7, NBitsOut=8):
         
         if isinstance(input, int):
-            input = [input]
-        
+            self.input = [input]
+        else:
+            self.input = input
+
+        self.N = len(self.input)
+        #print(f"Single: {self.input} has {self.N}")
         self.NIn = NBitsIn
-        self.NOut = NBitsOut        
-        self.N = len(input)
+        self.NOut = NBitsOut                
         self.bi = 0
         self.ni = 0
-
-        self.input = input[self.ni]
-        self.data = SerializeMSBTwos(self.input, self.NIn)
+        
+        self.data = SerializeMSBTwos(self.input[self.ni], self.NIn)
         self.data.reverse()
 
         self.slice = self.data[self.bi]
@@ -29,7 +31,7 @@ class SingleDataReader():
         self.msb = 0
  
     def Print(self, prefix="", verbose=1):                
-        print(f"Single Reader: {self.slice} from {self.input} ")
+        print(f"Single Reader: {self.slice} from {self.input[self.ni]} ")
         print(f"Single Reader: lsb({self.lsb}) msb({self.msb})")
 
     def Output(self):
@@ -48,7 +50,7 @@ class SingleDataReader():
             self.bi = 0                        
             self.ni = self.ni + 1
 
-            if self.ni == self.N:
+            if self.ni == len(self.input):
                 self.ni = 0
             self.data = SerializeMSBTwos(self.input[self.ni], self.NIn)
             self.data.reverse()                

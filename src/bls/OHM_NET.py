@@ -60,7 +60,7 @@ class OHM_NET:
         
         for ni in range(len(sparseOutput)):
             self.denseOutput[self.outputIndex[ni]] = sparseOutput[ni]
-
+        #print(f"OHM_NET: Output({self.denseOutput})")
         return self.denseOutput
                 
     def Print(self, prefix="", showInput=1) -> None:        

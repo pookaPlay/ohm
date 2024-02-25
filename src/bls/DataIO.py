@@ -1,5 +1,10 @@
 
-def SerializeMSBOffset(input, NBits=8):
+def SerializeMSBOffset(data, NBits=8):
+    
+    if isinstance(data, int):
+        input = data
+    else:
+        input = data.copy()
     # expects data to lie between -2^(NBits-1) and 2^(NBits-1)
     offset = 2**(NBits-1)
     input += offset
@@ -37,7 +42,8 @@ def SerializeMSBTwosSignExtend(input, NBits=8, extend=1):
         
     return(result)
 
-def DeserializeMSBTwos(input):
+def DeserializeMSBTwos(data):
+    input = data.copy()
     NBits= len(input)
     offset = 2**(NBits-1)
     # flip MSB
@@ -48,7 +54,8 @@ def DeserializeMSBTwos(input):
     result -= offset
     return(result)
 
-def DeserializeMSBOffset(input):
+def DeserializeMSBOffset(data):
+    input = data.copy()
     NBits= len(input)
     offset = 2**(NBits-1)
 
@@ -60,7 +67,8 @@ def DeserializeMSBOffset(input):
 
     return(result)
 
-def DeserializeLSBOffset(input):
+def DeserializeLSBOffset(data):
+    input = data.copy()
     NBits= len(input)
     offset = 2**(NBits-1)
 
@@ -71,7 +79,8 @@ def DeserializeLSBOffset(input):
 
     return(result)
 
-def DeserializeLSBTwos(input):
+def DeserializeLSBTwos(data):
+    input = data.copy()
     NBits= len(input)
     offset = 2**(NBits-1)
     # flip MSB

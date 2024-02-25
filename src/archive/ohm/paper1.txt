@@ -1,0 +1,308 @@
+\documentclass{article}
+
+
+\usepackage{arxiv}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{lipsum}
+\usepackage{amsmath, color}
+\usepackage{amsthm}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem*{remark}{Remark}
+
+\title{Hierarchical segmentation}
+
+
+\author{
+  Reid B. Porter\thanks{Use footnote for providing further
+    information about author (webpage, alternative
+    address)---\emph{not} for acknowledging funding agencies.} \\
+  Los Alamos National Laboratory\\
+ Los Alamos, NM 8745 \\
+  \texttt{rporter@lanl.gov} \\
+  %% examples of more authors
+   \And
+ Beate G. Zimmer \\
+  Department of Mathematics and Statistics\\
+  Texas A\&M University-Corpus Christi\\
+  Corpus Christi, TX 78412 \\
+  \texttt{beate.zimmer@tamucc.edu} \\
+  \AND
+  Quan Nguyen\\
+  Department of Computer Science\\
+  University of Texas at Arlington\\
+  Arlington, TX 76019 \\
+  \texttt{remrace@gmail.com} \\
+  %% \AND
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+  %% \And
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+  %% \And
+  %% Coauthor \\
+  %% Affiliation \\
+  %% Address \\
+  %% \texttt{email} \\
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Graph cut algorithms are heavily used in image segmentation. If an image is represented as a edge weighed graph, segmentation is a matter of cutting edges in a spanning tree. Two common algorithms used here are  connected component segmentations and watershed segmentations. Watershed cuts can have from leaks which cause undersegmentation. Connected components is very sensitive to noisy data in whose presence it oversegments. We hope to combat the two different weaknesses weaknesses by combining the two methods into a hierarchical model. We make use of a modified version of Kruskal's algorithm to make this NP hard problem a problem that can be calculated in polynomial time. Watershed algorithms tend to be seeded algorithms, but through our combination of the two algorithms, the connected components become the seeds.  We assume we have a finite number of ground truth classes.
+\end{abstract}
+
+
+% keywords can be removed
+\keywords{Watershed cuts \and Connected Components \and Hierarchical segmentation}
+
+
+\section{Introduction}
+Graphical models or edge weighted graphs are a powerful tool for image segmentation. In a hierarchy of segmentations we  start with pixels as vertices and edges denoting adjacency which could be 4-connected of 8-connected. The classical approaches calculated the edge weights as a function of the image gradient over the edge \cite{Couprie2011}. Rather than calculating the edge weight as an image gradient, we use deep learning to generate real-valued edge weights or affinities. Positive affinities denote similarity whereas negative affinities indicate that the pixels should belong to different segments. We use Kruskal's algorithm to greedily construct a maximum spanning tree (MST) of the edges. This tree is then segmented with the connected component (CC) method. There is at most one MST edge between any two connected component segments. Now we regard the CC segments as vertices, connected by MST weighed edges. Over this new tree we use the watershed cut algorithm.
+
+\section{Graph Cuts}
+Felzenzswalb \cite{Felzenszwalb2004} Couprie \cite{Couprie2011} While there are many algorithms to cut an edge-weighted graph, we restrict our attention to two basic methods: connected components and watershed cuts.
+
+{\color{blue} We make the simplifying assumption that all affinities or edge weights are unique}.
+
+\subsection{Correlation Clustering}
+Bansal \cite{Bansal2004} introduced correlation clustering. In their setting  the edge weights denote correlations (maybe not normalized) then correlation clustering tries to maximize agreements by joining positive edges and minimize disagreements by cutting negative edges. Correlation clustering is NP complete i.e. there is no fast way to find a good solution. An idea to work with a restricted set of possible segmentations is to threshold the edge weights in a maximum spanning tree and  is to restrict the class of possible solutions to the spanning forest obtained by thresholding the weights at all possible values of the threshold $\theta$ and then using a linear search through the values of $\theta$ for the best of those segmentations. Correlation clustering is a very appealing concept when having a weighted graph with signed affinities. 
+
+
+
+\subsection{Connected Components}
+\label{subsec:cc}
+Turaga \cite{Turaga09} \cite{Turaga10} observed that the connected component segmentation can be done through maximin edges. The maximin edge between two vertices is an edge on a path connecting the two vertices whose weight is the maximum value found when considering the minimum weight within a path connecting the edges over all possible paths. This could also be interpreted as the maximum possible flow along a path from one vertex to another. Two vertices in the graph are connected if and only if their maximin edge exceeds a given threshold $\theta$. The important observation is that all these maximin edges are maximum spanning tree (MST) edges. For a connected component segmentation we find a maximum spanning tree for the affinity graph, delete all edges with a negative affinity and form path connected components from the resulting subtrees. Turaga was learning the affinities by selecting random pairs of vertices and updating the maximim edge between them to reduce the gradient of a hinge loss function based on the Rand error.
+In \cite{Turaga19} they claim to calculate a Rand error error based loss function through two passes through the affinity graph. In the positive pass all edges between segments are set to zero (or minus infinity if we have negative affinities?) and the errors of an MST of the new affinity graph are calculated. (This may calculate the false negatives?)  In a second pass all edges within segments are set to 1 (or plus infinity if affinities aren't normalized?) and the errors for an MST for this graph are computed. This may calculate the false positives? {\color{red} working on this, will fix this paragraph}.
+
+\subsection{Watershed cuts}
+\label{subsec:ws}
+An edge in a weighted graph where higher affinities denote stronger similarities is a watershed edge if from its two ends increasing paths over the full weighted graph, (not the MST) to different local maxima can be found.
+In \cite{Cousty2009} the relationship between watershed cuts and minimum spanning trees is described - but their weights act in the opposite way of the ones used here, so adaptation for this setting is a maximum spanning tree. Their new insight is a that a maximum spanning forest in a weighted graph that includes each local maximum induces in a separate tree induces a watershed cut and can be found from just the MST. For watershed cuts we need an auxiliary weight for each MST edge that is computed only over the adjoining edges. If $i$ is a vertex, let $N_i$ denote the set of all neighboring vertices and let $A_{ij}$ denote the affinity of edge $e_{ij}$ between vertices $i$ and $J$. Define the auxiliary weight $A_{ij}^*$ by
+\begin{equation}\label{eq:A_ij^*}
+A_{ij}^*=\min\left( \max_{k\in N_i\setminus\{j\}}A_{ik},\max_{k\in N_j\setminus\{i\}}A_{kj}\right).
+\end{equation}
+If $A_{ij}^*<A_{ij}$ then on at least one side of the edge $e_{ij}$, all adjoining edges have lower weights and in that direction no all-uphill path to a local maximum exists. This puts the edge $e_{ij}$ in a watershed basin in the original notation of watershed cuts in which we have basins and ridges between them. ({\color{green} basins are hills now}) In our case high affinities denote similarity and we do a watershed cut on the negatives of the affinities or we could say we consider hills and put the cuts at the bottom of the valleys between adjoining hills.
+If $A_{ij}^*> A_{ij}$, then on both sides of edge $e_{ij}$ an uphill edge exists and we have a watershed edge (or identified a valley bottom). The watershed cut is done by removing all such edges and then finding the path connected components of the rest.
+An important observation of the Cousty paper is that the watershed cut can be done by deleting MST edges for which  $A_{ij}^*> A_{ij}$. {\color{green} If $A_{ij}^*= A_{ij}$ we are in a plateau and not sure what to do. We avoid this by assuming unique affinities?}
+Calculating a loss function over edges in the original graph is different from calculating a loss function over all pixel pairs in the graph. For pixel pairs we need to calculate tow truth values for each pair of vertices, namely $y_{i,i}=1$ if pixels $i$ and $i$ have the same label in the ground truth and is zero otherwise and $\widehat{y}_{i,i}=1$ if pixels $i$ and $i$ have the same label in the segmentation and is zero otherwise.
+Then the Rand error is calculated as a sum of truth values over all pairs of vertices in the graph:
+$$RE(Y,A)=\binom{\vert V\vert}{2}^{-1} \sum_{V\times V } \left(y_{ij}\neq\widehat{y}_{ij}\right)$$
+whereas an edge-wise error can be calculated as as sum over all edges $\cal{E}$ in the graph
+$$EE(Y,A)=\frac{1}{\vert \cal{E}\vert} \sum_{e_{ij}\in\cal{E} } \left(y_{ij}\neq\widehat{y}_{ij}\right)$$
+
+\section{Kruskal's algorithm}
+\label{sec:Kruskal}
+A modification of Kruskal's algorithm \cite{Kruskal} for finding an MST in a weighted graph in the presence of a ground truth with a finite number $k$ of classes is outlined in \cite{PorterOyenZimmer15}. Unlike the original algorithm, it not only greedily constructs a maximum spanning tree of $M$ edges, but also keeps track of how many new ``correct'' connections between pixel pairs and how many new "false positive" connections each new edge added to the MST introduces. This is done through a membership array for each MST edge  and two vectors indexed by the MST edges ordered by decreasing weight. The MST edges are added greedily to the tree. We assume we have $k$ ground truth classes and each vertex has a ground truth class label.  Initially each vertex is considered a segment with a membership array of all zeros, except for a one in the class it is in. Greedily adding an MST edge to the tree merges segments and their membership arrays are added to produce a membership array for the new segment created. Instead of regarding it as associated with the segment created, it can be considered as associated with the MST edge that created that new segment. For the $n$-th edge added to the MST, $\#\hbox{same}(n)$ calculates how many new ``correct connections'' are added to the set of connections by calculating the  $\#\hbox{same}(n)$ count of the new MST edge as the dot product of the the membership vectors $m_1\bullet m_2$ of the segments it connects. To identify the segments, uses a findset function introduced in \cite{Najman2013} that indexes each segment by the name of one vertex in it and assigns to each vertex in the same segment that label. While $\#\hbox{same}(n)$  counts how many correct new connections are made by merging segments, $\#\hbox{diff}(n)$ counts the number of incorrect connections between pixel pairs that a merger introduces. 
+$$\#\hbox{same}(n)=m_1\bullet m_2$$
+where $m_1$ and $m_2$ are are the membership arrays of the segments it connects.
+The number of incorrect new connections introduced by adding the n-th highest edge to the MST, $\#\hbox{diff}(n)$ is calculated as the total number of new connections minus the number of correct new connections or as  
+$$\#\hbox{diff}(n)=\Vert m_1\Vert_1 \Vert m_2\Vert_1-m_1\bullet m_2$$
+where $m_1$ and $m_2$ are are the membership arrays of the segments it connects.
+
+ The segments in the connected component partition are formed by a spanning forest consisting of the MST edges of positive  weight - or weight above a chosen threshold $\theta$. For each segment we have a membership array - namely the membership array of the MST edge of lowest weight in the subtree.
+ 
+
+ 
+\subsection{The Rand Error}
+\label{sec:Kruskal}
+The $\#\hbox{same}$ and $\#\hbox{diff}$ counts introduced above allow us to keep track of the Rand error, introduced in \cite{Rand}, i.e. the pairwise pixel misclassification error in a segmentation taken over all possible pairs of pixels. The Rand error is the sum of the false positives plus the sum of the false negatives normalized by the total number of pairs of vertices. We use the Rand error to assess the error made in a segmentation that only uses the $k$ highest edges in a MST for $\vert V\vert$ vertices, i.e. with $\vert V\vert-1$ edges
+
+The sum of the components of the $\#\hbox{same}$ vector - or $\Vert \#\hbox{same}\Vert_1$ is the total number of correct connections between pixel pairs, the sum of the $\#\hbox{diff}$ vector  or $\Vert \#\hbox{diff}\Vert_1$ is the total number of incorrect connections between pixel pairs. If each vertex is its own segment, the sum of the $\#\hbox{same}$  counts is the total number of missed connections. If we merge all pixels into one segment, the sum of the $\#\hbox{diff}$-counts is the total number of bad connections or false positives.
+
+\subsubsection{Rand Error for Connected Component Segmentation
+}Assume we only use the $k$ highest weight MST edges to form segments. Then the Rand error of the resulting segmentation is the number of missing correct connections between pairs of vertices, calculated as $\sum_{j=k+1}^{\vert V\vert-1} \#\hbox{same}(j)$  plus the number of false connections already made $\sum_{i=1}^k \#\hbox{diff}(i)$, divided by the total number of vertex pairs. The Rand error is a function of the ground truth $Y$ and the edge weights or affinities $A$, as well as of the number $k$ of MST edges used.
+\begin{equation}
+\begin{split}
+RE(Y,A,k)&=\binom{\vert V\vert}{2}^{-1}\left(\sum_{i=1}^k \#\hbox{diff}(i)+\sum_{j=k+1}^{\vert V\vert-1} \#\hbox{same}(j)\right)\\
+&=\binom{\vert V\vert}{2}^{-1}\left(\sum_{j=1}^{\vert V\vert-1} \#\hbox{same}(j) +\sum_{i=1}^k \#\hbox{diff}(i)- \#\hbox{same}(j)\right)\\
+&=\binom{\vert V\vert}{2}^{-1}\sum_{j=1}^{\vert V\vert-1} \#\hbox{same}(j) +\binom{\vert V\vert}{2}^{-1}\left(\sum_{i=1}^k \#\hbox{diff}(i)- \#\hbox{same}(j)\right)\\
+&= C + \binom{\vert V\vert}{2}^{-1}\left(\sum_{i=1}^k \#\hbox{diff}(i)- \#\hbox{same}(j)\right)\\
+\end{split}
+\end{equation}
+where the constant $C$ is independent of $k$ and hence can be neglected when minimizing the Rand error.
+
+Working with just MST edges instead of all edges reduces the complexity of calculating the Rand error in a graph with $\vert V \vert$ vertices from $\mathcal{O}\left(\binom{\vert V\vert}{2}\right)$ to $\mathcal{O}\left(\vert V\vert-1\right)$. Writing the Rand error as a function of how many MST edges are used also allows us to explore, how different values for the threshold for cutting MST edges affects the Rand error.
+
+\subsubsection{Rand Error for Watershed segmentation}
+In \cite{PorterOyenZimmer15} there is also a discussion of the Rand error for watershed segmentations, based on the observation that a watershed segmentation can be calculated locally through the use of minimax weights $A_{ij}^*$ defined in equation \ref{eq:A_ij^*} in addition to the original weights $A_{ij}$. The $A_{ij}^*$ calculation is only based on the immediate neighboring edges and an edge is a watershed edge if $A_{ij}^*>A_{ij}*$.
+One way to calculate the errors is to run Kruskal`s algorithm with edge new weights  $A_{ij}'=A_{ij}-A_{ij}^*$ and go down to the lowest edge with $A_{ij}'>0$, not using edges that create loops. This gives counts for how many correct an how many incorrect connections an edge makes as it is added to the spanning forest for the watershed cut.
+
+A different idea uses the ideas from \cite{Cousty2009}, namely the ability to just work with an MST.
+Since the definition uses the maximum weight of all neighboring edges, it does suffice to consider MST edges to determine whether $A_{ij}^*>A_{ij}$.  
+As a first step we use the original Kruskal algorithm to greedily create an MST.
+Then we calculate $A_{ij}^*$ over just the MST edges for any MST edge $A_{ij}$.
+We order the MST edges by decreasing weight and give them a label $+$ if $A_{ij}^*>A_{ij}$ and a label $-$ if $A_{ij}^*<A_{ij}$ (since we assume unique weights, equality is not possible).
+
+Then we use Kruskal's algorithm, but calculate same and diff and findset and setunion or membership arrays according to the sign. If the sign for an MST edge is $+$, the edge is used and all quantities are updated as before. If the sign of the edge is $-$, we do not join that edge, and set the same and diff counts for that edge equal to zero. Omitting an MST edge does change the same and diff counts for all later edges. This requires to have identified the MST edges ahead of time and labeled them with $+$ or  minus ahead of the main rum through Kruskal's algorithm that computes same and diff. {\color{red} It is also possible to calculate the depth of a watershed basin (hill for us) by calculating the difference in affinities between the first edge in that segment and the watershed edge. To that end we need to associate with each segment the highest affinity it contains and the last affinity added.}
+
+
+\section{Hierarchies}
+\subsection{Connected components followed by Watershed}
+Assume we have distinct affinities $A_{i,j}$ for all edges and have used Kruskal's algorithm to select an MST and compute  $\#\hbox{same}(n)$  and  $\#\hbox{diff}(n)$  for each of its edges.
+We then cut all MST edges with negative affinities. The MST edges are numbered by decreasing weight. If the $k$-th edge is the lowest positive MST edge, we know that the Rand error of the resulting connected component segmentation is
+\begin{equation*}
+RE(Y,A,k)=\binom{\vert V\vert}{2}^{-1}\left(\sum_{i=1}^k \#\hbox{diff}(i)+\sum_{i=k+1}^{\vert V\vert -1} \#\hbox{same}(i)\right).
+\end{equation*}
+
+The weakness of connected component segmentations is that they tend to oversegment or cut too many MST edges.
+If the connected component segmentation happens to be an oversegmentation, we want to lower the Rand error by merging some of the resulting segments. For this step we want to switch from the connected component segmentation to the watershed segmentation. We could just lower the threshold that we cut the affinities at for the connected components segmentation to a negative number, but at this stage any noise could cause problems. While lowering the threshold may reduce the Rand error, we hope that by switching the graph cut method we can capitalize on the strength of the connected component algorithm for growing segments and then use the strength of the watershed algorithm for defining edges at the same time.
+
+To switch algorithms, we consider a new graph: each previous segment found in the connected component segmentation is contracted into a new vertex and adjoining vertices are connected by an edge whose weight is the largest of the original affinities of any edge between the two segments. All the cut MST edges are connectors between such segments, but we get additional connecting edges that are not MST edges, since the MST does not allow loops.
+
+\begin{lemma}\label{lem:1}
+If there is an MST edge between any two vertices in the new graph, then the weight this edge is the new affinity.
+\end{lemma}
+ \begin{proof}
+ Assume that there is a non-MST edge of higher weight than an MST edge connecting the same two new vertices. Then we can replace the same MST edge in the original graph by the new edge and get a better MST for the original graph, a contradiction.
+ \end{proof}
+ 
+ \begin{lemma} \label{lem:ws-MST}
+ If there is no MST edge between a pair of new vertices, then the edge is not in a watershed basin for the new graph, i.e. it is a watershed edge and will be cut.
+ \end{lemma}
+
+
+\begin{proof}
+Recall that we defined  $A_{ij}^*=\min\left( \max_{k\in N_i\setminus\{j\}}A_{ik},\max_{k\in N_j\setminus\{i\}}A_{kj}\right)
+$ and concluded that
+if $A_{ij}^*< A_{ij}$, then on at least one side  of edge $e_{ij}$ all edges have lower weight and the edge is in a watershed basin. Since the negative weight MST edges of the original spanning tree are a spanning tree of the new graph, both ends of the edge $e_{ij}$ border at least one MST edge, which by the argument in the proof of Lemma \ref{lem:1} must have a higher weight, making $A_{ij}^*>A_{ij}$ and the edge $e_{ij}$ a watershed edge.
+\end{proof}
+
+
+All vertices in the new graph border at least one MST edge, since the MST reaches every vertex of the original graph. Lemma \ref{lem:ws-MST} says that every non-MST edge is a watershed edge and gets cut. 
+This allows us to reduce our search for watershed edges to the negative edges of the original MST. The next lemma seems confusing at first, as it talks about two different MSTs: the MST for the original graph and the new MST for edges between segments of the connected component segmentation.
+
+\begin{lemma}\label{lem:ws}
+If all affinities are distinct, then the MST edge of the highest weight in the new graph is not a watershed edge. This argument extends to the MST edge of second highest weight.
+\end{lemma}
+\begin{proof}
+If we look at  the edge of highest weight, the maximum weight on of all the bordering MST edges on the new MST between segments on either side is smaller, guaranteeing that $A_{ij}^*< A_{ij}$ or that the edge is not a watershed and will not be cut. For the edge of second highest weight at least on one side all the weights of all adjoining MST edges for the new graph are lower, making it a watershed basin edge too that will be joined. 
+\end{proof}
+
+\begin{remark}
+Lemma \ref{lem:ws} guarantees that the CC-WS hierarchy generates a different segmentation than the CC segmentation alone. We merge the CC segments connected by the two highest negative MST edges for sure. This does lower the threshold for merging by two MST edges. This observation gives rise to the idea of initially setting the threshold for the connected component segmentation higher than zero. Maybe this threshold should be a parameter for the combination of segmentations.
+\end{remark}
+Then we can proceed through the MST edges in order of decreasing weights.
+For each edge we check whether $A_{ij}^*< A_{ij}$, where the $A_{ij}^*$ are computed with the new graph.
+A previous MST edge of non-positive weight is a watershed edge if on both side of it there is a MST path in the old graph whose first negative edge is larger than the edge under consideration.
+Or if we only consider the new graph whose vertices are the CC segments then an edge is an WS edge if on both sides it borders a higher MST edge.
+
+\subsubsection{Rand error for a CC-WS Hierarchy}
+\label{subsec:RE Hierarchy}
+
+For the original CC we compute the change in Rand error for each new merger of two previous segments as outlined in section \ref{sec:Kruskal}. 
+Before we had a formula for the Rand error as we add MST edges by decreasing weight. At the end of the CC segmentation we do have the correct Rand error for that segmentation and a membership array for each segment. 
+
+The same method of accounting allows us to compute the Rand error of the hierarchy as the watershed cut is executed after the connected component segmentation. The connected component segmentation used the positive MST edges, whereas the WS segmentation uses the negative MST edges.
+We use the ``watershed basin'' test $A_{ij}^*<A_{ij}$ for each negative MST edge in decreasing order. It an edge $e_{ij}$ is in a watershed basin ({\color{green} basins are hills now?}) then the two segments it connects are joined and new $\#\hbox{same}_{ij}$ and $\#\hbox{diff}_{ij}$ counts are calculated and the Rand error is updated by adding $\#\hbox{diff}_{ij}-\#\hbox{same}_{ij}$ to the Rand error of the previous segmentation. If an MST edge is not a watershed basin edge, it is a watershed edge and gets cut, hence we do not merge the two segments it connects.
+
+\subsubsection{Loss function for the CC-WS hierarchy}
+In \cite{Nguyen2019} we described a hinge loss function for a connected component segmentation that was based on the $\#\hbox{same}$ and  $\#\hbox{diff}$ counts for the MST edges. As seen in section \ref{subsec:RE Hierarchy}, the Rand loss for the hierarchical segmentation is still based on MST edges, albeit omitting the negative MST edges that are watershed edges. Hence this loss function adapts to the hierarchy and we can use automatic differentiation of calculate its gradient. We change the notation to accommodate skipped MST edges by writing $\hbox{same}_{ij}$ in place of $\hbox{same}(k)$ of the $k$-th edge connects vertices $i$ and $j$. {\color{red} True? Is the testing for watershed basin edge getting in the way of this?} As before $A$ denotes the affinities (where only the MST edge affinities are used) and $Y$ are the ground truth vertex class labels. The parameter $\theta$ is the threshold for the connected component segmentation. MST edges of weight below $\theta$ get cut in the first segmentation.
+
+{\bf Remark:} This formally looks exactly like the loss function for the cc segmentation, the difference is in how the same and diff counts are calculated. For omitted MST edges, same and diff are zero.
+ {\color{red} But shouldn't we flip the sign of $(A_{ij}-\theta)$ for non-watershed affinities below theta?}
+\begin{equation}
+    \label{eq:weighted_loss_meta}
+    RL(A,Y) = \sum_{(i,j)\in MST}{W_{ij} \cdot \max\left(0,1-\ell_{ij}(A_{ij}-\theta)\right)},
+\end{equation}
+where
+\begin{equation}\label{eq:loss_meta_label1}
+\ell_{ij} = sign(\#\hbox{same}_{ij} -\#\hbox{diff}_{ij})
+\end{equation}\\
+\begin{equation}\label{eq:weighting_function_modified}
+W_{ij} = \left\vert \frac{\#\hbox{same}_{ij}-\#\hbox{diff}_{ij}}{\#\hbox{same}_{ij}+\#\hbox{diff}_{ij}}\right\vert
+\end{equation}
+    
+The weight function gives a weight of 1 to the first edge in the MST and assigns a weight of zero to edges that induce the same number of correct and incorrect connections. If the new edge $e_{ij}$ added to the MST connects just one vertex to a segment, the  the size of the new segment is $\#\hbox{same}_{ij}+\#\hbox{diff}_{ij}+1$, which motivated this choice of a weighting function. The first few edges connect a small number of vertices, but have the largest impact for a connected component segmentation.
+
+
+\subsection{Watershed followed by Connected components}
+To be a watershed basin edge, all adjoining edges on at least one side of an edge must have a lower weight than the edge under consideration. If all MST edges on one side of an edge  have a lower weight than the edge, then the edge is a watershed basin edge and does not get cut. Lemma \ref{lem:ws-MST} implies that we can  restrict our attention to MST edges, as all other edges are watershed edges and get cut. (This hinges on the fact that the largest edge adjoining any vertex must be a MST edge.)
+
+Hence all we do is a WS segmentation of the MST. For this, the $A_{ij}^*$ are still computed over the whole graph, not just the MST. But since the MST edges are the high edges, it would suffice to compute the $A_{ij}^*$ over the MST. The values would be different, but the sign of $A_{ij}-A_{i,j}^*$  An MST edge will be cut if it has higher MST edges on both sides. An MST edge that does not have MST edges on both sides can not be a watershed edge.
+
+
+We sort the MST edges by decreasing affinities - the order they were added to the MST by Kruskal's algorithm. For each edge we look at their immediate MST neighbors. ({\color{red} Is computing the $A_{ij}^*$ over the MST only easier/cheaper/worth while?} We start building segments from the watershed basin MST edges. We start out with individual vertices as segments and assign membership arrays as a sequence of zeros with a one in the location of the original segment the vertex is in. Any time we add an edge to a segment we create/update a membership array and the same and diff counts. If a segment contains only 2 vertices, we add the weight of the edge between the vertices to the membership array. This will be used in updating the affinities between segments.
+
+After the WS segmentation we shrink each of the connected components of the segmentation to a new vertex and assign a new affinity as the minimum of the depths of the basing (heights of hills for us) on either side of the watershed edge. We can keep track of these depths in Kruskal's algorithm.
+ Then we decide on a threshold $\theta$ for a connected component segmentation. As before we really hope to do a correlation clustering segmentation over a restricted set of possible segmentations - namely those induced by the threshold $\theta$. 
+ 
+ We try to minimize the loss for this clustering by calculating adding up $A_{ij}-\theta$ for all MST edges that are cut and $\theta-A_{ij}$ for all MST edge that are not cut - or turn it into a hinge loss or quadratic loss.
+ 
+ The Rand error and this loss function are only calculated over MST edges and in each learning step we calculate the MST and update the MST edges to minimize the loss. This batch learning may seem capricious as there could be completely disjoint MSTs in two consecutive steps, but in our experiments we have found that generally the training converges.
+calculate new affinities 
+ 
+
+\begin{lemma} Any negative MST edge between two vertices that each border a positive MST edge is a watershed edge and gets cut.
+\end{lemma}
+\begin{proof}
+If edge $A_{ij}<0$ and there are edges $e_{ki}, e_{jm}$ with $A_{ki}>0$ and , $A_{jm}>0$, then $A_{ij}^*>A_{ij}$ and the edge is not in a watershed basin.
+\end{proof}
+
+This means that a negative MST edge between two connected components would be  a watershed edge and be cut.
+
+\begin{lemma} Any negative MST edge $e_{ij}$ that borders a positive MST edge $e_{ki}$  is a watershed basin edge if an only if all MST edges $e_{j,m}$ satisfy $A_{jm}<A_{ij}$.
+\end{lemma}
+\begin{proof}
+In this case $ \max_{k\in N_i\setminus\{j\}}A_{ik}>A_{ij}$ and for a watershed basin edge we would need $A_{ij}>\min\left( \max_{k\in N_i\setminus\{j\}}A_{ik},\max_{k\in N_j\setminus\{i\}}A_{kj}\right)=\max_{k\in N_j\setminus\{i\}}A_{kj}$. If all MST edges on one side of edge $e_{ij}$ have lower affinities than $A_{ij}$ then the edge can not be a watershed edge.
+\end{proof}
+
+In the same scenario, if at least one  MST edge $e_{jm}$ satisfy $A_{jm}>A_{ij}$, then the edge is a watershed edge, as it is bordered by two MST edges with higher affinities.
+
+
+ \section{Waterfall segmentation}
+ Meyer in\cite{Meyer2015} described a waterfall hierarchy consisting of a sequence of watershed cuts.  Generally  a watershed cut oversegments an image. In the second step each segment is a vertex and the weight of the edge between two adjoining segments is the minimum of the basin depth on either side. Said differently, each watershed basin is flooded to the lowest  pass point to an adjoining basin. This could be viewed as calculating merging each watershed basin with the neighbor to whom the pass height is the lowest. (in original topography, we have the opposite). The affinity between two basins is the minimum pass height. On those affinities we do another watershed cut.
+ an edge that is a watershed edge has lower affinities on both sides, i.e. on both sides all its neighbors who merge with a different lake.
+ In the original Meyer setup where edge weights denote the difference between segments or large weights mean the edge should be split, we work with a minimum spanning tree. To build the waterfall hierarchy, we work our way through the minimum spanning tree in increasing order of the edge weights. Each vertex $v$ has a label $\rho(v)$ that starts out with $0$. Initially each vertex is its own segment. As we add the lowest MST edge $(u,v)$ , we give it a new weight $w(u,v)=1+\min(\rho(u), \rho(v))$ then we update $\rho(u)$ to be the highest weight of any edge in the segment that contains $u$. For the first edge that means both vertices now have label $1$. For each vertex, we had the findset function in Kruskal, now we add the label function for each vertex. For the second lowest MST edge, two things can happen: it can turn the original segment of 2 vertices into a segment of 3 vertices or it can form a second segment of two vertices. In the first case the new edge weight would still be $1$, since for the new vertex has label $0$, and in the second case both vertices have label zero. Once a new edge joins two earlier segments, this edge has weight $w(u,v)=1+\min(\rho(u), \rho(v))$ if all earlier vertex labels were 1, the new edge label is 2. What this edge weight measures is the minimum depth of the basin on either side of the vertex, not in absolute units but in how many consecutive watershed cuts it takes to flood this edge. The new edge labels will be natural numbers. In the first watershed cut, all edges with label $1$ would be kept and form the watershed basins. If we then assign the minimum depth of a watershed basin as the affinity for each watershed edge and do another watershed cut on the new graph formed by watershed basins as vertices and watershed edges with the new basin depth weights, the original MST edges of label 2 would be joined. In other words the result of combining two watershed cuts would be the same as joining all edges of new labels 1 and 2.
+
+ Once we have the new waterfall labels for all MST edges, we can start calculating the Rand errors by generating same and diff counts for the MST edges, first going tough all of the label 1 edges, then the label 2 edges etc.
+ This allows us to calculate the Rand error of the first segmentation are the Rand error of the first 2 segmentations etc - effectively allowing to decide on which number of watershed cuts generates the lowest Rand error in training.
+
+Then order in which edges are considered is dependent on the order they were added to the MST, but not in the actual affinities of those edges. The new edge weights denote in which flooding the vertices are joined. Those new weights are not necessarily added in order - if the weights are all small in one corner of the graph and all high in another, it could happen that in the low weight corner we get high edge weights before anything in the opposite corner gets connected with an edge weight of one.
+
+
+\section{Comparing CC-WS and WS-CC hierarchies}
+
+The commonality is that both segmentations are done only on an MST. With both versions all the positive MST edges stay connected.
+The difference is the segmentation of the negative edges.
+
+For the WS-CC segmentation, the immediate neighbors of the MST edges matter, whereas for the CC-WS segmentation all positive MST edges get contracted to a single vertex and the MST edges around that vertex matter.
+If an edge borders a connected component, for the WS-CC segmentation the positive MST edges inside give a higher edge on that side and the maximim affinity on the other side determines whether the edge is a watershed edge or not.
+\subsection{Examples}
+If we have a chain of affinities
+
+-3...1...-2...-1
+ 
+ then in CC-WS segmentation the -2 edge is not a watershed edge since in the new graph we have the chain -3...-2...-1, whereas in WS-CC it is a watershed edge due to the local chain 1...-2...-1 .
+ 
+ with    -1...1....-2...2...-1
+ 
+ then in the CC-WS hierarchy the -2 edge is a watershed edge due to the new chain -1...-2...-1 and it is a watershed edge in WS-CC due to the local chain 1...-2...2
+ 
+
+It is easy to construct examples where -2 is a watershed example in both segmentations with   -1...-2...-1 being the most basic example or where the -2 edge is an edge in neither hierarchy, as in the -1...-2...-3 example
+ \section{Experiments}
+ We hope that the experiments show that the WS-CC hierarchy has a richer set of candidates to select from than just the waterfall hierarchy. This is due to the fact that the waterfall is solely based on the order in which MST edges are added, whereas the correlation clustering part uses the difference between the affinities and the selected threshold, which is a different order of adding edges. 
+\bibliographystyle{unsrt}  
+\bibliography{references}  %%% Remove comment to use the external .bib file (using bibtex).
+%%% and comment out the ``thebibliography'' section.
+
+
+%%% Comment out this section when you \bibliography{references} is enabled.
+
+
+\end{document}

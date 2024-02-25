@@ -1,4 +1,4 @@
-from DataIO import SerializeMSBTwos
+from DataIO import SerializeMSBTwos,  DeserializeMSBTwos
 
 # Bit Serial Memory
 class BSMEM():
@@ -23,37 +23,51 @@ class BSMEM():
     def SetInput(self, di, input):
         self.nextInput[di] = input
 
-    def SetInputs(self, input):
-        self.nextInput = input
-
     def GetOutput(self, di):
         return self.mem[di]
 
     def GetOutput(self):
         return self.mem
     
-    def Step(self):
+    def Step(self, input):
+        #print(f"###################################")
+        #self.Print("DEBUG IN")
+
         # write
         if self.mode == 1:
-            print("####################################")
-            print(self.nextInput)
-            print(self.mem)
-            for di in range(self.D):
-                print(self.mem[di])
-                self.mem[di][self.wi] = self.nextInput[di]
+            #print("####################################")
+            #print(self.nextInput)
+            #print(self.mem)
+            for di in range(len(input)):                
+                self.mem[di][self.wi] = input[di]
+                #print(f"Setting {di}, {self.wi} value {self.nextInput[di]}")
 
             self.wi += 1
             if self.wi == self.K:
                 self.wi = 0
-        # read 
-        self.ri += 1        
-        if self.ri == self.K:
-            self.ri = 0
+        else:   # read 
+            self.ri += 1        
+            if self.ri == self.K:
+                self.ri = 0
 
-    def Print(self):
-        print("BSMEM")
-        print(f"width: {self.D} depth: {self.K}")
-        print(f"mem: {self.mem}")   
+        #self.Print("DEBUG OUT")
+
+    def GetInts(self):
+        result = list()
+        for di in range(len(self.mem)):
+            result.append(DeserializeMSBTwos(self.mem[di]))
+        
+        return result
+    
+    def Print(self, prefix="", verbose=2):
+        print(f"{prefix}|BSMEM--------------------------|")
+        print(f"{prefix}|Size: {self.D} Depth: {self.K} ")
+        
+        for di in range(len(self.mem)):
+                print(f"{prefix}{self.mem[di]}")
+
+
+                
 
     
     
