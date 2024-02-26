@@ -34,7 +34,8 @@ class PTF:
         print(f"{prefix} PTF: {self.lastx} -> {self.y}")
 
     def Step(self, x) -> None:
+        self.Calc(x)
         pass
 
-    def Reset(self, x) -> None:
-        self.Calc(x)
+    def Reset(self) -> None:
+        self.y = 0

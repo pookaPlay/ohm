@@ -75,7 +75,7 @@ class OHM:
         self.msbAtOut.Reset()
         self.flags = list(self.d2 * [0])                        
         self.latchInput = list(self.d2 * [0])
-        self.pbf.Reset([self.lsb2msb[i].Output() for i in range(self.d2)])        
+        self.pbf.Reset()
         self.msb2lsb.Reset()        
 
         self.done = 0

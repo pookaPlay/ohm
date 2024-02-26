@@ -7,7 +7,7 @@ class BSMEM():
         self.D = D
         self.K = K
         self.mode = writeMode
-
+        self.mem = [list(self.K * [0]) for _ in range(self.D)]        
         self.Reset()
         
 
@@ -23,11 +23,11 @@ class BSMEM():
     def SetInput(self, di, input):
         self.nextInput[di] = input
 
-    def GetOutput(self, di):
-        return self.mem[di]
-
-    def GetOutputs(self):
-        return self.mem
+    def Output(self, di=-1):
+        if di != -1:
+            return self.mem[di][self.ri]
+        else:
+            return [self.mem[ai][self.ri] for ai in len(self.mem)]
     
     def Step(self, input):
         #print(f"###################################")

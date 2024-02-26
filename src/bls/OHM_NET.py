@@ -2,58 +2,51 @@
 ## This has the connectivity 
 
 from BSMEM import BSMEM
+from RDMEM import RDMEM
 from OHM_LSB import OHM_LSB
 from OHM_MSB import OHM_MSB
-from DataReader import DataReader
 
 class OHM_NET:
 
-    def __init__(self, dataMem: list[DataReader], 
-                 paramMem : list[DataReader],
-                 lsbMem : BSMEM,
-                 msbMem : BSMEM,
-                 N = 2):
+    def __init__(self, memD, memK, numNodes):
     
-        self.N = N      # number of parallel nodes
-        self.lsbMem = lsbMem
-        self.msbMem = msbMem
-        self.dataMem = dataMem
-        self.paramMem = paramMem
+        self.NN = numNodes      # number of parallel nodes
+        self.D = memD
+        self.K = memK
+        self.lsbMem = [BSMEM(self.D, self.K), BSMEM(self.D, self.K)]
+        self.msbMem = [BSMEM(self.D, self.K), BSMEM(self.D, self.K)]
 
-        self.ohmLSB = OHM_LSB(self.N)        
-        self.ohmMSB = OHM_MSB(self.N)
+        #input = [[7, -2, -6], [7, 0, -3], [1, 3, 5], [-6, 1, 2]]    
+        input = [[7, 7, 1, -6], [-2, 0, 3, 1], [-6, -3, 5, 2]]
+        self.dataMem = RDMEM(input, self.K, self.K)
+
+        weights = self.NN * [1]
+        self.paramMem = RDMEM(weights, self.K, self.K)
+
+        self.ohmLSB = OHM_LSB(self.NN, self.D)        
+        self.ohmMSB = OHM_MSB(self.NN, self.D)
 
         self.Reset()
 
     def Reset(self) -> None:
-            
-        # Connectivity
-        self.dataIndex = list(range(self.N))
-        self.paramIndex = list(range(self.N))
-        self.dataInputs = list([0] * self.N)
-        self.paramInputs = list([0] * self.N)
 
-        self.msbIndex = list(range(self.N))        
-        self.lsbIndex = list(range(self.N))              
-        self.msbDenseOut = list(self.msbMem.D * [0])
-        self.lsbDenseOut = list(self.lsbMem.D * [0])        
-        
+        [mem.Reset() for mem in self.lsbMem]
+        [mem.Reset() for mem in self.msbMem]
+        self.dataMem.Reset()
+        self.paramMem.Reset()
         self.ohmLSB.Reset()        
         self.ohmMSB.Reset()        
         
 
     def Calc(self) -> None:
-
-        self.dataInputs = [self.dataMem[self.dataIndex[ni]].Output() for ni in range(self.N)]
-        self.paramInputs = [self.paramMem[self.paramIndex[ni]].Output() for ni in range(self.N)]
-        self.ohmLSB.Calc(self.dataInputs, self.paramInputs)        
-
-        self.msbInputs = [self.msbMem.GetOutput(self.msbIndex[ni]) for ni in range(self.N)]
-        self.ohmMSB.Calc(self.msbInputs)
+        print(f"OHM_NET: Calc")
+        self.ohmLSB.Calc(self.dataMem, self.paramMem)        
+        #self.msbInputs = [self.msbMem.GetOutput(self.msbIndex[ni]) for ni in range(self.N)]
+        #self.ohmMSB.Calc(self.msbInputs)
             
     def Step(self) -> None:        
         self.ohmLSB.Step()        
-        self.ohmMSB.Step()
+        #self.ohmMSB.Step()
 
     def LSBOutputPass(self):
         
@@ -83,3 +76,48 @@ class OHM_NET:
                 print(prefix + f"  DataMemValue({self.dataInputs}) ParamMemValue({self.paramInputs}) Output({self.msbIndex})")
 
         self.ohmLSB.Print(prefix + "  ", showInput)
+        self.ohmMSB.Print(prefix + "  ", showInput)
+
+""" 
+    ohm.Calc()
+    ohm.Print("", 2)
+            
+    msbMem.Step(ohm.LSBOutputPass())
+    lsbMem.Step(ohm.MSBOutputPass())        
+
+    ohm.Step()
+
+    for ti in range(NSteps):
+        print(f"== {ti+1} ============================")
+
+        [dataMem[p].Step() for p in range(len(dataMem))]
+        [paramMem[p].Step() for p in range(len(paramMem))]
+
+        if showInputs > 1: 
+            print(f"DATA")
+            [dataMem[p].Print() for p in range(len(dataMem))]
+        if showInputs > 1:
+            print(f"PARAMS")
+            [paramMem[p].Print() for p in range(len(paramMem))]
+
+        ohm.Calc()
+        ohm.Print("", 2)                    
+        
+        msbMem.Step(ohm.LSBOutputPass())
+        lsbMem.Step(ohm.MSBOutputPass())        
+        ohm.Step()
+
+        #msbMem.Print("  ")
+        #result = msbMem.GetInts()
+        #print(f"RESULT: {result}")
+
+        
+
+    
+    msbMem.Print("MSB")
+    msbResult = msbMem.GetInts()
+    print(f"RESULT: {msbResult}")
+
+    lsbMem.Print("LSB")
+    lsbResult = lsbMem.GetInts()
+    print(f"RESULT: {lsbResult}") """
