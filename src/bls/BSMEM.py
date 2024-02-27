@@ -13,18 +13,9 @@ class BSMEM():
 
     def Reset(self):
         self.ri = 0
-        self.wi = 0
-        self.nextInput = list(self.D * [0])
+        self.wi = 0        
         self.mem = [list(self.K * [0]) for _ in range(self.D)]        
     
-    def ClearInput(self):
-        self.nextInput = list(self.D * [0])
-
-    def SetInput(self, input, di=-1):
-        if di == -1:
-            self.nextInput = input  
-        else:   
-            self.nextInput[di] = input
 
     def Output(self, di=-1):
         if di != -1:
@@ -32,15 +23,13 @@ class BSMEM():
         else:
             return [self.mem[ai][self.ri] for ai in len(self.mem)]
     
-    def Step(self, input):
-        #print(f"###################################")
-        #self.Print("DEBUG IN")
+    def Step(self, input = None):
 
-        # write
-        if self.mode == 1:
-            #print("####################################")
-            #print(self.nextInput)
-            #print(self.mem)
+        if input is None:
+            self.ri += 1        
+            if self.ri == self.K:
+                self.ri = 0
+        else:        
             for di in range(len(input)):                
                 self.mem[di][self.wi] = input[di]
                 #print(f"Setting {di}, {self.wi} value {self.nextInput[di]}")
@@ -48,12 +37,6 @@ class BSMEM():
             self.wi += 1
             if self.wi == self.K:
                 self.wi = 0
-        else:   # read 
-            self.ri += 1        
-            if self.ri == self.K:
-                self.ri = 0
-
-        #self.Print("DEBUG OUT")
 
     def GetInts(self):
         result = list()

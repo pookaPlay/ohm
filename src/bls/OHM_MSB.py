@@ -4,38 +4,37 @@ from STACK import STACK
 
 class OHM_MSB:
 
-    def __init__(self, N, D) -> None:    
-        self.N = N         
-        self.D = D      
-        self.stacks = [STACK() for _ in range(self.N)]        
+    def __init__(self, numNodes, memD, nodeD) -> None:    
+        self.N = numNodes         
+        self.nodeD = nodeD
+        self.memD = memD
         
-        self.inIndex = list(range(self.D))        
-        self.outIndex = list(range(self.D))              
-
+        self.stacks = [STACK() for _ in range(self.N)]        
+                
         self.Reset()                   
             
     def Reset(self) -> None:
         for ai in range(self.N):
             self.stacks[ai].Reset()
-        pass
+        
+        self.inIndex = [list(range(self.nodeD)) for _ in range(self.N)]
+        self.outIndex = list(range(self.N))              
+        self.denseOut = list(self.memD * [0])                    
 
-    def Output(self):
-
-        result = [self.stacks[ai].Output() for ai in range(self.N)]
-        return result                    
+    def Output(self):        
+        return self.denseOut                    
 
     def Calc(self, mem) -> None:
         
-        self.inputs = [self.mem[self.inIndex[ni]].Output() for ni in range(self.N)]
-
+        self.denseOut = list(self.memD * [0])        
+        
         for ai in range(self.N):
-            self.stacks[ai].Calc(x[ai], msb)        
+            inIndex = self.inIndex[ai] 
+            inputs = [mem.Output(inIndex[ni]) for ni in range(len(inIndex))]
+            self.stacks[ai].Calc(inputs)  #, msb)        
+            self.stacks[ai].Output()
+            self.denseOut[self.outIndex[ai]] = self.stacks[ai].Output()                    
         
-        self.sparseOut = [self.adders[ai].Output() for ai in range(self.N)]
-        
-        self.denseOut = list(self.D * [0])                
-        for ni in range(len(self.sparseOut)):
-            self.denseOut[self.outIndex[ni]] = self.sparseOut[ni]
             
     def Step(self) -> None:                
         for ai in range(len(self.stacks)):

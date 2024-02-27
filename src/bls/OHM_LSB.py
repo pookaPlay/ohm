@@ -6,16 +6,16 @@ from ADD import ADD
 class OHM_LSB:
 
 
-    def __init__(self,  NN, ND) -> None:        
+    def __init__(self,  NN, memD) -> None:        
                 
         self.N = NN
-        self.D = ND
+        self.memD = memD
         
         self.adders = [ADD() for _ in range(self.N)]        
 
-        self.inIndexA = list(range(self.D))
-        self.inIndexB = list(range(self.D))
-        self.outIndex = list(range(self.D))
+        self.inIndexA = list(range(self.N))
+        self.inIndexB = list(range(self.N))
+        self.outIndex = list(range(self.N))
 
         self.Reset()          
     
@@ -40,7 +40,7 @@ class OHM_LSB:
     
         self.sparseOut = [self.adders[ai].Output() for ai in range(self.N)]
         
-        self.denseOut = list(self.D * [0])                
+        self.denseOut = list(self.memD * [0])                
         for ni in range(len(self.sparseOut)):
             self.denseOut[self.outIndex[ni]] = self.sparseOut[ni]
         

@@ -8,14 +8,18 @@ from OHM_MSB import OHM_MSB
 
 class OHM_WORD:
 
-    def __init__(self, memD, memK, numNodes):
+    def __init__(self, memD, memK, numNodes, nodeD):
     
         self.NN = numNodes      # number of parallel nodes
-        self.D = memD
+        self.memD = memD
+        self.nodeD = nodeD
+
         self.K = memK
-        self.lsbMem = [BSMEM(self.D, self.K), BSMEM(self.D, self.K)]
-        self.msbMem = [BSMEM(self.D, self.K), BSMEM(self.D, self.K)]        
-        self.memState = 0 
+        self.lsbMem = [BSMEM(self.memD, self.K), BSMEM(self.memD, self.K)]
+        self.msbMem = [BSMEM(self.memD, self.K), BSMEM(self.memD, self.K)]        
+        
+        self.writei = 0
+        self.readi = 1        
 
         input = [7, -2, -6]        
         self.dataMem = RDMEM(input, self.K, self.K)
@@ -23,16 +27,11 @@ class OHM_WORD:
         weights = self.NN * [1]
         self.paramMem = RDMEM(weights, self.K, self.K)
 
-        self.ohmLSB = OHM_LSB(self.NN, self.D)        
-        self.denseLSBOut = list(self.D * [0])
-        self.lsbInIndex = list(range(self.D))
-        self.lsbOutIndex = list(range(self.D))
+        self.ohmLSB = OHM_LSB(self.NN, self.memD)   
+        self.ohmMSB = OHM_MSB(self.NN, self.memD, self.nodeD)
 
-        self.ohmMSB = OHM_MSB(self.NN, self.D)        
-        self.denseMSBOut = list(self.D * [0])
-        self.msbInIndex = list(range(self.D))
-        self.msbOutIndex = list(range(self.D))
-        
+        self.denseLSBOut = list(self.memD * [0])
+        self.denseMSBOut = list(self.memD * [0])
 
         self.Reset()
 
@@ -46,8 +45,8 @@ class OHM_WORD:
         self.paramMem.Reset()
         self.ohmLSB.Reset()        
         self.ohmMSB.Reset()        
-        self.denseLSBOut = list(self.D * [0])
-        self.denseMSBOut = list(self.D * [0])
+        self.denseLSBOut = list(self.memD * [0])
+        self.denseMSBOut = list(self.memD * [0])
 
         
     def RunNSteps(self, NSteps) -> None:
@@ -58,27 +57,38 @@ class OHM_WORD:
             print(f"===============================================")
             print(f"== {ti} =======================================")
             self.ohmLSB.Calc(self.dataMem, self.paramMem)
-            self.denseLSBOut = self.ohmLSB.Output()                                              
+            self.denseLSBOut = self.ohmLSB.Output()
 
-            #self.Print("", 2)                    
+            self.ohmMSB.Calc(self.lsbMem[self.readi])
+            self.denseMSBOut = self.ohmMSB.Output()
 
-            self.lsbMem[self.memState].Step(self.denseLSBOut)            
-            #[mem.Step() for mem in self.msbMem]
+            self.lsbMem[self.writei].Step(self.denseLSBOut)                        
+            self.msbMem[self.writei].Step(self.denseMSBOut)                                    
 
-            [mem.Print() for mem in self.lsbMem]
-            #[mem.Print() for mem in self.msbMem]
-
+            self.lsbMem[self.writei].Print()
+            self.msbMem[self.writei].Print()
+            
+            
             for ti in range(NSteps):
                 print(f"== {ti+1} ============================")
     
                 self.dataMem.Step()
                 self.paramMem.Step()
-            
+                self.lsbMem[self.readi].Step()
+                self.msbMem[self.readi].Step()
+
                 self.ohmLSB.Calc(self.dataMem, self.paramMem)
                 self.denseLSBOut = self.ohmLSB.Output()                      
-                #self.ohmMSB.Calc(self.dataMem, self.paramMem)                                
+                
+                self.ohmMSB.Calc(self.lsbMem[self.readi])
+                self.denseMSBOut = self.ohmMSB.Output()
 
-                self.lsbMem[self.memState].Step(self.denseLSBOut)
+                self.lsbMem[self.writei].Step(self.denseLSBOut)            
+                self.msbMem[self.writei].Step(self.denseMSBOut)                                        
+
+                self.lsbMem[self.writei].Print()
+                self.msbMem[self.writei].Print()
+                
                 
             
     def Step(self) -> None:

@@ -9,14 +9,12 @@ def RunOhmNet():
     showInputs = 0
 
     NSteps = 7
-    NN = 2      # number of parallel nodes
-    K = 8       # target precision
-    DK = 8      # input data precision
-    WK = 8      # input weight precision
-    MD = 8      # memory dimension for lsbmem and msbmem
-
+    numNodes = 2      
+    nodeDim = 2 
+    memK = 8
+    memD = 8
     
-    ohm = OHM_WORD(MD, K, NN)
+    ohm = OHM_WORD(memD, memK, numNodes, nodeDim)
     
     ohm.RunNSteps(NSteps)
 
