@@ -6,15 +6,16 @@ from ADD import ADD
 class OHM_LSB:
 
 
-    def __init__(self,  numNodes, numNodeInputs) -> None:        
+    def __init__(self,  NN, ND) -> None:        
                 
-        self.N = numNodes
-        self.D = numNodeInputs
+        self.N = NN
+        self.D = ND
         
         self.adders = [ADD() for _ in range(self.N)]        
 
-        self.memIndexA = list(range(self.D))
-        self.memIndexB = list(range(self.D))
+        self.inIndexA = list(range(self.D))
+        self.inIndexB = list(range(self.D))
+        self.outIndex = list(range(self.D))
 
         self.Reset()          
     
@@ -23,22 +24,26 @@ class OHM_LSB:
         for ai in range(self.N):
             self.adders[ai].Reset()
         
-    def Output(self):
-        result = [self.adders[ai].Output() for ai in range(self.N)]
-        return result            
+    def Output(self):        
+        return self.denseOut
 
     def Calc(self, memA, memB) -> None:
-        print(f"Calc: A")
-        memA.Print()
-        print(f"Calc: B")
-        memB.Print()
-        
+    
         #memA.Output()
-        #self.aInputs = [memA  .dataMem[self.dataIndex[ni]].Output() for ni in range(self.N)]
-        #self.paramInputs = [self.paramMem[self.paramIndex[ni]].Output() for ni in range(self.N)]
+        denseA = memA.Output()
+        denseB = memB.Output()
+        self.aInputs = [memA.Output(self.inIndexA[ni]) for ni in range(self.N)]
+        self.bInputs = [memB.Output(self.inIndexB[ni]) for ni in range(self.N)]
 
-        #for ai in range(self.N):
-        #    self.adders[ai].Calc(A[ai], B[ai])
+        for ai in range(self.N):
+            self.adders[ai].Calc(self.aInputs[ai], self.bInputs[ai])
+    
+        self.sparseOut = [self.adders[ai].Output() for ai in range(self.N)]
+        
+        self.denseOut = list(self.D * [0])                
+        for ni in range(len(self.sparseOut)):
+            self.denseOut[self.outIndex[ni]] = self.sparseOut[ni]
+        
 
     def Step(self) -> None:
         for ai in range(len(self.adders)):

@@ -6,7 +6,7 @@ from RDMEM import RDMEM
 from OHM_LSB import OHM_LSB
 from OHM_MSB import OHM_MSB
 
-class OHM_NET:
+class OHM_WORD:
 
     def __init__(self, memD, memK, numNodes):
     
@@ -17,15 +17,22 @@ class OHM_NET:
         self.msbMem = [BSMEM(self.D, self.K), BSMEM(self.D, self.K)]        
         self.memState = 0 
 
-        #input = [[7, -2, -6], [7, 0, -3], [1, 3, 5], [-6, 1, 2]]    
-        input = [[7, 7, 1, -6], [-2, 0, 3, 1], [-6, -3, 5, 2]]
+        input = [7, -2, -6]        
         self.dataMem = RDMEM(input, self.K, self.K)
 
         weights = self.NN * [1]
         self.paramMem = RDMEM(weights, self.K, self.K)
 
         self.ohmLSB = OHM_LSB(self.NN, self.D)        
-        self.ohmMSB = OHM_MSB(self.NN, self.D)
+        self.denseLSBOut = list(self.D * [0])
+        self.lsbInIndex = list(range(self.D))
+        self.lsbOutIndex = list(range(self.D))
+
+        self.ohmMSB = OHM_MSB(self.NN, self.D)        
+        self.denseMSBOut = list(self.D * [0])
+        self.msbInIndex = list(range(self.D))
+        self.msbOutIndex = list(range(self.D))
+        
 
         self.Reset()
 
@@ -34,33 +41,51 @@ class OHM_NET:
         [mem.Reset() for mem in self.lsbMem]
         [mem.Reset() for mem in self.msbMem]
         self.memState = 0 
-        
+
         self.dataMem.Reset()
         self.paramMem.Reset()
         self.ohmLSB.Reset()        
         self.ohmMSB.Reset()        
+        self.denseLSBOut = list(self.D * [0])
+        self.denseMSBOut = list(self.D * [0])
+
         
-
-    def Calc(self) -> None:
-
-        print(f"OHM_NET: Calc")
-        self.ohmLSB.Calc(self.dataMem, self.paramMem, self.msbMem[self.memState])
-        #self.msbInputs = [self.msbMem.GetOutput(self.msbIndex[ni]) for ni in range(self.N)]
-        #self.ohmMSB.Calc(self.msbInputs)
+    def RunNSteps(self, NSteps) -> None:
             
-    def Step(self) -> None:        
+            # Assumes all memories are ready 
+            ## T = 0 
+            ti = 0
+            print(f"===============================================")
+            print(f"== {ti} =======================================")
+            self.ohmLSB.Calc(self.dataMem, self.paramMem)
+            self.denseLSBOut = self.ohmLSB.Output()                                              
+
+            #self.Print("", 2)                    
+
+            self.lsbMem[self.memState].Step(self.denseLSBOut)            
+            #[mem.Step() for mem in self.msbMem]
+
+            [mem.Print() for mem in self.lsbMem]
+            #[mem.Print() for mem in self.msbMem]
+
+            for ti in range(NSteps):
+                print(f"== {ti+1} ============================")
+    
+                self.dataMem.Step()
+                self.paramMem.Step()
+            
+                self.ohmLSB.Calc(self.dataMem, self.paramMem)
+                self.denseLSBOut = self.ohmLSB.Output()                      
+                #self.ohmMSB.Calc(self.dataMem, self.paramMem)                                
+
+                self.lsbMem[self.memState].Step(self.denseLSBOut)
+                
+            
+    def Step(self) -> None:
         self.ohmLSB.Step()        
         #self.ohmMSB.Step()
-
-    def LSBOutputPass(self):
-        
-        self.msbDenseOut = list(self.msbMem.D * [0])
-        sparseOutput = self.ohmLSB.Output()        
-        
-        for ni in range(len(sparseOutput)):
-            self.msbDenseOut[self.msbIndex[ni]] = sparseOutput[ni]
-        #print(f"OHM_NET: Output({self.denseOutput})")
-        return self.msbDenseOut
+            
+        return 
 
     def MSBOutputPass(self):
         
@@ -73,12 +98,7 @@ class OHM_NET:
         return self.lsbDenseOut
 
     def Print(self, prefix="", showInput=1) -> None:        
-        if showInput > 0:
-            print(prefix + f"OHM_NET:")
-            if showInput > 1:
-                print(prefix + f"  DataMemIndex({self.dataIndex}) ParamMemIndex({self.paramIndex}) Output({self.msbIndex})")
-                print(prefix + f"  DataMemValue({self.dataInputs}) ParamMemValue({self.paramInputs}) Output({self.msbIndex})")
-
+        print(prefix + f"OHM_WORD:")
         self.ohmLSB.Print(prefix + "  ", showInput)
         self.ohmMSB.Print(prefix + "  ", showInput)
 

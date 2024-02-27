@@ -20,8 +20,11 @@ class BSMEM():
     def ClearInput(self):
         self.nextInput = list(self.D * [0])
 
-    def SetInput(self, di, input):
-        self.nextInput[di] = input
+    def SetInput(self, input, di=-1):
+        if di == -1:
+            self.nextInput = input  
+        else:   
+            self.nextInput[di] = input
 
     def Output(self, di=-1):
         if di != -1:

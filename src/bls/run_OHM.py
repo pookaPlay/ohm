@@ -1,6 +1,6 @@
 from SingleDataReader import SingleDataReader
 from DataWriter import DataWriter
-from OHM_NET import OHM_NET
+from OHM_WORD import OHM_WORD
 from BSMEM import BSMEM
 
 def RunOhmNet():
@@ -16,9 +16,9 @@ def RunOhmNet():
     MD = 8      # memory dimension for lsbmem and msbmem
 
     
-    ohm = OHM_NET(MD, K, NN)
-    ohm.Calc() 
-    #ohm.Step()
+    ohm = OHM_WORD(MD, K, NN)
+    
+    ohm.RunNSteps(NSteps)
 
     return
 

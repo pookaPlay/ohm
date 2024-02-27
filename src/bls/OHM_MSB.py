@@ -24,10 +24,18 @@ class OHM_MSB:
         result = [self.stacks[ai].Output() for ai in range(self.N)]
         return result                    
 
-    def Calc(self, x, msb=0) -> None:
+    def Calc(self, mem) -> None:
+        
+        self.inputs = [self.mem[self.inIndex[ni]].Output() for ni in range(self.N)]
+
         for ai in range(self.N):
             self.stacks[ai].Calc(x[ai], msb)        
         
+        self.sparseOut = [self.adders[ai].Output() for ai in range(self.N)]
+        
+        self.denseOut = list(self.D * [0])                
+        for ni in range(len(self.sparseOut)):
+            self.denseOut[self.outIndex[ni]] = self.sparseOut[ni]
             
     def Step(self) -> None:                
         for ai in range(len(self.stacks)):
