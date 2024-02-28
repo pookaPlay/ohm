@@ -49,13 +49,20 @@ class OHM_WORD:
         self.denseMSBOut = list(self.memD * [0])
 
         
-    def RunNSteps(self, NSteps) -> None:
+    def RunNStep(self, nsteps) -> None:      
             
-            # Assumes all memories are ready 
-            ## T = 0 
-            ti = 0
-            print(f"===============================================")
-            print(f"== {ti} =======================================")
+            self.PrintMem()
+      
+            for ti in range(nsteps):
+                print(f">>>>>>>>>>> Step {ti} ==========================================")     
+                self.RunStep()
+                self.readi = 1 - self.readi
+                self.writei = 1 - self.writei                
+                self.PrintMem()
+    
+    def RunStep(self):            
+            ti = 0                        
+            #print(f"     == {ti} =======================================")
             self.ohmLSB.Calc(self.dataMem, self.paramMem)
             self.denseLSBOut = self.ohmLSB.Output()
 
@@ -65,12 +72,12 @@ class OHM_WORD:
             self.lsbMem[self.writei].Step(self.denseLSBOut)                        
             self.msbMem[self.writei].Step(self.denseMSBOut)                                    
 
-            self.lsbMem[self.writei].Print()
-            self.msbMem[self.writei].Print()
+            #self.lsbMem[self.writei].Print()
+            #self.msbMem[self.writei].Print()
             
             
-            for ti in range(NSteps):
-                print(f"== {ti+1} ============================")
+            for ti in range(self.K):
+                #print(f"== {ti+1} ============================")
     
                 self.dataMem.Step()
                 self.paramMem.Step()
@@ -85,73 +92,19 @@ class OHM_WORD:
 
                 self.lsbMem[self.writei].Step(self.denseLSBOut)            
                 self.msbMem[self.writei].Step(self.denseMSBOut)                                        
+                                                  
 
-                self.lsbMem[self.writei].Print()
-                self.msbMem[self.writei].Print()
-                
-                
-            
-    def Step(self) -> None:
-        self.ohmLSB.Step()        
-        #self.ohmMSB.Step()
-            
-        return 
-
-    def MSBOutputPass(self):
-        
-        self.denseOutput = list(self.msbMem.D * [0])
-        sparseOutput = self.ohmMSB.Output()        
-        
-        for ni in range(len(sparseOutput)):
-            self.lsbDenseOut[self.lsbIndex[ni]] = sparseOutput[ni]
-        #print(f"OHM_NET: Output({self.denseOutput})")
-        return self.lsbDenseOut
+    def PrintMem(self):
+        print(f"LSB WRITE {self.writei}")
+        self.lsbMem[self.writei].Print()
+        print(f"MSB WRITE {self.writei}")
+        self.msbMem[self.writei].Print()
+        print(f"LSB READ {self.readi}")
+        self.lsbMem[self.readi].Print()
+        print(f"MSB READ {self.readi}")
+        self.msbMem[self.readi].Print()
 
     def Print(self, prefix="", showInput=1) -> None:        
         print(prefix + f"OHM_WORD:")
         self.ohmLSB.Print(prefix + "  ", showInput)
         self.ohmMSB.Print(prefix + "  ", showInput)
-
-""" 
-    ohm.Calc()
-    ohm.Print("", 2)
-            
-    msbMem.Step(ohm.LSBOutputPass())
-    lsbMem.Step(ohm.MSBOutputPass())        
-
-    ohm.Step()
-
-    for ti in range(NSteps):
-        print(f"== {ti+1} ============================")
-
-        [dataMem[p].Step() for p in range(len(dataMem))]
-        [paramMem[p].Step() for p in range(len(paramMem))]
-
-        if showInputs > 1: 
-            print(f"DATA")
-            [dataMem[p].Print() for p in range(len(dataMem))]
-        if showInputs > 1:
-            print(f"PARAMS")
-            [paramMem[p].Print() for p in range(len(paramMem))]
-
-        ohm.Calc()
-        ohm.Print("", 2)                    
-        
-        msbMem.Step(ohm.LSBOutputPass())
-        lsbMem.Step(ohm.MSBOutputPass())        
-        ohm.Step()
-
-        #msbMem.Print("  ")
-        #result = msbMem.GetInts()
-        #print(f"RESULT: {result}")
-
-        
-
-    
-    msbMem.Print("MSB")
-    msbResult = msbMem.GetInts()
-    print(f"RESULT: {msbResult}")
-
-    lsbMem.Print("LSB")
-    lsbResult = lsbMem.GetInts()
-    print(f"RESULT: {lsbResult}") """

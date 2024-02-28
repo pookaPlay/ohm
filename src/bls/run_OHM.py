@@ -8,7 +8,7 @@ def RunOhmNet():
     verbose = 2
     showInputs = 0
 
-    NSteps = 7
+    
     numNodes = 2      
     nodeDim = 2 
     memK = 8
@@ -16,7 +16,7 @@ def RunOhmNet():
     
     ohm = OHM_WORD(memD, memK, numNodes, nodeDim)
     
-    ohm.RunNSteps(NSteps)
+    ohm.RunNStep(2)
 
     return
 
