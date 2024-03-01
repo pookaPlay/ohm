@@ -46,7 +46,7 @@ class STACK:
             self.flags = list(self.D * [0])
             self.latchInput = list(self.D * [0])
             self.done = 0
-            # print(f"Negated inputs: {inputs}")
+            print(f">>>>>>>>>>>>>>>>>>>>>>>>>> Negated inputs: {inputs}")
         else:
             for i in range(self.D):    
                 if self.flags[i] == 1:

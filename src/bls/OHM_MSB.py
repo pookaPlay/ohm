@@ -4,12 +4,12 @@ from STACK import STACK
 
 class OHM_MSB:
 
-    def __init__(self, numNodes, memD, nodeD) -> None:    
+    def __init__(self, numNodes, memD, nodeD, ptf="max") -> None:    
         self.N = numNodes         
         self.nodeD = nodeD
         self.memD = memD
         
-        self.stacks = [STACK() for _ in range(self.N)]        
+        self.stacks = [STACK(self.nodeD, ptf) for _ in range(self.N)]        
                 
         self.Reset()                   
             

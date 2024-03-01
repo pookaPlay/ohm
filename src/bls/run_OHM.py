@@ -9,14 +9,14 @@ def RunOhmNet():
     showInputs = 0
 
     
-    numNodes = 2      
+    numNodes = 3      
     nodeDim = 2 
     memK = 8
     memD = 8
     
     ohm = OHM_WORD(memD, memK, numNodes, nodeDim)
     
-    ohm.RunNStep(2)
+    ohm.RunNStep(3)
 
     return
 

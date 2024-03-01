@@ -3,11 +3,10 @@ from DataIO import SerializeMSBTwos,  DeserializeMSBTwos, DeserializeLSBTwos
 # Bit Serial Memory
 class BSMEM():
 
-    def __init__(self, D, K, writeMode=1):
+    def __init__(self, D, K):
         self.D = D
         self.K = K
-        self.mode = writeMode
-        self.mem = [list(self.K * [0]) for _ in range(self.D)]        
+        
         self.Reset()
         
 

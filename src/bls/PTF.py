@@ -4,8 +4,8 @@ class PTF:
     def __init__(self, D=3) -> None:
         self.D = D
         self.weights = list(self.D * [1])
-        #self.threshold = self.D/2
-        self.threshold = self.D
+        self.threshold = self.D/2
+        #self.threshold = self.D
         self.y = 0
         self.lastx = list(self.D * [0])
             

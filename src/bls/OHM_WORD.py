@@ -13,7 +13,6 @@ class OHM_WORD:
         self.NN = numNodes      # number of parallel nodes
         self.memD = memD
         self.nodeD = nodeD
-
         self.K = memK
         self.lsbMem = [BSMEM(self.memD, self.K), BSMEM(self.memD, self.K)]
         self.msbMem = [BSMEM(self.memD, self.K), BSMEM(self.memD, self.K)]        
@@ -24,11 +23,12 @@ class OHM_WORD:
         input = [7, -2, -6]        
         self.dataMem = RDMEM(input, self.K, self.K)
 
-        weights = self.NN * [1]
+        weights = self.NN * [0]
         self.paramMem = RDMEM(weights, self.K, self.K)
 
+        ptf = "min"
         self.ohmLSB = OHM_LSB(self.NN, self.memD)   
-        self.ohmMSB = OHM_MSB(self.NN, self.memD, self.nodeD)
+        self.ohmMSB = OHM_MSB(self.NN, self.memD, self.nodeD, ptf)
 
         self.denseLSBOut = list(self.memD * [0])
         self.denseMSBOut = list(self.memD * [0])
@@ -51,14 +51,20 @@ class OHM_WORD:
         
     def RunNStep(self, nsteps) -> None:      
             
-            self.PrintMem()
+            self.Print()
       
             for ti in range(nsteps):
                 print(f">>>>>>>>>>> Step {ti} ==========================================")     
                 self.RunStep()
+                
+                #self.Print()
+
                 self.readi = 1 - self.readi
                 self.writei = 1 - self.writei                
-                self.PrintMem()
+                #self.PrintMem()
+                
+                print(f"LSB: {self.lsbMem[self.readi].GetInts()}")
+                print(f"MSB: {self.msbMem[self.writei].GetInts()}")
     
     def RunStep(self):            
             ti = 0                        
@@ -92,6 +98,8 @@ class OHM_WORD:
 
                 self.lsbMem[self.writei].Step(self.denseLSBOut)            
                 self.msbMem[self.writei].Step(self.denseMSBOut)                                        
+                #self.msbMem[self.writei].Print()
+                #self.ohmMSB.Print()                
                                                   
 
     def PrintMem(self):
