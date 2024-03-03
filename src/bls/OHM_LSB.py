@@ -27,7 +27,7 @@ class OHM_LSB:
     def Output(self):        
         return self.denseOut
 
-    def Calc(self, memA, memB) -> None:
+    def Calc(self, memA, memB, lsb=0) -> None:
     
         #memA.Output()
         denseA = memA.Output()
@@ -36,7 +36,7 @@ class OHM_LSB:
         self.bInputs = [memB.Output(self.inIndexB[ni]) for ni in range(self.N)]
 
         for ai in range(self.N):
-            self.adders[ai].Calc(self.aInputs[ai], self.bInputs[ai])
+            self.adders[ai].Calc(self.aInputs[ai], self.bInputs[ai], lsb)
     
         self.sparseOut = [self.adders[ai].Output() for ai in range(self.N)]
         

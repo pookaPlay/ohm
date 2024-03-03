@@ -24,15 +24,14 @@ class OHM_MSB:
     def Output(self):        
         return self.denseOut                    
 
-    def Calc(self, mem) -> None:
+    def Calc(self, mem, msb=0) -> None:
         
         self.denseOut = list(self.memD * [0])        
         
         for ai in range(self.N):
             inIndex = self.inIndex[ai] 
-            inputs = [mem.Output(inIndex[ni]) for ni in range(len(inIndex))]
-            self.stacks[ai].Calc(inputs)  #, msb)        
-            self.stacks[ai].Output()
+            inputs = [mem.OutputMSB(inIndex[ni]) for ni in range(len(inIndex))]
+            self.stacks[ai].Calc(inputs, msb)                    
             self.denseOut[self.outIndex[ai]] = self.stacks[ai].Output()                    
         
             

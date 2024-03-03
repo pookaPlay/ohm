@@ -8,7 +8,7 @@ from OHM_MSB import OHM_MSB
 
 class OHM_WORD:
 
-    def __init__(self, memD, memK, numNodes, nodeD):
+    def __init__(self, memD, memK, numNodes, nodeD, input = [7, -2, -6], weights = [0], ptf = "max"):
     
         self.NN = numNodes      # number of parallel nodes
         self.memD = memD
@@ -20,13 +20,11 @@ class OHM_WORD:
         self.writei = 0
         self.readi = 1        
 
-        input = [7, -2, -6]        
         self.dataMem = RDMEM(input, self.K, self.K)
 
-        weights = self.NN * [0]
-        self.paramMem = RDMEM(weights, self.K, self.K)
-
-        ptf = "min"
+        lweights = self.NN * weights
+        self.paramMem = RDMEM(lweights, self.K, self.K)
+        
         self.ohmLSB = OHM_LSB(self.NN, self.memD)   
         self.ohmMSB = OHM_MSB(self.NN, self.memD, self.nodeD, ptf)
 
@@ -55,7 +53,7 @@ class OHM_WORD:
       
             for ti in range(nsteps):
                 print(f">>>>>>>>>>> Step {ti} ==========================================")     
-                self.RunStep()
+                self.RunStep(ti)
                 
                 #self.Print()
 
@@ -64,15 +62,17 @@ class OHM_WORD:
                 #self.PrintMem()
                 
                 print(f"LSB: {self.lsbMem[self.readi].GetInts()}")
-                print(f"MSB: {self.msbMem[self.writei].GetInts()}")
+                print(f"MSB: {self.msbMem[self.writei].GetOffInts()}")
     
-    def RunStep(self):            
+    def RunStep(self, stepi=0) -> None:            
             ti = 0                        
-            #print(f"     == {ti} =======================================")
-            self.ohmLSB.Calc(self.dataMem, self.paramMem)
+            print(f"     == {stepi}:{ti} =======================================")
+            firstBit = 1            
+
+            self.ohmLSB.Calc(self.dataMem, self.paramMem, firstBit)
             self.denseLSBOut = self.ohmLSB.Output()
 
-            self.ohmMSB.Calc(self.lsbMem[self.readi])
+            self.ohmMSB.Calc(self.lsbMem[self.readi], firstBit)
             self.denseMSBOut = self.ohmMSB.Output()
 
             self.lsbMem[self.writei].Step(self.denseLSBOut)                        
@@ -83,25 +83,36 @@ class OHM_WORD:
             
             
             for ti in range(self.K):
-                #print(f"== {ti+1} ============================")
-    
+                print(f"     == {stepi}:{ti} =======================================")
+                firstBit = 0
                 self.dataMem.Step()
                 self.paramMem.Step()
                 self.lsbMem[self.readi].Step()
                 self.msbMem[self.readi].Step()
 
-                self.ohmLSB.Calc(self.dataMem, self.paramMem)
+                self.ohmLSB.Calc(self.dataMem, self.paramMem, firstBit)
                 self.denseLSBOut = self.ohmLSB.Output()                      
                 
-                self.ohmMSB.Calc(self.lsbMem[self.readi])
+                self.ohmMSB.Calc(self.lsbMem[self.readi], firstBit)
                 self.denseMSBOut = self.ohmMSB.Output()
 
                 self.lsbMem[self.writei].Step(self.denseLSBOut)            
                 self.msbMem[self.writei].Step(self.denseMSBOut)                                        
                 #self.msbMem[self.writei].Print()
-                #self.ohmMSB.Print()                
+                self.Print()                                
                                                   
-
+    def GetLSBRead(self):
+         return self.lsbMem[self.readi].GetInts()
+    
+    def GetMSBRead(self):
+         return self.msbMem[self.readi].GetInts()
+    
+    def GetLSBWrite(self):
+        return self.lsbMem[self.writei].GetInts()
+    
+    def GetMSBWrite(self):
+        return self.msbMem[self.writei].GetInts()
+                          
     def PrintMem(self):
         print(f"LSB WRITE {self.writei}")
         self.lsbMem[self.writei].Print()

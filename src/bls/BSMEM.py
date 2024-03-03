@@ -1,4 +1,4 @@
-from DataIO import SerializeMSBTwos,  DeserializeMSBTwos, DeserializeLSBTwos
+from DataIO import DeserializeLSBTwos, DeserializeMSBTwos, DeserializeMSBOffset, DeserializeLSBOffset
 
 # Bit Serial Memory
 class BSMEM():
@@ -12,7 +12,9 @@ class BSMEM():
 
     def Reset(self):
         self.ri = 0
+        self.rib = self.K-1
         self.wi = 0        
+
         self.mem = [list(self.K * [0]) for _ in range(self.D)]        
     
 
@@ -22,12 +24,20 @@ class BSMEM():
         else:
             return [self.mem[ai][self.ri] for ai in len(self.mem)]
     
+    def OutputMSB(self, di=-1):
+        if di != -1:
+            return self.mem[di][self.rib]
+        else:
+            return [self.mem[ai][self.rib] for ai in len(self.mem)]
+            
     def Step(self, input = None):
 
         if input is None:
             self.ri += 1        
+            self.rib -= 1
             if self.ri == self.K:
                 self.ri = 0
+                self.rib = self.K-1
         else:        
             for di in range(len(input)):                
                 self.mem[di][self.wi] = input[di]
@@ -43,7 +53,15 @@ class BSMEM():
             result.append(DeserializeLSBTwos(self.mem[di]))
         
         return result
-    
+
+    def GetOffInts(self):
+        result = list()
+        for di in range(len(self.mem)):
+            #result.append(DeserializeMSBOffset(self.mem[di]))
+            result.append(DeserializeMSBTwos(self.mem[di]))
+        
+        return result
+
     def Print(self, prefix="", verbose=2):
         print(f"{prefix}|BSMEM--------------------------|")
         print(f"{prefix}|Size: {self.D} Depth: {self.K} ")
