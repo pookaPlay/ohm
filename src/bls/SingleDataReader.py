@@ -64,7 +64,7 @@ class SingleDataReader():
             self.slice = self.data[self.NIn-1]
         else:            
             self.slice = [0]
-
+        
         self.msb = 0
         self.lsb = 0
 

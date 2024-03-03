@@ -1,4 +1,5 @@
 from DataReader import DataReader
+from DataIO import SerializeMSBTwos, DeserializeLSBTwos, DeserializeMSBTwos
 
 def test_DataReader():
     # Test case 1
@@ -18,4 +19,21 @@ def test_DataReader():
 
     print("All tests passed!")
 
-test_DataReader()
+def test_Serialize():
+    input = -3
+    testme = SerializeMSBTwos(input, 8)
+    print(testme)
+    result = DeserializeMSBTwos(testme)
+    if input != result:
+        print(f"Got {result} instead of {input}")
+
+    input = 3
+    testme = SerializeMSBTwos(input, 8)
+    print(testme)
+    result = DeserializeMSBTwos(testme)
+    if input != result:
+        print(f"Got {result} instead of {input}")
+
+
+#test_DataReader()
+test_Serialize()

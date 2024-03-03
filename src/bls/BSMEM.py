@@ -1,4 +1,5 @@
-from DataIO import DeserializeLSBTwos, DeserializeMSBTwos, DeserializeMSBOffset, DeserializeLSBOffset
+from DataIO import DeserializeLSBTwos, DeserializeMSBTwos
+from DataIO import SerializeMSBTwos
 
 # Bit Serial Memory
 class BSMEM():
@@ -9,6 +10,11 @@ class BSMEM():
         
         self.Reset()
         
+
+    def Load(self, data):                
+        for n in range(len(data)):
+            self.mem[n] = SerializeMSBTwos(data[n], self.K)
+            self.mem[n].reverse()
 
     def Reset(self):
         self.ri = 0
@@ -32,32 +38,33 @@ class BSMEM():
             
     def Step(self, input = None):
 
-        if input is None:
-            self.ri += 1        
-            self.rib -= 1
-            if self.ri == self.K:
-                self.ri = 0
-                self.rib = self.K-1
-        else:        
+        if input is not None:
             for di in range(len(input)):                
                 self.mem[di][self.wi] = input[di]
-                #print(f"Setting {di}, {self.wi} value {self.nextInput[di]}")
+            
+        self.ri += 1                
+        if self.ri == self.K:
+            self.ri = 0
 
-            self.wi += 1
-            if self.wi == self.K:
-                self.wi = 0
+        self.rib -= 1            
+        if self.rib == -1:
+            self.rib = self.K-1        
 
-    def GetInts(self):
+        self.wi += 1
+        if self.wi == self.K:
+            self.wi = 0
+
+    def GetLSBInts(self):
         result = list()
         for di in range(len(self.mem)):
+            print(f"DESERIALIZING: {self.mem[di]}")
             result.append(DeserializeLSBTwos(self.mem[di]))
         
         return result
 
-    def GetOffInts(self):
+    def GetMSBInts(self):
         result = list()
-        for di in range(len(self.mem)):
-            #result.append(DeserializeMSBOffset(self.mem[di]))
+        for di in range(len(self.mem)):            
             result.append(DeserializeMSBTwos(self.mem[di]))
         
         return result
@@ -65,11 +72,41 @@ class BSMEM():
     def Print(self, prefix="", verbose=2):
         print(f"{prefix}|BSMEM--------------------------|")
         print(f"{prefix}|Size: {self.D} Depth: {self.K} ")
-        
+        #for i in range(self.K)
+
         for di in range(len(self.mem)):
-                print(f"{prefix}{self.mem[di]}")
+            print(f"{prefix}{self.mem[di]}")
+        """ 
 
-
+                if self.mode == 0:    
+                    temps += str("W[")
+                    for i in range(self.N):
+                        if i == self.wi:
+                            temps += "(" + mem0[i] + ")"
+                        else:
+                            temps += " " + mem0[i]
+                    temps += "] R["
+                    for i in range(self.N):
+                        if i == self.ri:
+                            temps += "(" + mem1[i] + ")"
+                        else:
+                            temps += " " + mem1[i]            
+                else:
+                    temps += str("R[")
+                    for i in range(self.N):
+                        if i == self.ri:
+                            temps += "(" + mem0[i] + ")"
+                        else:
+                            temps += " " + mem0[i]
+                    temps += "] W["
+                    for i in range(self.N):
+                        if i == self.wi:
+                            temps += "(" + mem1[i] + ")"
+                        else:
+                            temps += " " + mem1[i]
+                    
+                print(temps + "]") 
+        """
                 
 
     

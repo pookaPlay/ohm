@@ -37,6 +37,7 @@ class OHM_LSB:
 
         for ai in range(self.N):
             self.adders[ai].Calc(self.aInputs[ai], self.bInputs[ai], lsb)
+            self.adders[ai].Print()
     
         self.sparseOut = [self.adders[ai].Output() for ai in range(self.N)]
         

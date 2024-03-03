@@ -10,7 +10,7 @@ class ADD:
 
     def Print(self, prefix="", verbose=1) -> None:
         if verbose > 0:
-            print(prefix + f"ADD : {self.sum}, {self.cin} from {self.a} and {self.b}")
+            print(prefix + f"ADD : {self.sum}, {self.cout} from {self.a}, {self.b} and {self.cin}")
     
     def Output(self) -> int:
         return self.sum
