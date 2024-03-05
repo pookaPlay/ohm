@@ -6,9 +6,11 @@ from ADD import ADD
 class OHM_LSB:
 
 
-    def __init__(self,  NN, memD) -> None:        
+    def __init__(self,  NN, nodeD, memD) -> None:        
                 
         self.N = NN
+        self.nodeD = nodeD
+        
         self.memD = memD
         
         self.adders = [ADD() for _ in range(self.N)]        

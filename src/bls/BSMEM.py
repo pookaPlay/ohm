@@ -6,8 +6,8 @@ class BSMEM():
 
     def __init__(self, D, K):
         self.D = D
-        self.K = K
-        
+        self.K = K        
+
         self.Reset()
         
 
@@ -69,8 +69,7 @@ class BSMEM():
         
         return result
 
-    def Print(self, prefix="", verbose=2):
-        print(f"{prefix}|BSMEM--------------------------|")
+    def Print(self, prefix="", verbose=2):        
         print(f"{prefix}|Size: {self.D} Depth: {self.K} ")
         #for i in range(self.K)
 
