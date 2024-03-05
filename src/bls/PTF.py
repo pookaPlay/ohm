@@ -25,7 +25,7 @@ class PTF:
     def Output(self) -> int:
         return self.y
 
-    def Calc(self, x, p) -> None:
+    def Calc(self, x) -> None:
         
         self.lastx = x
         temp = sum([self.weights[i] for i in range(self.D) if x[i] == 1])
