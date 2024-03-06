@@ -4,7 +4,7 @@
 from BSMEM import BSMEM
 from OHM_ADDER_TREE import OHM_ADDER_TREE
 
-class OHM_BYTE:
+class TestByte:
 
     def __init__(self, memD, memK, numNodes, nodeD, 
                  input = [7, -2, -6], weights = [0]):
@@ -81,6 +81,6 @@ class OHM_BYTE:
         self.lsbMem.Print("Out ")
 
     def Print(self, prefix="", showInput=1) -> None:        
-        print(prefix + f"OHM_BYTE:")
+        print(prefix + f"TestByte:")
         print(prefix + f"  addOut: {self.denseOut}")        
         self.ohmAdderTree.Print(prefix + "  ", showInput)        
