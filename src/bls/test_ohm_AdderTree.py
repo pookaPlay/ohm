@@ -54,3 +54,6 @@ def test_OHM_AdderTree_ptf():
     
 
     return
+
+test_OHM_AdderTree_bias()
+test_OHM_AdderTree_ptf()

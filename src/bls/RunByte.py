@@ -37,8 +37,8 @@ class RunByte:
         self.paramMem.Reset()
         self.ohmAdderTree.Reset()                
 
-        self.dataMem.Load(self.input)        
-        self.paramMem.Load(self.weights)
+        self.dataMem.LoadList(self.input)        
+        self.paramMem.LoadList(self.weights)
 
         
     def RunNStep(self, nsteps) -> None:      

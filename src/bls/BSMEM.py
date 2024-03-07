@@ -1,17 +1,17 @@
 from DataIO import DeserializeLSBTwos, DeserializeMSBTwos
 from DataIO import SerializeMSBTwos
+import pickle
 
 # Bit Serial Memory
 class BSMEM():
 
+    # ...
     def __init__(self, D, K):
         self.D = D
         self.K = K        
-
         self.Reset()
-        
 
-    def Load(self, data):                
+    def LoadList(self, data):                
         for n in range(len(data)):
             self.mem[n] = SerializeMSBTwos(data[n], self.K)
             self.mem[n].reverse()
@@ -55,6 +55,19 @@ class BSMEM():
         if self.wi == self.K:
             self.wi = 0
 
+
+
+    def Save(self, filename):
+        with open(filename, 'wb') as file:
+            pickle.dump(self, file)
+
+    @staticmethod
+    def Load(filename):
+        with open(filename, 'rb') as file:
+            return pickle.load(file)
+
+
+
     def GetLSBInts(self):
         result = list()
         for di in range(len(self.mem)):
@@ -69,6 +82,8 @@ class BSMEM():
             result.append(DeserializeMSBTwos(self.mem[di]))
         
         return result
+
+
 
     def Print(self, prefix="", verbose=2):        
         print(f"{prefix}|Size: {self.D} Depth: {self.K} ")
