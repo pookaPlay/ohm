@@ -19,7 +19,7 @@ class OHM_ADDER_TREE:
         self.outIndex = list(range(self.numOutputs))
 
         self.tree = list()        
-        if self.numOutputs == 1:            
+        if (self.numOutputs == 1) and (self.numInputs > 1):
             numStart = int(self.numInputs/2)                            
             if numStart > 1:
                 self.tree.append([ADD() for _ in range(numStart)])
@@ -30,6 +30,7 @@ class OHM_ADDER_TREE:
                     
             self.tree.append([ADD()])                
     
+        #print(f"ON INIT: {len(self.tree)}")
 
     def Reset(self) -> None:
         # Connectivity
@@ -67,6 +68,7 @@ class OHM_ADDER_TREE:
                 
             for ni in range(len(self.sparseOut)):
                 self.denseOut[self.outIndex[ni]] = self.sparseOut[ni]
+
         elif self.numOutputs == 1:            
             # self.tree[-1][0].Print()            
             self.denseOut[0] = self.tree[-1][0].Output()

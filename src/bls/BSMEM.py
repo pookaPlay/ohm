@@ -39,6 +39,7 @@ class BSMEM():
     def Step(self, input = None):
 
         if input is not None:
+            #print(f"Saving to loc {self.wi}")
             for di in range(len(input)):                
                 self.mem[di][self.wi] = input[di]
             
@@ -57,7 +58,7 @@ class BSMEM():
     def GetLSBInts(self):
         result = list()
         for di in range(len(self.mem)):
-            print(f"DESERIALIZING: {self.mem[di]}")
+            #print(f"DESERIALIZING: {self.mem[di]}")
             result.append(DeserializeLSBTwos(self.mem[di]))
         
         return result
@@ -107,17 +108,3 @@ class BSMEM():
                 print(temps + "]") 
         """
                 
-
-    
-    
-"""     def LoadData(self, data, Kin=8, Kout=8):
-        self.N = len(data)
-        for n in range(self.N):
-            self.D = len(data[n])
-            data = [SerializeMSBTwos(data[n][d], Kin) for d in range(self.D)]
-            for d in range(self.D):
-                data[d].reverse()                            
-
-            # maybe want to sign extend twos complement here
-            #self.slice = [self.data[d][self.NIn-1] for d in range(self.D)]
- """

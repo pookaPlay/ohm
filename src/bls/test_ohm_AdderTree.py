@@ -1,24 +1,65 @@
-from TestByte import TestByte
+from RunByte import RunByte
 
-
-def test_ohm_AdderTree():
+def test_ohm_AdderTree_bias():
 
     numNodes = 4
+    # This should be 1 or numNodes
+    numNodeOutputs = 4
+    
     nodeDim = 2
     memK = 8
     memD = 8
 
     input = [3, 2, 1, 0]
-    weights = numNodes * [1]    
-    ptf = "max"
-    #input = [[7, -2, -6], [7, 0, -3], [1, 3, 5], [-6, 1, 2]]
-    #input = [[7, 7, 1, -6], [-2, 0, 3, 1], [-6, -3, 5, 2]]
-    ohm = TestByte(memD, memK, numNodes, nodeDim, input, weights)
+    weights = numNodes * [-1]            
+    
+    expected = [2, 1, 0, -1]
+
+    ohm = RunByte(memD, memK, numNodes, numNodeOutputs, nodeDim, input, weights)
     
     ohm.RunNStep(1)
-    ohm.PrintMem()
-        
+    #ohm.PrintMem()
+    result = ohm.lsbMem.GetLSBInts()
+    #print(result)
+    
+    if (result[0:numNodeOutputs] != expected):
+        print(f"Failed test: got {result} expected {expected}")
+        assert False
+    
+
     return
 
-test_ohm_AdderTree()
+def test_ohm_AdderTree_ptf():
 
+    numNodes = 4
+    # This should be 1 or numNodes
+    numNodeOutputs = 1
+    
+    nodeDim = 2
+    memK = 8
+    memD = 8
+
+    input = [3, 2, 1, 0]
+    weights = numNodes * [1]            
+    numNodeOutputs = 1    
+    expected = 10
+
+    ohm = RunByte(memD, memK, numNodes, numNodeOutputs, nodeDim, input, weights)
+    
+    ohm.RunNStep(1)
+    #ohm.PrintMem()
+    result = ohm.lsbMem.GetLSBInts()
+    if (result[0] != expected):
+        print(f"Failed test: got {result[0]} expected {expected}")
+        assert False
+    
+
+    return
+
+
+def test_OHM_AdderTree():
+    test_ohm_AdderTree_ptf()
+    test_ohm_AdderTree_bias()
+    return
+
+test_OHM_AdderTree()

@@ -7,6 +7,7 @@ class ADD:
         self.cin = 0
         self.a = 0
         self.b = 0
+        self.cout = 0
 
     def Print(self, prefix="", verbose=1) -> None:
         if verbose > 0:
@@ -15,8 +16,10 @@ class ADD:
     def Output(self) -> int:
         return self.sum
 
-    def Reset(self) -> None:        
-        self.cin = 0        
+    def Reset(self) -> None:            
+        self.sum = 0
+        self.cin = 0
+        self.cout = 0        
 
     def Calc(self, a, b, lsb=0) -> None:                
         if lsb == 1:
