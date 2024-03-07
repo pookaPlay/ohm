@@ -1,6 +1,6 @@
 from RunByte import RunByte
 
-def test_ohm_AdderTree_bias():
+def test_OHM_AdderTree_bias():
 
     numNodes = 4
     # This should be 1 or numNodes
@@ -26,10 +26,9 @@ def test_ohm_AdderTree_bias():
         print(f"Failed test: got {result} expected {expected}")
         assert False
     
-
     return
 
-def test_ohm_AdderTree_ptf():
+def test_OHM_AdderTree_ptf():
 
     numNodes = 4
     # This should be 1 or numNodes
@@ -55,11 +54,3 @@ def test_ohm_AdderTree_ptf():
     
 
     return
-
-
-def test_OHM_AdderTree():
-    test_ohm_AdderTree_ptf()
-    test_ohm_AdderTree_bias()
-    return
-
-test_OHM_AdderTree()
