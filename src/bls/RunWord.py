@@ -26,7 +26,7 @@ class RunWord:
         self.ptfMem = BSMEM(self.K, self.K)
         
         self.biases = OHM_ADDER_CHAN(self.NN, self.memD)
-        self.ptf = PTF_ADDER_TREE(self.NN, self.memD)
+        self.ptf = PTF_ADDER_TREE(self.NN, self.memD, self.K)
         #self.biases.Print()
 
         self.Reset()
@@ -53,30 +53,47 @@ class RunWord:
     
     def RunMSB(self, stepi=0) -> None:            
             ti = 0                        
+            msb = 1
             print(f"     == {stepi}:{ti} ")
-            firstBit = 1            
+            
+            self.ptf.Calc(self.lsbMem, self.ptfMem, msb)            
+            self.denseOut = self.ptf.Output()            
+            
+            self.msbMem.Step(self.denseOut)            
+            self.ptf.Step()                        
+
+            msb = 0                
+            for ti in range(1, self.K):
+                print(f"     == {stepi}:{ti} ")                
+                
+                self.lsbMem.Step()                
+                
+                self.ptf.Calc(self.lsbMem, self.ptfMem, msb)
+                self.denseOut = self.ptf.Output()
+                
+                self.msbMem.Step(self.denseOut)                
+                self.ptf.Step()                                                                        
+
 
     def RunLSB(self, stepi=0) -> None:            
             ti = 0                        
             print(f"     == {stepi}:{ti} ")
-            firstBit = 1            
+            lsb = 1            
 
-            self.biases.Calc(self.dataMem, self.paramMem, firstBit)            
+            self.biases.Calc(self.dataMem, self.paramMem, lsb)            
             self.denseOut = self.biases.Output()
             #self.Print()
             self.lsbMem.Step(self.denseOut)
             #self.lsbMem.Print()            
-
             self.biases.Step()                        
-
+            
+            lsb = 0
             for ti in range(1, self.K):
-                print(f"     == {stepi}:{ti} ")                
-                firstBit = 0
-                
+                print(f"     == {stepi}:{ti} ")                                                
                 self.dataMem.Step()                
                 self.paramMem.Step()
         
-                self.biases.Calc(self.dataMem, self.paramMem, firstBit)
+                self.biases.Calc(self.dataMem, self.paramMem, lsb)
                 self.denseOut = self.biases.Output()
                 #self.Print()
                 self.lsbMem.Step(self.denseOut)
