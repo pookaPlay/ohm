@@ -8,7 +8,7 @@ def test_OHM_MSB():
     memD = 8
 
     input = [3, 2, 1, 0]
-    weights = numNodes * [-1]            
+    weights = numNodes * [1]            
     
     expected = [2, 1, 0, -1]
 
