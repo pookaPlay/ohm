@@ -23,7 +23,8 @@ class RunWord:
         self.msbMem = BSMEM(self.memD, self.K)                
         self.dataMem = BSMEM(self.K, self.K)
         self.paramMem = BSMEM(self.K, self.K)
-        self.ptfMem = BSMEM(self.K, self.K)
+        self.posMem = BSMEM(self.K, self.K)
+        self.negMem = BSMEM(self.K, self.K)
         
         self.biases = OHM_ADDER_CHAN(self.NN, self.memD)
         self.ptf = PTF_ADDER_TREE(self.NN, self.memD, self.K)        
@@ -36,7 +37,8 @@ class RunWord:
         self.msbMem.Reset()
         self.dataMem.Reset()
         self.paramMem.Reset()
-        self.ptfMem.Reset()
+        self.posMem.Reset()
+        self.negMem.Reset()
 
         self.biases.Reset()                
         self.ptf.Reset()
@@ -58,7 +60,7 @@ class RunWord:
             msb = 1
             print(f"     == {stepi}:{ti} ")
             
-            self.ptf.Calc(self.lsbMem, self.ptfMem, msb)            
+            self.ptf.Calc(self.lsbMem, self.posMem, self.negMem, msb)            
             self.denseOut = self.ptf.Output()            
             
             self.msbMem.Step(self.denseOut)            
@@ -72,7 +74,8 @@ class RunWord:
                 
                 self.lsbMem.Step()                
                 
-                self.ptf.Calc(self.lsbMem, self.ptfMem, msb)
+                self.ptf.Calc(self.lsbMem, self.posMem, self.negMem, msb)
+
                 self.denseOut = self.ptf.Output()
                 
                 self.msbMem.Step(self.denseOut)                

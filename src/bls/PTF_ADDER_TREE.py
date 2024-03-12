@@ -9,13 +9,16 @@ class PTF_ADDER_TREE(OHM_ADDER_TREE):
     def __init__(self,  numInputs, memD, memK) -> None:        
         super().__init__(numInputs, 1, memD)
         self.memK = memK    
+        self.flags = list(self.numInputs * [0])
 
     def Reset(self) -> None:        
         super().Reset()
-                
-    def Calc(self, memA, memB, msb=0) -> None:    
+        self.flags = list(self.numInputs * [0])
 
-        self.inputs = [memA.Output(aIndex) for aIndex in self.inIndexA]        
+                
+    def Calc(self, memInputs, memParamPos, memParamNeg, msb=0) -> None:    
+
+        self.inputs = [memInputs.Output(aIndex) for aIndex in self.inIndexA]        
         print(f"STACK has {len(self.inputs)}")
 
         # Called for each MSB
@@ -30,19 +33,31 @@ class PTF_ADDER_TREE(OHM_ADDER_TREE):
                 if self.flags[i] == 1:
                     self.inputs[i] = self.latchInput[i]
 
-        # Now run the LSB loop                
-        self.aInputs = self.inputs
-        self.bInputs = [memB.Output(bIndex) for bIndex in self.inIndexB]
+        # Now run the LSB loop
+        self.treeInputs = list()                    
+        for i in range(len(self.inputs)):            
+            if self.inputs[i] == 1:
+                self.treeInputs.append( memParamPos.Output(self.inIndexB[i]) )
+            else:
+                self.treeInputs.append( memParamNeg.Output(self.inIndexB[i]) )
+
         ti = 0
         lsb = 1        
-        pbfout = self.CalcPBFStep(lsb)            
+        pbfout = self.CalcPBFStep(self.treeInputs, lsb)            
         #print(f"     == LSB PBF Step 0: {pbfout}")                        
         lsb = 0
         for ti in range(1, self.memK):
-            memB.Step()            
-            self.aInputs = self.inputs            
-            self.bInputs = [memB.Output(bIndex) for bIndex in self.inIndexB]
-            self.CalcPBFStep(lsb)            
+            memParamPos.Step()
+            memParamNeg.Step()
+            
+            self.treeInputs = list()                    
+            for i in range(len(self.inputs)):            
+                if self.inputs[i] == 1:
+                    self.treeInputs.append( memParamPos.Output(self.inIndexB[i]) )
+                else:
+                    self.treeInputs.append( memParamNeg.Output(self.inIndexB[i]) )
+            
+            self.CalcPBFStep(self.treeInputs, lsb)            
             #print(f"     == LSB PBF Step {ti}: {self.pbfOut}")
 
         print(f"  == PBF Out: {self.pbfOut}")                        
@@ -64,15 +79,11 @@ class PTF_ADDER_TREE(OHM_ADDER_TREE):
 
         return self.denseOut
 
-    def CalcPBFStep(self, lsb=0):    
-
-        for ai in range(len(self.adders)):
-            self.adders[ai].Calc(self.aInputs[ai], self.bInputs[ai], lsb)
-            #self.adders[ai].Print()
+    def CalcPBFStep(self, inputs, lsb=0):    
         
         if len(self.tree) > 0:
             for ai in range(len(self.tree[0])):
-                self.tree[0][ai].Calc(self.adders[ai*2].Output(), self.adders[ai*2+1].Output(), lsb)
+                self.tree[0][ai].Calc(inputs[ai*2], inputs[ai*2+1], lsb)
         if len(self.tree) > 1:
             for ti in range(1, len(self.tree)):
                 for ai in range(len(self.tree[ti])):
