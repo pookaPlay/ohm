@@ -2,16 +2,14 @@ from RunWord import RunWord
 
 def test_OHM_MSB():
 
-    numNodes = 4
+    numNodes = 8
     nodeDim = 2
     memK = 8
     memD = 8
 
-    input = [3, 2, 1, 0]
+    input = [3, 2, 1, 0, -1, -2, -3, -4]
     weights = numNodes * [1]            
-    
-    expected = [2, 1, 0, -1]
-
+        
     ohm = RunWord(memD, memK, numNodes, nodeDim, input, weights)    
     ohm.Run()
     

@@ -98,8 +98,11 @@ class BSMEM():
 
             temps = str(f"{prefix}: {spacedInt} : [")
             for ki in range(len(self.mem[di])):
-                if ki == self.wi:
-                    temps += ">" + str(self.mem[di][ki]) + "<"
+                if ki == self.wi:                    
+                    if ki == self.ri:
+                        temps += ">(" + str(self.mem[di][ki]) + ")<"
+                    else:
+                        temps += ">" + str(self.mem[di][ki]) + "<"
                 elif ki == self.ri:
                     temps += "(" + str(self.mem[di][ki]) + ")"
                 elif ki == self.rib:
