@@ -16,11 +16,13 @@ class BSMEM():
             self.mem[n] = SerializeMSBTwos(data[n], self.K)
             self.mem[n].reverse()
 
-    def Reset(self):
+    def ResetIndex(self):
         self.ri = 0
         self.rib = self.K-1
-        self.wi = 0        
+        self.wi = 0
 
+    def Reset(self):
+        self.ResetIndex()        
         self.mem = [list(self.K * [0]) for _ in range(self.D)]        
     
 

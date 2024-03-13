@@ -12,6 +12,7 @@ class RunWord:
                  input = [7, -2, -6], weights = [0]):
     
         self.NN = numNodes      # number of parallel nodes        
+        self.numNodes = numNodes
         self.nodeD = nodeD
 
         self.memD = memD        
@@ -23,8 +24,7 @@ class RunWord:
         self.msbMem = BSMEM(self.memD, self.K)                
         self.dataMem = BSMEM(self.K, self.K)
         self.paramMem = BSMEM(self.K, self.K)
-        self.posMem = BSMEM(self.K, self.K)
-        self.negMem = BSMEM(self.K, self.K)
+        self.ptfMem = BSMEM(self.K, self.K)        
         
         self.biases = OHM_ADDER_CHAN(self.NN, self.memD)
         self.ptf = PTF_ADDER_TREE(self.NN, self.memD, self.K)        
@@ -37,22 +37,30 @@ class RunWord:
         self.msbMem.Reset()
         self.dataMem.Reset()
         self.paramMem.Reset()
-        self.posMem.Reset()
-        self.negMem.Reset()
+        self.ptfMem.Reset()        
 
         self.biases.Reset()                
         self.ptf.Reset()
 
         self.dataMem.LoadList(self.input)        
         self.paramMem.LoadList(self.weights)
+        
+        self.ptfMem.LoadList(list(self.numNodes*[1]))        
+        self.ptfMem.Print("PTF")
+
 
         
     def Run(self) -> None:      
             
+
         print(f">>>>>>>>>>> LSB PASS ")
         self.RunLSB(0)
+        self.lsbMem.ResetIndex()
+        self.lsbMem.Print("LSB")
         print(f">>>>>>>>>>> MSB PASS ")
         self.RunMSB(0)
+        #self.lsbMem.Print("LSB")
+        self.msbMem.Print("MSB")
                 
     
     def RunMSB(self, stepi=0) -> None:            
@@ -60,28 +68,28 @@ class RunWord:
             msb = 1
             print(f"     == {stepi}:{ti} ")
             
-            self.ptf.Calc(self.lsbMem, self.posMem, self.negMem, msb)            
+            self.ptf.Calc(self.lsbMem, self.ptfMem, msb)            
             self.denseOut = self.ptf.Output()            
-            
+            print(f"     == {stepi}:{ti} {self.denseOut}")
             self.msbMem.Step(self.denseOut)            
             self.ptf.Step()                        
 
-            self.lsbMem.Print("LSB")
-            self.msbMem.Print("MSB")
+            #self.lsbMem.Print("LSB")
+            #self.msbMem.Print("MSB")
             msb = 0                
             for ti in range(1, self.K):
                 print(f"     == {stepi}:{ti} ")                
                 
-                self.lsbMem.Step()                
+                self.lsbMem.Step()
+                #self.ptfMem.Step()
                 
-                self.ptf.Calc(self.lsbMem, self.posMem, self.negMem, msb)
-
+                self.ptf.Calc(self.lsbMem, self.ptfMem, msb)
                 self.denseOut = self.ptf.Output()
-                
+                print(f"     == {stepi}:{ti} {self.denseOut}")
                 self.msbMem.Step(self.denseOut)                
                 self.ptf.Step()                                                                        
-                self.lsbMem.Print("LSB")
-                self.msbMem.Print("MSB")
+                #self.lsbMem.Print("LSB")
+                #self.msbMem.Print("MSB")
 
 
 
@@ -132,3 +140,4 @@ class RunWord:
         print(prefix + f"RunWord:")
         print(prefix + f"  lsbOut: {self.denseOut}")        
         self.biases.Print(prefix + "  ", showInput)        
+ 
