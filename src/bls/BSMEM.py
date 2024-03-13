@@ -88,40 +88,23 @@ class BSMEM():
 
 
     def Print(self, prefix="", verbose=2):        
-        print(f"{prefix}|Size: {self.D} Depth: {self.K} ")
+        print(f"{prefix} MEM Size: {self.D} Depth: {self.K} ")
         #for i in range(self.K)
+        
+        for di in range(len(self.mem)):            
+            msbInt = DeserializeMSBTwos(self.mem[di])
+            lsbInt = DeserializeLSBTwos(self.mem[di])
+            spacedInt = "{:>4}".format(lsbInt)
 
-        for di in range(len(self.mem)):
-            print(f"{prefix}{self.mem[di]}")
-        """ 
-
-                if self.mode == 0:    
-                    temps += str("W[")
-                    for i in range(self.N):
-                        if i == self.wi:
-                            temps += "(" + mem0[i] + ")"
-                        else:
-                            temps += " " + mem0[i]
-                    temps += "] R["
-                    for i in range(self.N):
-                        if i == self.ri:
-                            temps += "(" + mem1[i] + ")"
-                        else:
-                            temps += " " + mem1[i]            
+            temps = str(f"{prefix}: {spacedInt} : [")
+            for ki in range(len(self.mem[di])):
+                if ki == self.wi:
+                    temps += ">" + str(self.mem[di][ki]) + "<"
+                elif ki == self.ri:
+                    temps += "(" + str(self.mem[di][ki]) + ")"
+                elif ki == self.rib:
+                    temps += "<" + str(self.mem[di][ki]) + ">"                        
                 else:
-                    temps += str("R[")
-                    for i in range(self.N):
-                        if i == self.ri:
-                            temps += "(" + mem0[i] + ")"
-                        else:
-                            temps += " " + mem0[i]
-                    temps += "] W["
-                    for i in range(self.N):
-                        if i == self.wi:
-                            temps += "(" + mem1[i] + ")"
-                        else:
-                            temps += " " + mem1[i]
-                    
-                print(temps + "]") 
-        """
-                
+                    temps += " " + str(self.mem[di][ki])
+            spacedInt = "{:>4}".format(msbInt)
+            print(temps + "] : " + spacedInt) 

@@ -15,12 +15,11 @@ class PTF_ADDER_TREE(OHM_ADDER_TREE):
     def Reset(self) -> None:        
         super().Reset()
         self.flags = list(self.numInputs * [0])
-
                 
     def Calc(self, memInputs, memParam, msb=0) -> None:    
 
         self.inputs = [memInputs.OutputMSB(aIndex) for aIndex in self.inIndexA]        
-        print(f"        STACK input: {self.inputs}")
+        print(f"STACK         input: {self.inputs}")
         self.numBits = int(math.log2(len(self.inputs)))
         # Called for each MSB
         if msb == 1:              
@@ -46,8 +45,8 @@ class PTF_ADDER_TREE(OHM_ADDER_TREE):
         ti = 0
         lsb = 1        
         #self.pbfOut = self.CalcPBFStep(self.treeInputs, lsb)            
-        #self.pbfOut = 1 if (sum(self.treeInputs) == len(self.treeInputs)) else 0
-        self.pbfOut = 1 if (sum(self.treeInputs) > 0) else 0
+        self.pbfOut = 1 if (sum(self.treeInputs) == len(self.treeInputs)) else 0
+        #self.pbfOut = 1 if (sum(self.treeInputs) > 0) else 0
         print(f"     PBF is {self.pbfOut} from {sum(self.treeInputs)}")
         # lsb = 0
         # for ti in range(1, self.numBits):
