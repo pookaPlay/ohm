@@ -1,6 +1,6 @@
-from RunWord import RunWord
+from RunOHMS import RunOHMS
 
-def test_OHM_MSB():
+def test_RUN_OHM():
 
     numNodes = 8
     nodeDim = 2
@@ -10,7 +10,7 @@ def test_OHM_MSB():
     input = [3, 2, 1, 0, -1, -2, -3, -4]
     weights = numNodes * [1]            
         
-    ohm = RunWord(memD, memK, numNodes, nodeDim, input, weights)    
+    ohm = RunOHMS(memD, memK, numNodes, nodeDim, input, weights)    
     ohm.Run()
     
     #ohm.PrintMem()
@@ -20,4 +20,4 @@ def test_OHM_MSB():
     
     return
 
-test_OHM_MSB()
+test_RUN_OHM()
