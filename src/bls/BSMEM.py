@@ -16,6 +16,11 @@ class BSMEM():
             self.mem[n] = SerializeMSBTwos(data[n], self.K)
             self.mem[n].reverse()
 
+    def LoadScalar(self, data):                
+        for n in range(len(self.mem)):            
+            for k in range(len(self.mem[n])):
+                self.mem[n][k] = data            
+
     def ResetIndex(self):
         self.ri = 0
         self.rib = self.K-1

@@ -37,7 +37,8 @@ class PTF_ADDER_TREE(OHM_ADDER_TREE):
         #print(f"STACK         flags: {self.flags}")
         #print(f"STACK latched input: {self.inputs}")
 
-        self.CalcPTF(memParam)
+        self.CalcWOS(memParam)
+        #self.CalcPTF(memParam)
 
         for i in range(len(self.inputs)):
             if self.flags[i] == 0:
@@ -56,6 +57,14 @@ class PTF_ADDER_TREE(OHM_ADDER_TREE):
 
     def Output(self):        
         return self.pbfOut
+
+
+    def CalcWOS(self, memParam):    
+        # hack uses this as threshold
+        thresh = memParam.Output(0)
+        #print(f" STACK-WOS {thresh}")
+        self.pbfOut = 1 if (sum(self.inputs) > thresh) else 0
+               
 
     def CalcPTF(self, memParam):    
         
