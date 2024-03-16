@@ -2,7 +2,7 @@ from BSMEM import BSMEM
 from OHM_ADDER_CHAN import OHM_ADDER_CHAN
 from PTF_ADDER_TREE import PTF_ADDER_TREE
 
-class RunOHMS:
+class RunSortNetwork:
 
     def __init__(self, memD, memK, 
                  numNodes, 

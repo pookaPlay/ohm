@@ -1,8 +1,8 @@
 from BSMEM import BSMEM
 from OHM_ADDER_CHAN import OHM_ADDER_CHAN
-from PTF_ADDER_TREE import PTF_ADDER_TREE
+from OS_ADDER_TREE import OS_ADDER_TREE
 
-class RunOHMS:
+class RunSortNetwork:
 
     def __init__(self, memD, memK, 
                  numNodes, 
@@ -24,7 +24,7 @@ class RunOHMS:
         self.biases = OHM_ADDER_CHAN(self.NN, self.memD)        
         
         self.paramStackMem = [BSMEM(self.NN, self.K) for _ in range(self.NN)]                        
-        self.stack = [PTF_ADDER_TREE(self.NN, self.memD, self.K) for _ in range(self.NN)]
+        self.stack = [OS_ADDER_TREE(self.NN, self.memD, self.K) for _ in range(self.NN)]
         
         self.doneOut = list(self.NN * [-1])
 
@@ -44,8 +44,7 @@ class RunOHMS:
         
         for mi in range(len(self.paramStackMem)):
             self.paramStackMem[mi].Reset()
-            #self.paramStackMem[mi].LoadScalar(len(self.paramStackMem)-mi-1)
-            self.paramStackMem[mi].LoadScalar(1)
+            self.paramStackMem[mi].LoadScalar(len(self.paramStackMem)-mi-1)            
                 
         [stack.Reset() for stack in self.stack]
 

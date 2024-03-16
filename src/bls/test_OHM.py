@@ -1,10 +1,10 @@
 # Import the test classes from the other files
 from test_OHM_WOS import test_OHM_WOS
 from test_OHM_WOS8 import test_OHM_WOS8
-#from test_OHM_AdderTree import test_OHM_AdderTree_ptf, test_OHM_AdderTree_bias
+from test_RUN_SORT_NETWORK import test_RUN_SORT_NETWORK
 
 
 test_OHM_WOS()
 test_OHM_WOS8()
-#test_OHM_AdderTree_ptf()
-#test_OHM_AdderTree_bias()
+test_RUN_SORT_NETWORK()
+

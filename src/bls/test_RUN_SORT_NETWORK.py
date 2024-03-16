@@ -1,6 +1,6 @@
-from RunOHMS import RunOHMS
+from RunSortNetwork import RunSortNetwork
 
-def test_RUN_OHM():
+def test_RUN_SORT_NETWORK():
 
     
     memK = 8
@@ -10,7 +10,7 @@ def test_RUN_OHM():
     numNodes = memD
     weights = numNodes * [0]            
         
-    ohm = RunOHMS(memD, memK, numNodes, input, weights)    
+    ohm = RunSortNetwork(memD, memK, numNodes, input, weights)    
     ohm.Run()
     
     #ohm.PrintMem()
@@ -20,4 +20,4 @@ def test_RUN_OHM():
     
     return
 
-test_RUN_OHM()
+test_RUN_SORT_NETWORK()

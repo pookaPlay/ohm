@@ -5,12 +5,12 @@ from ADD import ADD
 from OHM_ADDER_TREE import OHM_ADDER_TREE
 import math
 
-class PTF_ADDER_TREE(OHM_ADDER_TREE):
+class OS_ADDER_TREE(OHM_ADDER_TREE):
 
     def __init__(self,  numInputs, memD, memK) -> None:        
         super().__init__(numInputs, 1, memD)
         self.memK = memK    
-        self.flags = list(self.numInputs * [0])
+        self.flags = list(self.numInputs * [0])        
 
     def Reset(self) -> None:        
         super().Reset()
@@ -37,8 +37,7 @@ class PTF_ADDER_TREE(OHM_ADDER_TREE):
         #print(f"STACK         flags: {self.flags}")
         #print(f"STACK latched input: {self.inputs}")
 
-        #self.CalcOST(memParam)
-        self.CalcPTF(memParam)
+        self.CalcOST(memParam)        
 
         for i in range(len(self.inputs)):
             if self.flags[i] == 0:
@@ -65,46 +64,3 @@ class PTF_ADDER_TREE(OHM_ADDER_TREE):
         #print(f" STACK-WOS {thresh}")
         self.pbfOut = 1 if (sum(self.inputs) > thresh) else 0
                
-
-    def CalcPTF(self, memParam):    
-        
-        # LSB inner loop
-        self.treeInputs = list(self.numInputs * [0])
-        for i in range(len(self.inputs)):                        
-            self.treeInputs[i] = self.inputs[i] * memParam.Output(self.inIndexB[i])
-
-        ti = 0
-        lsb = 1        
-        #self.pbfOut = self.CalcTree(self.treeInputs, lsb)            
-        self.pbfOut = 1 if (sum(self.treeInputs) >= len(self.treeInputs)/2) else 0
-        #self.pbfOut = 1 if (sum(self.treeInputs) == len(self.treeInputs)) else 0
-        #self.pbfOut = 1 if (sum(self.treeInputs) > 0) else 0
-        #print(f"     PBF is {self.pbfOut} from {sum(self.treeInputs)}")
-        # lsb = 0
-        # for ti in range(1, self.numBits):
-        #     memParam.Step()            
-            
-        #     self.treeInputs = list(self.numInputs * [0])            
-        #     for i in range(len(self.inputs)):            
-        #         if self.inputs[i] == 1:
-        #             self.treeInputs[i] = memParam.Output(self.inIndexB[i])
-            
-        #     #self.pbfOut = self.CalcTree(self.treeInputs, lsb)            
-        #     #self.pbfOut = 1 if (sum(self.treeInputs) == len(self.treeInputs)) else 0
-        #     self.pbfOut = 1 if (sum(self.treeInputs) > 0) else 0
-        #     #print(f"     == LSB PBF Step {ti}: {self.pbfOut}")
-    
-    def CalcTree(self, inputs, lsb=0):    
-        
-        if len(self.tree) > 0:
-            for ai in range(len(self.tree[0])):
-                self.tree[0][ai].Calc(inputs[ai*2], inputs[ai*2+1], lsb)
-        if len(self.tree) > 1:
-            for ti in range(1, len(self.tree)):
-                for ai in range(len(self.tree[ti])):
-                    self.tree[ti][ai].Calc(self.tree[ti-1][ai*2].Output(), self.tree[ti-1][ai*2+1].Output(), lsb)
-            
-        self.pbfOut = self.tree[-1][0].Output()
-        
-        return self.pbfOut
-            
