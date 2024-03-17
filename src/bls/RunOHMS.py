@@ -15,13 +15,14 @@ class RunOHMS:
         self.K = memK
         self.input = input
         self.weights = weights
-
-        self.biasMem = BSMEM(self.memD, self.K)
-        self.stackMem = BSMEM(self.memD, self.K)                
-        self.dataMem = BSMEM(self.memD, self.K)
-        self.paramMem = BSMEM(self.memD, self.K)                
         
-        self.biases = OHM_ADDER_CHAN(self.NN, self.memD)        
+        self.dataMem = BSMEM(self.memD, self.K)                
+
+        self.stackMem = BSMEM(self.memD, self.K)                        
+        self.biasMem = [BSMEM(self.memD, self.K) for _ in range(self.NN)]
+
+        self.paramBiasMem = [BSMEM(self.memD, self.K) for _ in range(self.NN)]
+        self.bias = [OHM_ADDER_CHAN(self.NN, self.memD) for _ in range(self.NN)]         
         
         self.paramStackMem = [BSMEM(self.NN, self.K) for _ in range(self.NN)]                        
         self.stack = [PTF_ADDER_TREE(self.NN, self.memD, self.K) for _ in range(self.NN)]
@@ -32,16 +33,18 @@ class RunOHMS:
 
     def Reset(self) -> None:
 
-        self.biasMem.Reset()
-        self.stackMem.Reset()
         self.dataMem.Reset()
-        self.paramMem.Reset()        
+        self.dataMem.LoadList(self.input)                
 
-        self.biases.Reset()                
-       
-        self.dataMem.LoadList(self.input)        
-        self.paramMem.LoadList(self.weights)
-        
+        self.stackMem.Reset()
+        [biasMem.Reset() for biasMem in self.biasMem]                        
+    
+        for mi in range(len(self.paramBiasMem)):
+            self.paramBiasMem[mi].Reset()        
+            self.paramBiasMem[mi].LoadList(self.weights)
+
+        [bias.Reset() for bias in self.bias]
+               
         for mi in range(len(self.paramStackMem)):
             self.paramStackMem[mi].Reset()
             #self.paramStackMem[mi].LoadScalar(len(self.paramStackMem)-mi-1)
@@ -49,17 +52,20 @@ class RunOHMS:
                 
         [stack.Reset() for stack in self.stack]
 
-
         
     def Run(self) -> None:      
             
         print(f">>>>>>>>>>> LSB PASS ")
         self.RunLSB(0)
-        self.biasMem.ResetIndex()
-        self.biasMem.Print("LSB")
+        #for bi in range(len(self.bias)):
+        #    self.biasMem[bi].Print(f"LSB {bi}")
+        self.biasMem[0].Print("LSB")
+
         print(f">>>>>>>>>>> MSB PASS ")
+        [biasMem.ResetIndex() for biasMem in self.biasMem]            
+        
         self.RunMSB(0)
-        #self.lsbMem.Print("LSB")
+        
         self.stackMem.Print("MSB")
         print(self.doneOut)
                 
@@ -71,9 +77,8 @@ class RunOHMS:
             self.doneOut = list(self.NN * [-1])
 
             print(f"     == {stepi}:{ti} ")            
-            for si in range(len(self.doneOut)):
-                #self.paramStackMem[si].Print("WOSPARAM ")                
-                self.stack[si].Calc(self.biasMem, self.paramStackMem[si], msb)
+            for si in range(len(self.doneOut)):                
+                self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], msb)
                 if self.doneOut[si] < 0:
                     if self.stack[si].done == 1:
                         self.doneOut[si] = ti
@@ -91,10 +96,10 @@ class RunOHMS:
             msb = 0                
             for ti in range(1, self.K):
                 print(f"     == {stepi}:{ti} ")                
-                self.biasMem.Step()
+                [biasMem.Step() for biasMem in self.biasMem]
                 
                 for si in range(len(self.stack)):                    
-                    self.stack[si].Calc(self.biasMem, self.paramStackMem[si], msb)
+                    self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], msb)
                     
                     if self.doneOut[si] < 0:
                         if self.stack[si].done == 1:
@@ -114,46 +119,42 @@ class RunOHMS:
             print(f"     == {stepi}:{ti} ")
             lsb = 1            
 
-            self.biases.Calc(self.dataMem, self.paramMem, lsb)            
-            self.denseOut = self.biases.Output()
-            #self.Print()
-            self.biasMem.Step(self.denseOut)
-            #self.lsbMem.Print()            
-            self.biases.Step()                        
-            
+            for bi in range(len(self.bias)):
+                self.bias[bi].Calc(self.dataMem, self.paramBiasMem[bi], lsb)            
+                self.biasMem[bi].Step(self.bias[bi].Output())
+                self.bias[bi].Step()
+                                    
             lsb = 0
             for ti in range(1, self.K):
                 print(f"     == {stepi}:{ti} ")                                                
-                self.dataMem.Step()                
-                self.paramMem.Step()
+                self.dataMem.Step()         
+                [paramBiasMem.Step() for paramBiasMem in self.paramBiasMem]                
         
-                self.biases.Calc(self.dataMem, self.paramMem, lsb)
-                self.denseOut = self.biases.Output()
-                #self.Print()
-                self.biasMem.Step(self.denseOut)
-                #self.lsbMem.Print()
-                self.biases.Step()                                                                        
+                for bi in range(len(self.bias)):
+                    self.bias[bi].Calc(self.dataMem, self.paramBiasMem[bi], lsb)
+                    self.biasMem[bi].Step(self.bias[bi].Output())
+                    self.bias[bi].Step()                    
                 
 
     def SaveState(self, filename) -> None:
         # Call the static method Load
         self.dataMem.Save(filename + "_dataMem")
-        self.paramMem.Save(filename + "_paramMem")
+        self.paramBiasMem.Save(filename + "_paramMem")
         self.biasMem.Save(filename + "_lsbMem")
         #self.biases.Save(filename + "_biases")
             
     def LoadState(self, filename) -> None:
         self.dataMem = BSMEM.Load(filename + "_dataMem")
-        self.paramMem = BSMEM.Load(filename + "_paramMem")
+        self.paramBiasMem = BSMEM.Load(filename + "_paramMem")
         self.biasMem = BSMEM.Load(filename + "_lsbMem")        
 
     def PrintMem(self):        
         self.dataMem.Print("Data")
-        self.paramMem.Print("Param")
+        self.paramBiasMem.Print("Param")
         self.biasMem.Print("Out ")
 
     def Print(self, prefix="", showInput=1) -> None:        
         print(prefix + f"RunOHMS:")
         print(prefix + f"  lsbOut: {self.denseOut}")        
-        self.biases.Print(prefix + "  ", showInput)        
+        self.bias.Print(prefix + "  ", showInput)        
  
