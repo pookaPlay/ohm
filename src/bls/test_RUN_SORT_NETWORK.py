@@ -11,12 +11,7 @@ def test_RUN_SORT_NETWORK():
     weights = numNodes * [0]            
         
     ohm = RunSortNetwork(memD, memK, numNodes, input, weights)    
-    ohm.Run()
-    
-    #ohm.PrintMem()
-    #result = ohm.lsbMem.GetLSBInts()
-    #print(result)
-    
+    ohm.Run()  
     
     return
 
