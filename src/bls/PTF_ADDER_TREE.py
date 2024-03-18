@@ -67,26 +67,27 @@ class PTF_ADDER_TREE(OHM_ADDER_TREE):
 
         ti = 0
         lsb = 1        
-        self.pbfOut = self.CalcTree(self.treeInputs, lsb)            
+        #self.pbfOut = self.CalcTree(self.treeInputs, lsb)            
 
-        #self.pbfOut = 1 if (sum(self.treeInputs) >= len(self.treeInputs)/2) else 0
+        self.pbfOut = 1 if (sum(self.treeInputs) >= len(self.treeInputs)/2) else 0
         #self.pbfOut = 1 if (sum(self.treeInputs) == len(self.treeInputs)) else 0
         #self.pbfOut = 1 if (sum(self.treeInputs) > 0) else 0
         #print(f"     PBF is {self.pbfOut} from {sum(self.treeInputs)}")
-        lsb = 0
-        for ti in range(1, 2):
-            
-            memParam.Step()       
+        if 0:
+            lsb = 0
+            for ti in range(1, 2):
+                
+                memParam.Step()       
 
-            self.treeInputs = list(self.numInputs * [0])            
-            for i in range(len(self.inputs)):            
-                self.treeInputs[i] = self.inputs[i] * memParam.Output(self.inIndexB[i])
-            
-            self.pbfOut = self.CalcTree(self.treeInputs, lsb)
+                self.treeInputs = list(self.numInputs * [0])            
+                for i in range(len(self.inputs)):            
+                    self.treeInputs[i] = self.inputs[i] * memParam.Output(self.inIndexB[i])
+                
+                self.pbfOut = self.CalcTree(self.treeInputs, lsb)
             
     
     def CalcTree(self, inputs, lsb=0):    
-        
+        #print(f"     CalcTree inputs: {inputs}" )
         if len(self.tree) > 0:
             for ai in range(len(self.tree[0])):
                 self.tree[0][ai].Calc(inputs[ai*2], inputs[ai*2+1], lsb)

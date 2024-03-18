@@ -8,6 +8,7 @@ class RunOHMS:
                  numNodes, 
                  input = [7, -2, -6], weights = [0]):
     
+        self.defaultPTF = 1
         self.NN = numNodes      # number of parallel nodes        
         self.numNodes = numNodes        
 
@@ -46,9 +47,8 @@ class RunOHMS:
         [bias.Reset() for bias in self.bias]
                
         for mi in range(len(self.paramStackMem)):
-            self.paramStackMem[mi].Reset()
-            #self.paramStackMem[mi].LoadScalar(len(self.paramStackMem)-mi-1)
-            self.paramStackMem[mi].LoadScalar(1)
+            self.paramStackMem[mi].Reset()            
+            self.paramStackMem[mi].LoadScalar(self.defaultPTF)
                 
         [stack.Reset() for stack in self.stack]
 
