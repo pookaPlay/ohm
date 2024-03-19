@@ -1,11 +1,11 @@
-from RunOHMS import RunOHMS
 from ml.TorchSynData import LoadXor
 from ml.TorchSynData import LoadLinear
 from ml.TorchSynData import PlotMap
-#from ../ml/TorchSynData import LoadXor, LoadLinear, PlotMap
+from bls.RunOHMS import RunOHMS
 
-def test_RUN_OHM():
+def test_RUN():
 
+    x, y, xv, yv, xxyy = LoadXor(100)
     
     memK = 8
         
@@ -28,4 +28,4 @@ def test_RUN_OHM():
     
     return
 
-test_RUN_OHM()
+test_RUN()

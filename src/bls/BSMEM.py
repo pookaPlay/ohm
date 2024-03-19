@@ -1,5 +1,5 @@
-from DataIO import DeserializeLSBTwos, DeserializeMSBTwos
-from DataIO import SerializeMSBTwos
+from bls.DataIO import DeserializeLSBTwos, DeserializeMSBTwos
+from bls.DataIO import SerializeMSBTwos
 import pickle
 
 # Bit Serial Memory
@@ -12,14 +12,16 @@ class BSMEM():
         self.Reset()
 
     def LoadList(self, data):                
+        self.Reset()            
         for n in range(len(data)):
             self.mem[n] = SerializeMSBTwos(data[n], self.K)
             self.mem[n].reverse()
 
-    def LoadScalar(self, data):    
+    def LoadTest(self, data):            
         self.Reset()            
-        for n in range(len(self.mem)):            
-            self.mem[n][0] = data            
+        for n in range(len(data)):
+            self.mem[n] = SerializeMSBTwos(data[n], self.K)
+            self.mem[n].reverse()
 
     def ResetIndex(self):
         self.ri = 0

@@ -1,7 +1,4 @@
-from OHM import OHM
-from BSMEM import BSMEM
-from DataReader import DataReader
-from ADD import ADD
+from bls.ADD import ADD
 
 class OHM_ADDER_CHAN:
 

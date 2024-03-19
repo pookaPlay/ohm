@@ -1,21 +1,23 @@
-from BSMEM import BSMEM
-from OHM_ADDER_CHAN import OHM_ADDER_CHAN
-from STACK_ADDER_TREE import STACK_ADDER_TREE
+from bls.BSMEM import BSMEM
+from bls.OHM_ADDER_CHAN import OHM_ADDER_CHAN
+from bls.STACK_ADDER_TREE import STACK_ADDER_TREE
 
 class RunOHMS:
 
     def __init__(self, memD, memK, 
                  numNodes, 
-                 input = [7, -2, -6], weights = [0]):
+                 input = [7, -2, -6], 
+                 biasWeights = [0], 
+                 ptfWeights = [1]):
     
-        self.defaultPTF = 1
         self.NN = numNodes      # number of parallel nodes        
         self.numNodes = numNodes        
 
         self.memD = memD        
         self.K = memK
         self.input = input
-        self.weights = weights
+        self.biasWeights = biasWeights
+        self.ptfWeights = ptfWeights
         
         self.dataMem = BSMEM(self.memD, self.K)                
 
@@ -42,14 +44,16 @@ class RunOHMS:
     
         for mi in range(len(self.paramBiasMem)):
             self.paramBiasMem[mi].Reset()        
-            self.paramBiasMem[mi].LoadList(self.weights)
+            self.paramBiasMem[mi].LoadList(self.biasWeights)
 
         [bias.Reset() for bias in self.bias]
                
         for mi in range(len(self.paramStackMem)):
             self.paramStackMem[mi].Reset()            
-            self.paramStackMem[mi].LoadScalar(self.defaultPTF)
-                
+            self.paramStackMem[mi].LoadTest(self.ptfWeights)
+            if mi == 0:
+                self.paramStackMem[mi].Print("PTF")
+
         [stack.Reset() for stack in self.stack]
 
         

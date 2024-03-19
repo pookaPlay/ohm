@@ -1,7 +1,4 @@
-from OHM import OHM
-from BSMEM import BSMEM
-from DataReader import DataReader
-from ADD import ADD
+from bls.ADD import ADD
 import math
 
 class STACK_ADDER_TREE():
@@ -79,6 +76,9 @@ class STACK_ADDER_TREE():
     def CalcPTF(self, memParam):    
         
         self.numBits = int(math.log2(len(self.inputs)))
+        # for 8 inputs this is 3 bits - half of full resolution (4-bits)
+        # we only expect half the inputs to be set
+
         # LSB inner loop
         memParam.ResetIndex()
         self.ResetTree()
@@ -88,7 +88,7 @@ class STACK_ADDER_TREE():
             self.treeInputs[i] = self.inputs[i] * memParam.Output(self.inIndexB[i])
 
         temp = 1 if (sum(self.treeInputs) >= len(self.treeInputs)/2) else 0
-        print(f" -->SPBF: {temp}              from {sum(self.treeInputs)}")
+        print(f" -->        SPBF: {temp}              from {sum(self.treeInputs)}")
         #self.pbfOut = temp 
 
         #return
@@ -117,7 +117,7 @@ class STACK_ADDER_TREE():
             #self.PrintTree()
             self.Step()
 
-        print(f" -->FPBF: {self.pbfOut}          after {self.numBits} ticks")
+        print(f" -->        FPBF: {self.pbfOut}          after {self.numBits} ticks")
             
     
     def CalcTree(self, inputs, lsb=0):    
