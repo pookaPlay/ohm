@@ -5,8 +5,8 @@ def test_RUN_OHM():
     
     memK = 8
         
-    input = [64, 32, 16, 8, 4, 2, 1]
-    input += [-x for x in input]  # Add the negative values
+    input = [8, -8, 4, -4, 2, -2, 1, -1]
+    #input += [-x for x in input]  # Add the negative values
 
     memD = len(input)
     numNodes = memD

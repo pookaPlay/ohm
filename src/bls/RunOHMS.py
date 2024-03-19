@@ -1,6 +1,6 @@
 from BSMEM import BSMEM
 from OHM_ADDER_CHAN import OHM_ADDER_CHAN
-from PTF_ADDER_TREE import PTF_ADDER_TREE
+from STACK_ADDER_TREE import STACK_ADDER_TREE
 
 class RunOHMS:
 
@@ -26,7 +26,7 @@ class RunOHMS:
         self.bias = [OHM_ADDER_CHAN(self.NN, self.memD) for _ in range(self.NN)]         
         
         self.paramStackMem = [BSMEM(self.NN, self.K) for _ in range(self.NN)]                        
-        self.stack = [PTF_ADDER_TREE(self.NN, self.memD, self.K) for _ in range(self.NN)]
+        self.stack = [STACK_ADDER_TREE(self.NN, self.memD, self.K) for _ in range(1)] #self.NN)]
         
         self.doneOut = list(self.NN * [-1])
 
@@ -74,7 +74,8 @@ class RunOHMS:
             ti = 0                        
             msb = 1            
             self.denseOut = list(self.NN * [0])
-            self.doneOut = list(self.NN * [-1])
+            #self.doneOut = list(self.NN * [-1])
+            self.doneOut = list(1 * [-1])
 
             print(f"     == {stepi}:{ti} ")            
             for si in range(len(self.doneOut)):                
@@ -89,7 +90,7 @@ class RunOHMS:
             #print(f"     == {stepi}:{ti} {self.denseOut}")
             self.stackMem.Step(self.denseOut)
             
-            [stack.Step() for stack in self.stack]
+            #[stack.Step() for stack in self.stack]
 
             #self.lsbMem.Print("LSB")
             #self.msbMem.Print("MSB")
@@ -109,7 +110,9 @@ class RunOHMS:
 
                 #print(f"     == {stepi}:{ti} {self.denseOut}")
                 self.stackMem.Step(self.denseOut)
-                [stack.Step() for stack in self.stack]
+                
+                #[stack.Step() for stack in self.stack]
+                
                 #self.lsbMem.Print("LSB")
                 #self.msbMem.Print("MSB")
 

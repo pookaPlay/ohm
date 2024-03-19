@@ -2,18 +2,38 @@ from OHM import OHM
 from BSMEM import BSMEM
 from DataReader import DataReader
 from ADD import ADD
-from OHM_ADDER_TREE import OHM_ADDER_TREE
 import math
 
-class PTF_ADDER_TREE(OHM_ADDER_TREE):
+class STACK_ADDER_TREE():
 
     def __init__(self,  numInputs, memD, memK) -> None:        
-        super().__init__(numInputs, 1, memD)
+        self.numInputs = numInputs
+        self.numOutputs = 1
+        self.memD = memD                
+
+        self.inIndexA = list(range(self.numInputs))
+        self.inIndexB = list(range(self.numInputs))
+        self.outIndex = list(range(self.numOutputs))
+
+        self.tree = list()        
+        if (self.numOutputs == 1) and (self.numInputs > 1):
+            numStart = int(self.numInputs/2)                            
+            if numStart > 1:
+                self.tree.append([ADD() for _ in range(numStart)])
+                numStart = int(numStart / 2)
+                while numStart > 1:
+                    self.tree.append([ADD() for _ in range(numStart)])
+                    numStart = int(numStart / 2)            
+                    
+            self.tree.append([ADD()])                
         self.memK = memK    
         self.flags = list(self.numInputs * [0])
 
     def Reset(self) -> None:        
-        super().Reset()
+        for ti in range(len(self.tree)):
+            for ai in range(len(self.tree[ti])):
+                self.tree[ti][ai].Reset()
+
         self.flags = list(self.numInputs * [0])
                 
     def Calc(self, memInputs, memParam, msb=0) -> None:    
@@ -69,8 +89,12 @@ class PTF_ADDER_TREE(OHM_ADDER_TREE):
 
         temp = 1 if (sum(self.treeInputs) >= len(self.treeInputs)/2) else 0
         print(f" -->SPBF: {temp}              from {sum(self.treeInputs)}")
+        self.pbfOut = temp 
+
+        return
         ti = 0
-        lsb = 1        
+        lsb = 1                
+
         self.pbfOut = self.CalcTree(self.treeInputs, lsb)            
         #print(f" --> First tree PBF got {self.pbfOut}")
         #self.PrintTree()
@@ -84,11 +108,11 @@ class PTF_ADDER_TREE(OHM_ADDER_TREE):
         for ti in range(1, self.numBits):
             # I probably want to sign extend the inputs 
             # or keep constant for single bit weights?
-            memParam.Step()       
+            #memParam.Step()       
 
-            self.treeInputs = list(self.numInputs * [0])            
-            for i in range(len(self.inputs)):            
-                self.treeInputs[i] = self.inputs[i] * memParam.Output(self.inIndexB[i])
+            #self.treeInputs = list(self.numInputs * [0])            
+            #for i in range(len(self.inputs)):            
+            #    self.treeInputs[i] = self.inputs[i] * memParam.Output(self.inIndexB[i])
             
             self.pbfOut = self.CalcTree(self.treeInputs, lsb)
             #self.PrintTree()
@@ -126,4 +150,13 @@ class PTF_ADDER_TREE(OHM_ADDER_TREE):
     def Step(self) -> None:
         for ti in range(len(self.tree)):
             for ai in range(len(self.tree[ti])):
-                self.tree[ti][ai].Step()                
+                self.tree[ti][ai].Step()
+
+               
+    def Print(self, prefix="", verbose=1) -> None:        
+        print(f"{prefix}STACK_ADDER_TREE: {len(self.adders)} adders")
+
+        for ti in range(len(self.tree)):
+            print(prefix + f"---")
+            for ai in range(len(self.tree[ti])):
+                self.tree[ti][ai].Print(prefix + "  ", verbose)        
