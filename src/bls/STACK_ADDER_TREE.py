@@ -89,9 +89,9 @@ class STACK_ADDER_TREE():
 
         temp = 1 if (sum(self.treeInputs) >= len(self.treeInputs)/2) else 0
         print(f" -->SPBF: {temp}              from {sum(self.treeInputs)}")
-        self.pbfOut = temp 
+        #self.pbfOut = temp 
 
-        return
+        #return
         ti = 0
         lsb = 1                
 
@@ -106,13 +106,12 @@ class STACK_ADDER_TREE():
 
         lsb = 0
         for ti in range(1, self.numBits):
-            # I probably want to sign extend the inputs 
-            # or keep constant for single bit weights?
-            #memParam.Step()       
+            
+            memParam.Step()       
 
-            #self.treeInputs = list(self.numInputs * [0])            
-            #for i in range(len(self.inputs)):            
-            #    self.treeInputs[i] = self.inputs[i] * memParam.Output(self.inIndexB[i])
+            self.treeInputs = list(self.numInputs * [0])            
+            for i in range(len(self.inputs)):            
+                self.treeInputs[i] = self.inputs[i] * memParam.Output(self.inIndexB[i])
             
             self.pbfOut = self.CalcTree(self.treeInputs, lsb)
             #self.PrintTree()
