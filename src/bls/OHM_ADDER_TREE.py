@@ -1,7 +1,7 @@
-from OHM import OHM
-from BSMEM import BSMEM
-from DataReader import DataReader
-from ADD import ADD
+from bls.OHM import OHM
+from bls.BSMEM import BSMEM
+from bls.DataReader import DataReader
+from bls.ADD import ADD
 
 class OHM_ADDER_TREE:
 

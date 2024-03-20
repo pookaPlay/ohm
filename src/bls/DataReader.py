@@ -1,4 +1,4 @@
-from DataIO import SerializeMSBTwos
+from bls.DataIO import SerializeMSBTwos
 
 class DataReader():
     def __init__(self, input=[[5, 7, 6]], NBitsIn=7, NBitsOut=8):

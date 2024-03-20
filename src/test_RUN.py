@@ -5,10 +5,13 @@ from bls.RunOHMS import RunOHMS
 
 def test_RUN():
 
-    x, y, xv, yv, xxyy = LoadXor(100)
+    x, y, xv, yv, xxyy = LoadXor(25)
     
-    memK = 8
+    print(x.shape)
+    print(y.shape)
+    print(xxyy.shape)
         
+    memK = 8        
     input = [8, -8, 4, -4, 2, -2, 1, -1]
     #input += [-x for x in input]  # Add the negative values
 

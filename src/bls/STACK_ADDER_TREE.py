@@ -88,10 +88,10 @@ class STACK_ADDER_TREE():
             self.treeInputs[i] = self.inputs[i] * memParam.Output(self.inIndexB[i])
 
         temp = 1 if (sum(self.treeInputs) >= len(self.treeInputs)/2) else 0
-        print(f" -->        SPBF: {temp}              from {sum(self.treeInputs)}")
-        #self.pbfOut = temp 
+        #print(f" -->        SPBF: {temp}              from {sum(self.treeInputs)}")
+        self.pbfOut = temp 
 
-        #return
+        return
         ti = 0
         lsb = 1                
 

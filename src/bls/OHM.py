@@ -1,12 +1,12 @@
 ##################################################
 ## Bit Serial OHM Node with both LSB and MSB paths
 
-from CCSRL import CCSRL
-from ADD import ADD
-from PTF import PTF
-from SRL import SRL
-from msb2lsb import msb2lsb
-from lsb2msb import lsb2msb
+from bls.CCSRL import CCSRL
+from bls.ADD import ADD
+from bls.PTF import PTF
+from bls.SRL import SRL
+from bls.msb2lsb import msb2lsb
+from bls.lsb2msb import lsb2msb
 
 class OHM:
     

@@ -17,11 +17,11 @@ class BSMEM():
             self.mem[n] = SerializeMSBTwos(data[n], self.K)
             self.mem[n].reverse()
 
-    def LoadTest(self, data):            
+    def LoadScalar(self, scalar):            
         self.Reset()            
-        for n in range(len(data)):
-            self.mem[n] = SerializeMSBTwos(data[n], self.K)
-            self.mem[n].reverse()
+        for n in range(len(self.mem)):
+            for i in range(len(self.mem[n])):
+                self.mem[n][i] = scalar            
 
     def ResetIndex(self):
         self.ri = 0
