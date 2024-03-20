@@ -1,7 +1,7 @@
 from bls.ADD import ADD
 import math
 
-class STACK_ADDER_TREE():
+class STACK_ADDER_TREE:
 
     def __init__(self,  numInputs, memD, memK) -> None:        
         self.numInputs = numInputs

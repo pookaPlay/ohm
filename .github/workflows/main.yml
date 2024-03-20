@@ -16,5 +16,6 @@ jobs:
       uses: actions/setup-python@v5
     - name: Run tests
       run: |
-        python src/bls/test_OHM.py        
+        python src/test_OHM.py
+        python src/test_RUN_SORT_NETWORK.py
         

@@ -1,19 +1,40 @@
-from OHM import OHM
-from BSMEM import BSMEM
-from DataReader import DataReader
-from ADD import ADD
-from OHM_ADDER_TREE import OHM_ADDER_TREE
 import math
+from bls.ADD import ADD
 
-class OS_ADDER_TREE(OHM_ADDER_TREE):
+class OS_ADDER_TREE:
 
     def __init__(self,  numInputs, memD, memK) -> None:        
-        super().__init__(numInputs, 1, memD)
+            
+        self.numInputs = numInputs
+        self.numOutputs = 1
+        self.memD = memD
         self.memK = memK    
-        self.flags = list(self.numInputs * [0])        
+        self.flags = list(self.numInputs * [0])                
+        self.adders = [ADD() for _ in range(self.numInputs)]        
+
+        self.inIndexA = list(range(self.numInputs))
+        self.inIndexB = list(range(self.numInputs))
+        self.outIndex = list(range(self.numOutputs))
+
+        self.tree = list()        
+        if (self.numOutputs == 1) and (self.numInputs > 1):
+            numStart = int(self.numInputs/2)                            
+            if numStart > 1:
+                self.tree.append([ADD() for _ in range(numStart)])
+                numStart = int(numStart / 2)
+                while numStart > 1:
+                    self.tree.append([ADD() for _ in range(numStart)])
+                    numStart = int(numStart / 2)            
+                    
+            self.tree.append([ADD()])                                      
 
     def Reset(self) -> None:        
-        super().Reset()
+        for ai in range(len(self.adders)):
+            self.adders[ai].Reset()
+        for ti in range(len(self.tree)):
+            for ai in range(len(self.tree[ti])):
+                self.tree[ti][ai].Reset()
+
         self.flags = list(self.numInputs * [0])
                 
     def Calc(self, memInputs, memParam, msb=0) -> None:    
@@ -63,4 +84,22 @@ class OS_ADDER_TREE(OHM_ADDER_TREE):
         thresh = memParam.Output(0)
         #print(f" STACK-WOS {thresh}")
         self.pbfOut = 1 if (sum(self.inputs) > thresh) else 0
-               
+                       
+    def Step(self) -> None:
+        for ai in range(len(self.adders)):
+            self.adders[ai].Step()
+        
+        for ti in range(len(self.tree)):
+            for ai in range(len(self.tree[ti])):
+                self.tree[ti][ai].Step()
+
+                
+    def Print(self, prefix="", verbose=1) -> None:        
+        print(f"{prefix}OS_ADDER_TREE: {len(self.adders)} adders")
+        for ai in range(len(self.adders)):
+            self.adders[ai].Print(prefix + "  ", verbose)
+
+        for ti in range(len(self.tree)):
+            print(prefix + f"---")
+            for ai in range(len(self.tree[ti])):
+                self.tree[ti][ai].Print(prefix + "  ", verbose)        

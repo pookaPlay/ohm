@@ -1,4 +1,4 @@
-from DataIO import DeserializeLSBTwos
+from bls.DataIO import DeserializeLSBTwos
 
 class DataWriter():
     def __init__(self):

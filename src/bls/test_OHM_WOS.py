@@ -1,6 +1,6 @@
-from DataReader import DataReader
-from DataWriter import DataWriter
-from OHM import OHM
+from bls.DataReader import DataReader
+from bls.DataWriter import DataWriter
+from bls.OHM import OHM
 
 
 def runTest(input, ptf):

@@ -50,7 +50,7 @@ class RunOHMS:
                
         for mi in range(len(self.paramStackMem)):
             self.paramStackMem[mi].Reset()            
-            self.paramStackMem[mi].LoadTest(self.ptfWeights)
+            self.paramStackMem[mi].LoadList(self.ptfWeights)
             if mi == 0:
                 self.paramStackMem[mi].Print("PTF")
 

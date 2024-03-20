@@ -1,6 +1,6 @@
 from bls.BSMEM import BSMEM
 from bls.OHM_ADDER_CHAN import OHM_ADDER_CHAN
-from bls.STACK_ADDER_TREE import STACK_ADDER_TREE
+from bls.OS_ADDER_TREE import OS_ADDER_TREE
 
 class RunSortNetwork:
 
@@ -24,7 +24,7 @@ class RunSortNetwork:
         self.biases = OHM_ADDER_CHAN(self.NN, self.memD)        
         
         self.paramStackMem = [BSMEM(self.NN, self.K) for _ in range(self.NN)]                        
-        self.stack = [STACK_ADDER_TREE(self.NN, self.memD, self.K) for _ in range(self.NN)]
+        self.stack = [OS_ADDER_TREE(self.NN, self.memD, self.K) for _ in range(self.NN)]
         
         self.doneOut = list(self.NN * [-1])
 
