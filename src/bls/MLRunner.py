@@ -28,7 +28,7 @@ class MLRunner:
 
         for ni in range(len(self.input)):            
             sample = self.input[ni].tolist()
-            print(f"Sample {ni}: {sample}")
+            print(f"Sample {ni}\n{sample}")
             self.ohm.Run(sample)
 
 

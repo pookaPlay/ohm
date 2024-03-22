@@ -53,7 +53,8 @@ class STACK_ADDER_TREE:
         #print(f"STACK         flags: {self.flags}")
         #print(f"STACK latched input: {self.inputs}")
         
-        self.CalcPTF(memParam)
+        #self.CalcPTF(memParam)
+        self.HackPTF(memParam)
 
         for i in range(len(self.inputs)):
             if self.flags[i] == 0:
@@ -72,6 +73,26 @@ class STACK_ADDER_TREE:
 
     def Output(self):        
         return self.pbfOut               
+
+    def HackPTF(self, memParam):    
+        
+        self.numBits = int(math.log2(len(self.inputs)))
+        
+        memParam.ResetIndex()
+        self.ResetTree()
+
+        intParam = memParam.GetLSBInts()
+
+        self.treeInputs = list(self.numInputs * [0])
+        for i in range(len(self.inputs)):                        
+            self.treeInputs[i] = self.inputs[i] * memParam.Output(self.inIndexB[i])
+
+        #temp = 1 if (sum(self.treeInputs) >= sum(intParam)/2) else 0
+        temp = 1 if (sum(self.treeInputs) >= 1.0) else 0        
+        
+        self.pbfOut = temp 
+
+        return
 
     def CalcPTF(self, memParam):    
         

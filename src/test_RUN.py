@@ -30,7 +30,7 @@ def ThreshExpand(x, thresh):
 def test_RUN():
 
     display = 1
-    thresholds = [1.0, -1.0]
+    thresholds = [0.5, -0.5]
     
     x, y, xv, yv, xxyy = LoadXor(2, display)
         

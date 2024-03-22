@@ -85,7 +85,7 @@ class RunOHMS:
         
         #self.stackMem.Print("MSB")
         results = self.stackMem.GetMSBInts()
-        print(f"Results: {results}")
+        print(f"{results} in {self.doneOut} cycles")
         #print(self.doneOut)
                 
     
