@@ -1,11 +1,8 @@
 import torch
-import torch.nn as nn
 import numpy as np
 import matplotlib.pyplot as plt
-import networkx as nx
 import math
 from torch.distributions.multivariate_normal import MultivariateNormal
-from torch.autograd import gradcheck
 
 
 def PlotMap(YMAP):
@@ -54,7 +51,7 @@ def SampleData(mymean, myvar, N):
 
     return(x,y)
 
-def LoadXor(N):
+def LoadXor(N, show = 1):
     
     mymean = 1
     myvar = 0.1
@@ -64,9 +61,10 @@ def LoadXor(N):
     (x, y) = SampleData(mymean, myvar, N)
     (xv, yv) = SampleData(mymean, myvar, N)
 
-    plt.scatter(x[ y[:,0] > 0 , 0], x[ y[:,0] > 0 , 1], color='g', marker='o')
-    plt.scatter(x[ y[:,0] < 0 , 0], x[ y[:,0] < 0 , 1], color='r', marker='x')
-    plt.show()
+    if show == 1:    
+        plt.scatter(x[ y[:,0] > 0 , 0], x[ y[:,0] > 0 , 1], color='g', marker='o')
+        plt.scatter(x[ y[:,0] < 0 , 0], x[ y[:,0] < 0 , 1], color='r', marker='x')
+        plt.show()
 
     #   X = np.arange(-domain+mean, domain+mean, variance)
     #   Y = np.arange(-domain+mean, domain+mean, variance)
@@ -85,7 +83,7 @@ def LoadXor(N):
 
 
 
-def LoadLinear(N):
+def LoadLinear(N, show = 1):
     mymean1 = 1
     mymean2 = 1
     myvar1 = 0.1
@@ -109,9 +107,10 @@ def LoadLinear(N):
     #x1netOut.detach().numpy()      
     x = torch.cat([x1, x2], 0)
     y = torch.cat([y1, y2], 0)
-    plt.scatter(x1[:,0], x1[:,1], color='g', marker='o')
-    plt.scatter(x2[:,0], x2[:,1], color='r', marker='x')
-    plt.show()
+    if show == 1:    
+        plt.scatter(x1[:,0], x1[:,1], color='g', marker='o')
+        plt.scatter(x2[:,0], x2[:,1], color='r', marker='x')
+        plt.show()
 
     #   X = np.arange(-domain+mean, domain+mean, variance)
     #   Y = np.arange(-domain+mean, domain+mean, variance)

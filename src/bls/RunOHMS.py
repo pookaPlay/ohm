@@ -12,7 +12,7 @@ class RunOHMS:
     
         self.NN = numNodes      # number of parallel nodes        
         self.numNodes = numNodes        
-
+        #print(input)
         self.memD = memD        
         self.K = memK
         self.input = input
@@ -37,7 +37,9 @@ class RunOHMS:
     def Reset(self) -> None:
 
         self.dataMem.Reset()
-        self.dataMem.LoadList(self.input)                
+        #print("ON RESET")
+        #print(self.input)
+        self.dataMem.LoadList(self.input)
 
         self.stackMem.Reset()
         [biasMem.Reset() for biasMem in self.biasMem]                        
@@ -56,22 +58,35 @@ class RunOHMS:
 
         [stack.Reset() for stack in self.stack]
 
-        
-    def Run(self) -> None:      
+
+    def ResetIndex(self) -> None:
+        self.stackMem.ResetIndex()
+        [biasMem.ResetIndex() for biasMem in self.biasMem]                        
+        [paramBiasMem.ResetIndex() for paramBiasMem in self.paramBiasMem]        
+        [paramStackMem.ResetIndex() for paramStackMem in self.paramStackMem]
+
+    def Run(self, input = None) -> None:      
             
-        print(f">>>>>>>>>>> LSB PASS ")
+        self.ResetIndex()
+
+        if input is not None:
+            self.input = input
+            self.dataMem.LoadList(self.input)
+
+        #print(f">>>>>>>>>>> LSB PASS ")
         self.RunLSB(0)
         #for bi in range(len(self.bias)):
         #    self.biasMem[bi].Print(f"LSB {bi}")
-        self.biasMem[0].Print("LSB")
-
-        print(f">>>>>>>>>>> MSB PASS ")
+        #self.biasMem[0].Print("LSB")
+        #print(f">>>>>>>>>>> MSB PASS ")
         [biasMem.ResetIndex() for biasMem in self.biasMem]            
         
         self.RunMSB(0)
         
-        self.stackMem.Print("MSB")
-        print(self.doneOut)
+        #self.stackMem.Print("MSB")
+        results = self.stackMem.GetMSBInts()
+        print(f"Results: {results}")
+        #print(self.doneOut)
                 
     
     def RunMSB(self, stepi=0) -> None:            
@@ -81,7 +96,7 @@ class RunOHMS:
             #self.doneOut = list(self.NN * [-1])
             self.doneOut = list(1 * [-1])
 
-            print(f"     == {stepi}:{ti} ")            
+            #print(f"     == {stepi}:{ti} ")            
             for si in range(len(self.doneOut)):                
                 self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], msb)
                 if self.doneOut[si] < 0:
@@ -100,7 +115,7 @@ class RunOHMS:
             #self.msbMem.Print("MSB")
             msb = 0                
             for ti in range(1, self.K):
-                print(f"     == {stepi}:{ti} ")                
+                #print(f"     == {stepi}:{ti} ")                
                 [biasMem.Step() for biasMem in self.biasMem]
                 
                 for si in range(len(self.stack)):                    
@@ -123,7 +138,7 @@ class RunOHMS:
 
     def RunLSB(self, stepi=0) -> None:            
             ti = 0                        
-            print(f"     == {stepi}:{ti} ")
+            #print(f"     == {stepi}:{ti} ")
             lsb = 1            
 
             for bi in range(len(self.bias)):
@@ -133,7 +148,7 @@ class RunOHMS:
                                     
             lsb = 0
             for ti in range(1, self.K):
-                print(f"     == {stepi}:{ti} ")                                                
+                #print(f"     == {stepi}:{ti} ")                                                
                 self.dataMem.Step()         
                 [paramBiasMem.Step() for paramBiasMem in self.paramBiasMem]                
         
