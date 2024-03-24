@@ -5,9 +5,9 @@ import math
 from torch.distributions.multivariate_normal import MultivariateNormal
 
 
-def PlotMap(YMAP):
+def PlotMap(ynp):
 
-    ynp = YMAP.cpu().detach().numpy() 
+    #ynp = YMAP.cpu().detach().numpy() 
     #print(ynp.shape)
     L_sqrt = int(math.sqrt(ynp.shape[0]))
     ynp = ynp.reshape([L_sqrt, L_sqrt])
@@ -49,6 +49,10 @@ def SampleData(mymean, myvar, N):
     x = torch.cat((x1, x2, x3, x4), 0)    
     y = torch.cat((y1, y2, y3, y4), 0)
 
+    indices = torch.randperm(x.shape[0])
+    x = x[indices]
+    y = y[indices]
+
     return(x,y)
 
 def LoadXor(N, show = 1):
@@ -59,6 +63,11 @@ def LoadXor(N, show = 1):
     mySpace = 0.01
 
     (x, y) = SampleData(mymean, myvar, N)
+    
+    indices = torch.randperm(x.shape[0])
+    x = x[indices]
+    y = y[indices]
+
     (xv, yv) = SampleData(mymean, myvar, N)
 
     if show == 1:    
@@ -78,7 +87,7 @@ def LoadXor(N, show = 1):
     yyt = torch.Tensor(yy)
     
     xxyy = torch.cat([xxt, yyt], 1)
-    
+        
     return(x, y, xv, yv, xxyy)
 
 

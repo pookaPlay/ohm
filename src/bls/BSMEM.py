@@ -1,5 +1,5 @@
 from bls.DataIO import DeserializeLSBTwos, DeserializeMSBTwos
-from bls.DataIO import SerializeMSBTwos
+from bls.DataIO import SerializeLSBTwos
 import pickle
 
 # Bit Serial Memory
@@ -11,18 +11,6 @@ class BSMEM():
         self.K = K        
         self.Reset()
 
-    def LoadList(self, data):                
-        self.Reset()            
-        for n in range(len(data)):
-            self.mem[n] = SerializeMSBTwos(data[n], self.K)
-            self.mem[n].reverse()
-
-    def LoadScalar(self, scalar):            
-        self.Reset()            
-        for n in range(len(self.mem)):
-            for i in range(len(self.mem[n])):
-                self.mem[n][i] = scalar            
-
     def ResetIndex(self):
         self.ri = 0
         self.rib = self.K-1
@@ -31,6 +19,26 @@ class BSMEM():
     def Reset(self):
         self.ResetIndex()        
         self.mem = [list(self.K * [0]) for _ in range(self.D)]        
+        self.memhack = [0] * self.D
+
+    def GetLSBIntsHack(self):        
+        return self.memhack
+
+    def SetLSBIntsHack(self, vals):        
+        self.memhack = vals
+
+    def LoadList(self, data):                
+        self.Reset()       
+        self.memhack = data.copy()     
+        
+        for n in range(len(data)):
+            self.mem[n] = SerializeLSBTwos(data[n], self.K)            
+
+    def LoadScalar(self, scalar):            
+        self.Reset()            
+        for n in range(len(self.mem)):
+            for i in range(len(self.mem[n])):
+                self.mem[n][i] = scalar            
     
 
     def Output(self, di=-1):
@@ -74,8 +82,6 @@ class BSMEM():
     def Load(filename):
         with open(filename, 'rb') as file:
             return pickle.load(file)
-
-
 
     def GetLSBInts(self):
         result = list()

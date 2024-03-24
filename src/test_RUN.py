@@ -6,8 +6,10 @@ from bls.MLRunner import MLRunner
 import torch
 import numpy as np
 
-torch.manual_seed(0)
-np.random.seed(0)
+
+seed = 0
+torch.manual_seed(seed)
+np.random.seed(seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
@@ -29,10 +31,13 @@ def ThreshExpand(x, thresh):
 
 def test_RUN():
 
-    display = 1
-    thresholds = [0.5, -0.5]
+    adaptWeights = 0
+    display = 0
+    thresholds = [1.0, -1.0]
+    numPoints = 5
     
-    x, y, xv, yv, xxyy = LoadXor(2, display)
+    x, y, xv, yv, xxyy = LoadXor(numPoints, display)
+    #x, y, xxyy = LoadLinear(numPoints, display)
         
     print(x.shape)
     print(y.shape)
@@ -50,12 +55,15 @@ def test_RUN():
     numNodes = memD
     biasWeights = numNodes * [0]
     ptfWeights = numNodes * [1]
+    #ptfWeights[0] = numNodes
+    #ptfWeights = [19, 0, 976, 0, 926, 11201, 6, 0]
     
     runner = MLRunner(memD, memK, numNodes, 
                       biasWeights, ptfWeights, 
-                      nx, nxxyy)
+                      nx, nxxyy, adaptWeights)
     runner.Run()            
-    
-    return
+    #result = runner.ApplyToMap()
+    #PlotMap(result)
+
 
 test_RUN()

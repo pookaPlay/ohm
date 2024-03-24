@@ -32,6 +32,14 @@ def SerializeMSBTwos(input, NBits=8):
     
     return(result)            
 
+def SerializeLSBTwos(input, NBits=8):
+    # expects data to lie between -2^(NBits-1) and 2^(NBits-1)
+    result = SerializeMSBOffset(input, NBits)
+    # flip MSB
+    result[0] = 1 - result[0]
+    result.reverse()
+    return(result)            
+
 def SerializeMSBTwosSignExtend(input, NBits=8, extend=1):
     # expects data to lie between -2^(NBits-1) and 2^(NBits-1)
     result = SerializeMSBOffset(input, NBits)

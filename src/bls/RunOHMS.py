@@ -8,7 +8,8 @@ class RunOHMS:
                  numNodes, 
                  input = [7, -2, -6], 
                  biasWeights = [0], 
-                 ptfWeights = [1]):
+                 ptfWeights = [1], 
+                 adaptWeights = 1):
     
         self.NN = numNodes      # number of parallel nodes        
         self.numNodes = numNodes        
@@ -28,7 +29,7 @@ class RunOHMS:
         self.bias = [OHM_ADDER_CHAN(self.NN, self.memD) for _ in range(self.NN)]         
         
         self.paramStackMem = [BSMEM(self.NN, self.K) for _ in range(self.NN)]                        
-        self.stack = [STACK_ADDER_TREE(self.NN, self.memD, self.K) for _ in range(1)] #self.NN)]
+        self.stack = [STACK_ADDER_TREE(self.NN, self.memD, self.K, adaptWeights) for _ in range(1)] #self.NN)]
         
         self.doneOut = list(self.NN * [-1])
 
@@ -53,8 +54,8 @@ class RunOHMS:
         for mi in range(len(self.paramStackMem)):
             self.paramStackMem[mi].Reset()            
             self.paramStackMem[mi].LoadList(self.ptfWeights)
-            if mi == 0:
-                self.paramStackMem[mi].Print("PTF")
+            #if mi == 0:
+            #    self.paramStackMem[mi].Print("PTF")
 
         [stack.Reset() for stack in self.stack]
 
@@ -84,9 +85,11 @@ class RunOHMS:
         self.RunMSB(0)
         
         #self.stackMem.Print("MSB")
-        results = self.stackMem.GetMSBInts()
-        print(f"{results} in {self.doneOut} cycles")
+        self.results = self.stackMem.GetMSBInts()
+
+        print(f"{self.results} in {self.doneOut} cycles")
         #print(self.doneOut)
+        return self.doneOut[0]
                 
     
     def RunMSB(self, stepi=0) -> None:            
@@ -97,7 +100,7 @@ class RunOHMS:
             self.doneOut = list(1 * [-1])
 
             #print(f"     == {stepi}:{ti} ")            
-            for si in range(len(self.doneOut)):                
+            for si in range(len(self.stack)):                
                 self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], msb)
                 if self.doneOut[si] < 0:
                     if self.stack[si].done == 1:
@@ -106,7 +109,7 @@ class RunOHMS:
                 self.denseOut[si] = self.stack[si].Output()            
                         
             # Save output
-            #print(f"     == {stepi}:{ti} {self.denseOut}")
+            print(f"     == {stepi}:{ti} {self.denseOut}")
             self.stackMem.Step(self.denseOut)
             
             #[stack.Step() for stack in self.stack]
@@ -127,7 +130,7 @@ class RunOHMS:
 
                     self.denseOut[si] = self.stack[si].Output()            
 
-                #print(f"     == {stepi}:{ti} {self.denseOut}")
+                print(f"     == {stepi}:{ti} {self.denseOut}")
                 self.stackMem.Step(self.denseOut)
                 
                 #[stack.Step() for stack in self.stack]
