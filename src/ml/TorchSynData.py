@@ -60,7 +60,7 @@ def LoadXor(N, show = 1):
     mymean = 1
     myvar = 0.1
     myrange = 2
-    mySpace = 0.01
+    mySpace = 0.1
 
     (x, y) = SampleData(mymean, myvar, N)
     

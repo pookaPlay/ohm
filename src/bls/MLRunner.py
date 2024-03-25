@@ -1,6 +1,7 @@
 from bls.RunOHMS import RunOHMS
-import torch
+import math
 import pickle
+import torch
 
 class MLRunner:
 
@@ -25,23 +26,27 @@ class MLRunner:
         self.ohm = RunOHMS(memD, memK, numNodes, first, biasWeights, ptfWeights, adaptWeights)
 
 
-    def Run(self) -> None:
+    def Run(self, adaptWeights) -> None:
         print(f"Running on {len(self.input)} samples")
-        
         ticks = list()
-        for ni in range(1):
-        #for ni in range(len(self.input)):                        
-            #sample = self.input[ni].tolist()
-            sample = self.input[0].tolist()
-            print(f"------------------------------")
+        self.ohm.SetAdaptWeights(adaptWeights)        
+        
+        for ni in range(len(self.input)):                        
+            sample = self.input[ni].tolist()
+            #sample = self.input[0].tolist()
+            if ni == 0:
+                print(f"------------------------------")
             self.weights = self.ohm.paramStackMem[0].GetLSBIntsHack()
-            print(f"     PTF IN: {self.weights}")                  
+            if ni == 0:
+                print(f"     PTF IN: {self.weights}")                  
             atick = self.ohm.Run(sample)
 
-            print(f"Sample {ni}: {sample} -> {self.ohm.results[0]}")                        
+            if ni == 0:
+                print(f"Sample {ni}: {sample} -> {self.ohm.results[0]}")                        
             #self.ohm.paramStackMem[0].Print(f"PTF step {ni}")
             self.weights = self.ohm.paramStackMem[0].GetLSBIntsHack()
-            print(f"     PTF OUT: {self.weights}")                  
+            if ni == 0:
+                print(f"     PTF OUT: {self.weights}")                  
 
             if atick < 0: 
                 atick = self.K
@@ -50,9 +55,19 @@ class MLRunner:
         avg = sum(ticks) / len(ticks)
         print(f"Avg Ticks: {avg}")
         
+    def WeightAdjust(self) -> None:
+        self.weights = self.ohm.paramStackMem[0].GetLSBIntsHack()
+        for i in range(len(self.weights)):                    
+            if (self.weights[i] > 1):
+                self.weights[i] = int(math.floor(self.weights[i] / 2))
+            
+        self.ohm.paramStackMem[0].SetLSBIntsHack(self.weights)
 
-    def ApplyToMap(self) -> None:
+    def ApplyToMap(self, adaptWeights) -> None:
         print(f"Running on {len(self.xxyy)} samples")
+                
+        self.ohm.SetAdaptWeights(adaptWeights)        
+
         ticks = 0
         results = torch.zeros(len(self.xxyy))
         for ni in range(len(self.xxyy)):            

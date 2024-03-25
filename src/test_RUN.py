@@ -31,7 +31,7 @@ def ThreshExpand(x, thresh):
 
 def test_RUN():
 
-    adaptWeights = 0
+    numIterations = 1 
     display = 0
     thresholds = [1.0, -1.0]
     numPoints = 5
@@ -45,8 +45,7 @@ def test_RUN():
 
     nx = ThreshExpand(x, thresholds)        
     nxxyy = ThreshExpand(xxyy, thresholds)        
-        
-    
+            
     memK = 8        
     #input = [8, -8, 4, -4, 2, -2, 1, -1]
     #input += [-x for x in input]  # Add the negative values
@@ -56,14 +55,21 @@ def test_RUN():
     biasWeights = numNodes * [0]
     ptfWeights = numNodes * [1]
     #ptfWeights[0] = numNodes
-    #ptfWeights = [19, 0, 976, 0, 926, 11201, 6, 0]
-    
+    adaptWeights = 0
     runner = MLRunner(memD, memK, numNodes, 
-                      biasWeights, ptfWeights, 
-                      nx, nxxyy, adaptWeights)
-    runner.Run()            
-    #result = runner.ApplyToMap()
-    #PlotMap(result)
+                        biasWeights, ptfWeights, 
+                        nx, nxxyy, adaptWeights)        
+    
+
+    for iter in range(numIterations):
+        print("##################################################")
+        print(f"ITERATION {iter}")
+        adaptWeights = 0
+        runner.Run(adaptWeights)
+        #runner.WeightAdjust()
+        adaptWeights = 0
+        result = runner.ApplyToMap(adaptWeights)
+        PlotMap(result)
 
 
 test_RUN()

@@ -35,6 +35,10 @@ class RunOHMS:
 
         self.Reset()
 
+    def SetAdaptWeights(self, adaptWeights) -> None:
+        for stack in self.stack:
+            stack.adaptWeights = adaptWeights
+    
     def Reset(self) -> None:
 
         self.dataMem.Reset()
@@ -87,7 +91,7 @@ class RunOHMS:
         #self.stackMem.Print("MSB")
         self.results = self.stackMem.GetMSBInts()
 
-        print(f"{self.results} in {self.doneOut} cycles")
+        #print(f"{self.results} in {self.doneOut} cycles")
         #print(self.doneOut)
         return self.doneOut[0]
                 
@@ -109,7 +113,7 @@ class RunOHMS:
                 self.denseOut[si] = self.stack[si].Output()            
                         
             # Save output
-            print(f"     == {stepi}:{ti} {self.denseOut}")
+            #print(f"     == {stepi}:{ti} {self.denseOut}")
             self.stackMem.Step(self.denseOut)
             
             #[stack.Step() for stack in self.stack]
@@ -130,7 +134,7 @@ class RunOHMS:
 
                     self.denseOut[si] = self.stack[si].Output()            
 
-                print(f"     == {stepi}:{ti} {self.denseOut}")
+                #print(f"     == {stepi}:{ti} {self.denseOut}")
                 self.stackMem.Step(self.denseOut)
                 
                 #[stack.Step() for stack in self.stack]

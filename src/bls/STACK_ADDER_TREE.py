@@ -48,37 +48,47 @@ class STACK_ADDER_TREE:
             for i in range(len(self.inputs)):    
                 if self.flags[i] == 1:
                     self.inputs[i] = self.latchInput[i]
+                
+        #################################################                                        
+        #self.HackPTF(memParam)
+        intParam = memParam.GetLSBIntsHack()
+        halfSum = sum(intParam)/2
+        self.treeInputs = list(self.numInputs * [0])
+        for i in range(len(self.inputs)):                                    
+            self.treeInputs[i] = self.inputs[i] * intParam[i]
         
-        #self.CalcPTF(memParam)
-        self.HackPTF(memParam)
+        self.pbfOut = 1 if (sum(self.treeInputs) >= halfSum) else 0        
 
         for i in range(len(self.inputs)):
             if self.flags[i] == 0:
                 if self.inputs[i] != self.pbfOut:
                     self.flags[i] = 1
                     self.latchInput[i] = self.inputs[i]
-                                        
+
+        #################################################                                
+        # Weight update
+        if self.adaptWeights == 1:
+            if self.done == 0:
+                intParam = memParam.GetLSBIntsHack()
+
+                for i in range(len(intParam)):
+                    if self.flags[i] == 0:
+                        if self.inputs[i] == 1:
+                            intParam[i] = intParam[i] + 1                        
+            
+                memParam.SetLSBIntsHack(intParam)
+                #if msb == 1:
+                #    for i in range(len(intParam)):
+                #        #if intParam[i] > 0:
+                #        intParam[i] = intParam[i] - 1
+        #################################################
+
         if (sum(self.flags) == (len(self.inputs)-1)):          
             self.done = 1            
         
         # convert back to twos complement
         if msb == 1:
             self.pbfOut = 1 - self.pbfOut
-
-        # Weight update
-        if self.adaptWeights == 1:
-            
-            intParam = memParam.GetLSBIntsHack()
-
-            for i in range(len(intParam)):
-                if self.flags[i] == 0:
-                    intParam[i] = intParam[i] + 1
-            
-            memParam.SetLSBIntsHack(intParam)
-            #if msb == 1:
-            #    for i in range(len(intParam)):
-            #        #if intParam[i] > 0:
-            #        intParam[i] = intParam[i] - 1
 
         return self.pbfOut
 
