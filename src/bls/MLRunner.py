@@ -39,14 +39,15 @@ class MLRunner:
             self.weights = self.ohm.paramStackMem[0].GetLSBIntsHack()
             if ni == 0:
                 print(f"     PTF IN: {self.weights}")                  
-            atick = self.ohm.Run(sample)
+            atick = self.ohm.Run(sample, ni)
 
-            if ni == 0:
-                print(f"Sample {ni}: {sample} -> {self.ohm.results[0]}")                        
+            #if ni == 0:
+            print(f"Sample {ni}: {sample} -> {self.ohm.results[0]}[{self.ohm.doneIndexOut[0]}] in {self.ohm.doneOut[0]}")
             #self.ohm.paramStackMem[0].Print(f"PTF step {ni}")
             self.weights = self.ohm.paramStackMem[0].GetLSBIntsHack()
-            if ni == 0:
-                print(f"     PTF OUT: {self.weights}")                  
+            
+            #if ni == 0:
+            #    print(f"     PTF OUT: {self.weights}")                  
 
             if atick < 0: 
                 atick = self.K

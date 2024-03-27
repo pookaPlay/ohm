@@ -35,7 +35,7 @@ class STACK_ADDER_TREE:
 
         self.flags = list(self.numInputs * [0])
                 
-    def Calc(self, memInputs, memParam, msb=0) -> None:    
+    def Calc(self, memInputs, memParam, msb=0, sampleIndex=0) -> None:    
 
         self.inputs = [memInputs.OutputMSB(aIndex) for aIndex in self.inIndexA]        
 
@@ -44,6 +44,7 @@ class STACK_ADDER_TREE:
             self.flags = list(len(self.inputs) * [0])
             self.latchInput = list(len(self.inputs) * [0])
             self.done = 0
+            self.doneIndex = -1
         else:
             for i in range(len(self.inputs)):    
                 if self.flags[i] == 1:
@@ -67,7 +68,7 @@ class STACK_ADDER_TREE:
 
         #################################################                                
         # Weight update
-        if self.adaptWeights == 1:
+        if self.adaptWeights == 99:        
             if self.done == 0:
                 intParam = memParam.GetLSBIntsHack()
 
@@ -84,8 +85,11 @@ class STACK_ADDER_TREE:
         #################################################
 
         if (sum(self.flags) == (len(self.inputs)-1)):          
-            self.done = 1            
+            self.done = 1
+            self.doneIndex = [i for i, flag in enumerate(self.flags) if flag == 0]
         
+        #if sampleIndex == 18:
+        #    print(f"Flags: {self.flags}")
         # convert back to twos complement
         if msb == 1:
             self.pbfOut = 1 - self.pbfOut

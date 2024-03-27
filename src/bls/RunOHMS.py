@@ -32,6 +32,7 @@ class RunOHMS:
         self.stack = [STACK_ADDER_TREE(self.NN, self.memD, self.K, adaptWeights) for _ in range(1)] #self.NN)]
         
         self.doneOut = list(self.NN * [-1])
+        self.doneIndexOut = list(self.NN * [-1])
 
         self.Reset()
 
@@ -70,28 +71,43 @@ class RunOHMS:
         [paramBiasMem.ResetIndex() for paramBiasMem in self.paramBiasMem]        
         [paramStackMem.ResetIndex() for paramStackMem in self.paramStackMem]
 
-    def Run(self, input = None) -> None:      
-            
+    def ParameterUpdate(self) -> None:        
+        #print("Parameter Update")
+        #print(self.results)
+        return
+    
+    def Run(self, input = [], sampleIndex = -1) -> None:      
+
+        printIndex = -1
+
         self.ResetIndex()
 
-        if input is not None:
-            self.input = input
-            self.dataMem.LoadList(self.input)
+        assert(len(input) > 0)
+
+        self.input = input
+        self.dataMem.LoadList(self.input)
 
         #print(f">>>>>>>>>>> LSB PASS ")
-        self.RunLSB(0)
+        self.RunLSB(sampleIndex)
         #for bi in range(len(self.bias)):
         #    self.biasMem[bi].Print(f"LSB {bi}")
-        #self.biasMem[0].Print("LSB")
+        #if sampleIndex == printIndex:
+        #    self.biasMem[0].Print("LSB")
+        
         #print(f">>>>>>>>>>> MSB PASS ")
         [biasMem.ResetIndex() for biasMem in self.biasMem]            
         
-        self.RunMSB(0)
+        self.RunMSB(sampleIndex)
         
-        #self.stackMem.Print("MSB")
+        #if sampleIndex == printIndex:
+        #    self.stackMem.Print("MSB")
+
         self.results = self.stackMem.GetMSBInts()
 
-        #print(f"{self.results} in {self.doneOut} cycles")
+        self.ParameterUpdate()
+        #if sampleIndex == printIndex:
+        #    print(f"{self.results} in {self.doneOut} cycles")
+        
         #print(self.doneOut)
         return self.doneOut[0]
                 
@@ -102,13 +118,16 @@ class RunOHMS:
             self.denseOut = list(self.NN * [0])
             #self.doneOut = list(self.NN * [-1])
             self.doneOut = list(1 * [-1])
-
+            self.doneIndexOut = list(1 * [-1])
             #print(f"     == {stepi}:{ti} ")            
-            for si in range(len(self.stack)):                
-                self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], msb)
+            for si in range(len(self.stack)):     
+                
+                self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], msb, stepi)
+                
                 if self.doneOut[si] < 0:
                     if self.stack[si].done == 1:
                         self.doneOut[si] = ti
+                        self.doneIndexOut[si] = self.stack[si].doneIndex
 
                 self.denseOut[si] = self.stack[si].Output()            
                         
@@ -126,19 +145,29 @@ class RunOHMS:
                 [biasMem.Step() for biasMem in self.biasMem]
                 
                 for si in range(len(self.stack)):                    
-                    self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], msb)
+                    self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], msb, stepi)
                     
                     if self.doneOut[si] < 0:
                         if self.stack[si].done == 1:
                             self.doneOut[si] = ti
+                            self.doneIndexOut[si] = self.stack[si].doneIndex[si]
 
                     self.denseOut[si] = self.stack[si].Output()            
 
                 #print(f"     == {stepi}:{ti} {self.denseOut}")
                 self.stackMem.Step(self.denseOut)
-                
+                                
                 #[stack.Step() for stack in self.stack]
-                
+            
+            # fix dones for duplicates
+            for si in range(len(self.stack)):                    
+                if self.doneOut[si] < 0:
+                    self.doneOut[si] = self.K
+                    dups = [i for i, flag in enumerate(self.stack[si].flags) if flag == 0]
+                    self.doneIndexOut[si] = dups[0] if len(dups) > 0 else -1
+
+            
+           
                 #self.lsbMem.Print("LSB")
                 #self.msbMem.Print("MSB")
 
