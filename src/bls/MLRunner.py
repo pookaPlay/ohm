@@ -6,7 +6,7 @@ import torch
 class MLRunner:
 
     def __init__(self, memD, memK, numNodes,               
-                 biasWeights, ptfWeights, 
+                 biasWeights, ptfWeights, ptfThresh,
                  nx, nxxyy, adaptWeights):
     
         self.NN = numNodes      # number of parallel nodes        
@@ -15,49 +15,61 @@ class MLRunner:
         self.K = memK        
         self.biasWeights = biasWeights
         self.ptfWeights = ptfWeights
-        
+        self.ptfThresh = ptfThresh
+
         #self.dataMax = 2**self.K - 1.0
-        self.dataMax = 127.0
+        self.dataMax = 63
         self.input = self.ScaleData(nx, self.dataMax)
         self.xxyy = self.ScaleData(nxxyy, self.dataMax)
 
         first = self.input[0].tolist()        
 
-        self.ohm = RunOHMS(memD, memK, numNodes, first, biasWeights, ptfWeights, adaptWeights)
+        self.ohm = RunOHMS(memD, memK, numNodes, first, 
+                           biasWeights, ptfWeights, ptfThresh, 
+                           0) #adapt ptf weights
 
 
     def Run(self, adaptWeights) -> None:
         print(f"Running on {len(self.input)} samples")
         ticks = list()
-        self.ohm.SetAdaptWeights(adaptWeights)        
+        #self.ohm.SetAdaptWeights(adaptWeights)        
         
         for ni in range(len(self.input)):                        
-            sample = self.input[ni].tolist()
-            #sample = self.input[0].tolist()
-            if ni == 0:
-                print(f"------------------------------")
-            self.weights = self.ohm.paramStackMem[0].GetLSBIntsHack()
-            if ni == 0:
-                print(f"     PTF IN: {self.weights}")                  
-            atick = self.ohm.Run(sample, ni)
 
-            #if ni == 0:
-            print(f"Sample {ni}: {sample} -> {self.ohm.results[0]}[{self.ohm.doneIndexOut[0]}] in {self.ohm.doneOut[0]}")
-            #self.ohm.paramStackMem[0].Print(f"PTF step {ni}")
-            self.weights = self.ohm.paramStackMem[0].GetLSBIntsHack()
-            
-            #if ni == 0:
-            #    print(f"     PTF OUT: {self.weights}")                  
+            sample = self.input[ni].tolist()
+
+            atick = self.ohm.Run(sample, ni)
 
             if atick < 0: 
                 atick = self.K
             ticks.append(atick)            
 
+            outIndex = self.ohm.doneIndexOut[0]
+
+            stackInputs = self.ohm.biasMem[0].GetLSBInts()
+            if True:
+            #if ni == 0:                
+                print(f"------------------------------")            
+                print(f"Sample {ni}: {stackInputs} -> {self.ohm.results[0]}[{self.ohm.doneIndexOut[0]}] in {self.ohm.doneOut[0]}")
+                biases = self.ohm.paramBiasMem[0].GetLSBInts()                                                        
+                print(f"       Bias: {biases}")                                  
+                weights = self.ohm.paramStackMem[0].GetLSBInts()                                                        
+                print(f"       Weights: {weights}")                                       
+                thresh = self.ohm.paramThreshMem[0].GetLSBInts()                                                        
+                print(f"       Thresh: {thresh}")                                       
+            #weights = self.ohm.paramBiasMem[0].GetLSBIntsHack()
+            if adaptWeights == 1:
+                biases = self.ohm.paramBiasMem[0].GetLSBInts()                                        
+                biases[outIndex] = biases[outIndex] + 1 
+                self.ohm.paramBiasMem[0].LoadList(biases)
+                #print(f"     Bias OUT: {weights}")                                  
+
         avg = sum(ticks) / len(ticks)
         print(f"Avg Ticks: {avg}")
         
     def WeightAdjust(self) -> None:
-        self.weights = self.ohm.paramStackMem[0].GetLSBIntsHack()
+        weights = self.ohm.paramBiasMem[0].GetLSBIntsHack()
+        #self.weights = self.ohm.paramStackMem[0].GetLSBIntsHack()
         for i in range(len(self.weights)):                    
             if (self.weights[i] > 1):
                 self.weights[i] = int(math.floor(self.weights[i] / 2))
@@ -67,7 +79,7 @@ class MLRunner:
     def ApplyToMap(self, adaptWeights) -> None:
         print(f"Running on {len(self.xxyy)} samples")
                 
-        self.ohm.SetAdaptWeights(adaptWeights)        
+        #self.ohm.SetAdaptWeights(adaptWeights)        
 
         ticks = 0
         results = torch.zeros(len(self.xxyy))

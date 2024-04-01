@@ -9,6 +9,7 @@ class RunOHMS:
                  input = [7, -2, -6], 
                  biasWeights = [0], 
                  ptfWeights = [1], 
+                 ptfThresh = [0],
                  adaptWeights = 1):
     
         self.NN = numNodes      # number of parallel nodes        
@@ -19,7 +20,8 @@ class RunOHMS:
         self.input = input
         self.biasWeights = biasWeights
         self.ptfWeights = ptfWeights
-        
+        self.ptfThresh = ptfThresh
+
         self.dataMem = BSMEM(self.memD, self.K)                
 
         self.stackMem = BSMEM(self.memD, self.K)                        
@@ -28,7 +30,9 @@ class RunOHMS:
         self.paramBiasMem = [BSMEM(self.memD, self.K) for _ in range(self.NN)]
         self.bias = [OHM_ADDER_CHAN(self.NN, self.memD) for _ in range(self.NN)]         
         
-        self.paramStackMem = [BSMEM(self.NN, self.K) for _ in range(self.NN)]                        
+        self.paramStackMem = [BSMEM(self.memD, self.K) for _ in range(self.NN)]
+        self.paramThreshMem = [BSMEM(1, self.K) for _ in range(self.NN)]
+
         self.stack = [STACK_ADDER_TREE(self.NN, self.memD, self.K, adaptWeights) for _ in range(1)] #self.NN)]
         
         self.doneOut = list(self.NN * [-1])
@@ -59,9 +63,9 @@ class RunOHMS:
         for mi in range(len(self.paramStackMem)):
             self.paramStackMem[mi].Reset()            
             self.paramStackMem[mi].LoadList(self.ptfWeights)
-            #if mi == 0:
-            #    self.paramStackMem[mi].Print("PTF")
-
+            self.paramThreshMem[mi].Reset()
+            self.paramThreshMem[mi].LoadList(self.ptfThresh)
+        
         [stack.Reset() for stack in self.stack]
 
 
@@ -70,6 +74,8 @@ class RunOHMS:
         [biasMem.ResetIndex() for biasMem in self.biasMem]                        
         [paramBiasMem.ResetIndex() for paramBiasMem in self.paramBiasMem]        
         [paramStackMem.ResetIndex() for paramStackMem in self.paramStackMem]
+        [paramThreshMem.ResetIndex() for paramThreshMem in self.paramThreshMem]
+        
 
     def ParameterUpdate(self) -> None:        
         #print("Parameter Update")
@@ -98,7 +104,9 @@ class RunOHMS:
         [biasMem.ResetIndex() for biasMem in self.biasMem]            
         
         self.RunMSB(sampleIndex)
-        
+        thresh = self.paramThreshMem[0].GetLSBInts()                                                        
+        #print(f"       Thresh on out: {thresh}")                                       
+
         #if sampleIndex == printIndex:
         #    self.stackMem.Print("MSB")
 
@@ -122,7 +130,7 @@ class RunOHMS:
             #print(f"     == {stepi}:{ti} ")            
             for si in range(len(self.stack)):     
                 
-                self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], msb, stepi)
+                self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], self.paramThreshMem[si], msb, stepi)
                 
                 if self.doneOut[si] < 0:
                     if self.stack[si].done == 1:
@@ -145,7 +153,7 @@ class RunOHMS:
                 [biasMem.Step() for biasMem in self.biasMem]
                 
                 for si in range(len(self.stack)):                    
-                    self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], msb, stepi)
+                    self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], self.paramThreshMem[si], msb, stepi)
                     
                     if self.doneOut[si] < 0:
                         if self.stack[si].done == 1:

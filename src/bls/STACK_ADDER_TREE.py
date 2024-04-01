@@ -1,7 +1,6 @@
 from bls.ADD import ADD
 import math
 
-global adaptWeights
 
 class STACK_ADDER_TREE:
 
@@ -35,7 +34,7 @@ class STACK_ADDER_TREE:
 
         self.flags = list(self.numInputs * [0])
                 
-    def Calc(self, memInputs, memParam, msb=0, sampleIndex=0) -> None:    
+    def Calc(self, memInputs, memParam, memThresh, msb=0, sampleIndex=0) -> None:    
 
         self.inputs = [memInputs.OutputMSB(aIndex) for aIndex in self.inIndexA]        
 
@@ -53,7 +52,11 @@ class STACK_ADDER_TREE:
         #################################################                                        
         #self.HackPTF(memParam)
         intParam = memParam.GetLSBIntsHack()
-        halfSum = sum(intParam)/2
+        threshParam = memThresh.GetLSBIntsHack()        
+
+        #halfSum = sum(intParam)/2
+        halfSum = threshParam[0]
+
         self.treeInputs = list(self.numInputs * [0])
         for i in range(len(self.inputs)):                                    
             self.treeInputs[i] = self.inputs[i] * intParam[i]
@@ -67,8 +70,22 @@ class STACK_ADDER_TREE:
                     self.latchInput[i] = self.inputs[i]
 
         #################################################                                
+        # Thresh update
+        thresh = memThresh.GetLSBIntsHack()                    
+        #print(f"Thresh on input: {thresh}")
+
+        #if self.pbfOut == 1:
+        #    thresh[0] = thresh[0] + 1
+        #else:
+        #    thresh[0] = thresh[0] - 1                    
+
+        memThresh.SetLSBIntsHack(thresh)
+        thresh = memThresh.GetLSBIntsHack()                    
+        #print(f"Thresh on output: {thresh}")
+        
         # Weight update
-        if self.adaptWeights == 99:        
+        if False:
+            #if self.adaptWeights == 99:        
             if self.done == 0:
                 intParam = memParam.GetLSBIntsHack()
 
