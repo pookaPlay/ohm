@@ -35,7 +35,7 @@ def test_RUN():
     
     display = 0
     thresholds = [1.0, -1.0]
-    numPoints = 2
+    numPoints = 5
     
     x, y, xv, yv, xxyy = LoadXor(numPoints, display)
     #x, y, xxyy = LoadLinear(numPoints, display)

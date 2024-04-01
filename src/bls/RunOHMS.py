@@ -149,6 +149,7 @@ class RunOHMS:
             #self.msbMem.Print("MSB")
             msb = 0                
             for ti in range(1, self.K):
+                
                 #print(f"     == {stepi}:{ti} ")                
                 [biasMem.Step() for biasMem in self.biasMem]
                 

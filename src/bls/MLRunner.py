@@ -53,9 +53,9 @@ class MLRunner:
                 print(f"Sample {ni}: {stackInputs} -> {self.ohm.results[0]}[{self.ohm.doneIndexOut[0]}] in {self.ohm.doneOut[0]}")
                 biases = self.ohm.paramBiasMem[0].GetLSBInts()                                                        
                 print(f"       Bias: {biases}")                                  
-                weights = self.ohm.paramStackMem[0].GetLSBInts()                                                        
+                weights = self.ohm.paramStackMem[0].GetLSBIntsHack()                                                        
                 print(f"       Weights: {weights}")                                       
-                thresh = self.ohm.paramThreshMem[0].GetLSBInts()                                                        
+                thresh = self.ohm.paramThreshMem[0].GetLSBIntsHack()                                                        
                 print(f"       Thresh: {thresh}")                                       
             #weights = self.ohm.paramBiasMem[0].GetLSBIntsHack()
             if adaptWeights == 1:

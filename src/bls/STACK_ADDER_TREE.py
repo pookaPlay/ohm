@@ -74,13 +74,13 @@ class STACK_ADDER_TREE:
         thresh = memThresh.GetLSBIntsHack()                    
         #print(f"Thresh on input: {thresh}")
 
-        #if self.pbfOut == 1:
-        #    thresh[0] = thresh[0] + 1
-        #else:
-        #    thresh[0] = thresh[0] - 1                    
+        if self.pbfOut == 1:
+            thresh[0] = thresh[0] + 1
+        else:
+            thresh[0] = thresh[0] - 1                    
 
         memThresh.SetLSBIntsHack(thresh)
-        thresh = memThresh.GetLSBIntsHack()                    
+        #thresh = memThresh.GetLSBIntsHack()                    
         #print(f"Thresh on output: {thresh}")
         
         # Weight update
