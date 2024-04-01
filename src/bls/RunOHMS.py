@@ -4,24 +4,17 @@ from bls.STACK_ADDER_TREE import STACK_ADDER_TREE
 
 class RunOHMS:
 
-    def __init__(self, memD, memK, 
-                 numNodes, 
-                 input = [7, -2, -6], 
-                 biasWeights = [0], 
-                 ptfWeights = [1], 
-                 ptfThresh = [0],
-                 adaptWeights = 1):
+    def __init__(self, memD, memK, numNodes, input, param):
     
+        self.param = param
+        self.input = input
+
         self.NN = numNodes      # number of parallel nodes        
         self.numNodes = numNodes        
         #print(input)
         self.memD = memD        
         self.K = memK
-        self.input = input
-        self.biasWeights = biasWeights
-        self.ptfWeights = ptfWeights
-        self.ptfThresh = ptfThresh
-
+        
         self.dataMem = BSMEM(self.memD, self.K)                
 
         self.stackMem = BSMEM(self.memD, self.K)                        
@@ -33,7 +26,7 @@ class RunOHMS:
         self.paramStackMem = [BSMEM(self.memD, self.K) for _ in range(self.NN)]
         self.paramThreshMem = [BSMEM(1, self.K) for _ in range(self.NN)]
 
-        self.stack = [STACK_ADDER_TREE(self.NN, self.memD, self.K, adaptWeights) for _ in range(1)] #self.NN)]
+        self.stack = [STACK_ADDER_TREE(self.NN, self.memD, self.K, param) for _ in range(1)] #self.NN)]
         
         self.doneOut = list(self.NN * [-1])
         self.doneIndexOut = list(self.NN * [-1])
@@ -56,15 +49,15 @@ class RunOHMS:
     
         for mi in range(len(self.paramBiasMem)):
             self.paramBiasMem[mi].Reset()        
-            self.paramBiasMem[mi].LoadList(self.biasWeights)
+            self.paramBiasMem[mi].LoadList(self.param['biasWeights'])
 
         [bias.Reset() for bias in self.bias]
                
         for mi in range(len(self.paramStackMem)):
             self.paramStackMem[mi].Reset()            
-            self.paramStackMem[mi].LoadList(self.ptfWeights)
+            self.paramStackMem[mi].LoadList(self.param['ptfWeights'])
             self.paramThreshMem[mi].Reset()
-            self.paramThreshMem[mi].LoadList(self.ptfThresh)
+            self.paramThreshMem[mi].LoadList(self.param['ptfThresh'])
         
         [stack.Reset() for stack in self.stack]
 
@@ -76,13 +69,8 @@ class RunOHMS:
         [paramStackMem.ResetIndex() for paramStackMem in self.paramStackMem]
         [paramThreshMem.ResetIndex() for paramThreshMem in self.paramThreshMem]
         
-
-    def ParameterUpdate(self) -> None:        
-        #print("Parameter Update")
-        #print(self.results)
-        return
     
-    def Run(self, input = [], sampleIndex = -1) -> None:      
+    def Run(self, input, sampleIndex, param) -> None:      
 
         printIndex = -1
 
@@ -103,20 +91,18 @@ class RunOHMS:
         #print(f">>>>>>>>>>> MSB PASS ")
         [biasMem.ResetIndex() for biasMem in self.biasMem]            
         
-        self.RunMSB(sampleIndex)
-        thresh = self.paramThreshMem[0].GetLSBInts()                                                        
-        #print(f"       Thresh on out: {thresh}")                                       
-
-        #if sampleIndex == printIndex:
-        #    self.stackMem.Print("MSB")
+        self.RunMSB(sampleIndex)                              
 
         self.results = self.stackMem.GetMSBInts()
 
-        self.ParameterUpdate()
-        #if sampleIndex == printIndex:
-        #    print(f"{self.results} in {self.doneOut} cycles")
-        
-        #print(self.doneOut)
+        if param['adaptThresh'] == 1:
+            print(f"Thresh count: {self.stack[0].threshCount}")
+            thresh = self.paramThreshMem[0].GetLSBIntsHack()
+            thresh[0] = thresh[0] + self.stack[0].threshCount
+            if thresh[0] < 1:
+                thresh[0] = 1
+            self.paramThreshMem[0].SetLSBIntsHack(thresh)
+                
         return self.doneOut[0]
                 
     
@@ -174,11 +160,6 @@ class RunOHMS:
                     self.doneOut[si] = self.K
                     dups = [i for i, flag in enumerate(self.stack[si].flags) if flag == 0]
                     self.doneIndexOut[si] = dups[0] if len(dups) > 0 else -1
-
-            
-           
-                #self.lsbMem.Print("LSB")
-                #self.msbMem.Print("MSB")
 
 
     def RunLSB(self, stepi=0) -> None:            

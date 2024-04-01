@@ -36,7 +36,7 @@ def test_RUN():
     display = 0
     thresholds = [1.0, -1.0]
     numPoints = 5
-    
+        
     x, y, xv, yv, xxyy = LoadXor(numPoints, display)
     #x, y, xxyy = LoadLinear(numPoints, display)
         
@@ -53,9 +53,17 @@ def test_RUN():
     dataN = nx.shape[0]
     memD = len(nx[0])
     numNodes = memD
-    biasWeights = numNodes * [0]
-    ptfWeights = numNodes * [1]
-    ptfThresh = [int(numNodes/2)]    
+    
+    param = {
+    'biasWeights': numNodes * [0],
+    'ptfWeights': numNodes * [1],
+    'ptfThresh': [int(numNodes/2)],
+    'adaptBias': 0,
+    'adaptWeights': 0,
+    'adaptThresh': 0,
+    'scaleTo': 127
+    }
+    
     #ptfThresh = [numNodes]    
     #ptfThresh = [1]    
     
@@ -63,17 +71,14 @@ def test_RUN():
     #biasWeights = [125, 125, 100, 103, 98, 94, 38, 17]
     #biasWeights[0] = numNodes
 
-    adaptWeights = 0
-    runner = MLRunner(memD, memK, numNodes, 
-                        biasWeights, ptfWeights, ptfThresh,
-                        nx, nxxyy, adaptWeights)        
+    runner = MLRunner(memD, memK, numNodes, nx, nxxyy, param)        
     
 
     for iter in range(numIterations):
         print("##################################################")
         print(f"ITERATION {iter}")
-        adaptWeights = 0
-        runner.Run(adaptWeights)
+        
+        runner.Run(param)
 
         #adaptWeights = 0
         #result = runner.ApplyToMap(adaptWeights)

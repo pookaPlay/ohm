@@ -4,11 +4,11 @@ import math
 
 class STACK_ADDER_TREE:
 
-    def __init__(self,  numInputs, memD, memK, adaptWeights) -> None:        
+    def __init__(self,  numInputs, memD, memK, param) -> None:        
         self.numInputs = numInputs
         self.numOutputs = 1
         self.memD = memD                
-        self.adaptWeights = adaptWeights
+        self.param = param
         self.inIndexA = list(range(self.numInputs))
         self.inIndexB = list(range(self.numInputs))
         self.outIndex = list(range(self.numOutputs))
@@ -44,6 +44,7 @@ class STACK_ADDER_TREE:
             self.latchInput = list(len(self.inputs) * [0])
             self.done = 0
             self.doneIndex = -1
+            self.threshCount = 0
         else:
             for i in range(len(self.inputs)):    
                 if self.flags[i] == 1:
@@ -71,22 +72,24 @@ class STACK_ADDER_TREE:
 
         #################################################                                
         # Thresh update
-        thresh = memThresh.GetLSBIntsHack()                    
-        #print(f"Thresh on input: {thresh}")
-
+        #thresh = memThresh.GetLSBIntsHack()                    
         if self.pbfOut == 1:
-            thresh[0] = thresh[0] + 1
+            self.threshCount = self.threshCount + 1
+            #thresh[0] = thresh[0] + 1
         else:
-            thresh[0] = thresh[0] - 1                    
-
-        memThresh.SetLSBIntsHack(thresh)
+            self.threshCount = self.threshCount - 1
+            #thresh[0] = thresh[0] - 1                    
+        #if thresh[0] < 1:
+        #    thresh[0] = 1
+        #memThresh.SetLSBIntsHack(thresh)
+        
         #thresh = memThresh.GetLSBIntsHack()                    
         #print(f"Thresh on output: {thresh}")
         
         # Weight update
-        if False:
-            #if self.adaptWeights == 99:        
+        if self.param['adaptWeights'] == 1:            
             if self.done == 0:
+                
                 intParam = memParam.GetLSBIntsHack()
 
                 for i in range(len(intParam)):

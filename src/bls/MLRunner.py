@@ -5,31 +5,24 @@ import torch
 
 class MLRunner:
 
-    def __init__(self, memD, memK, numNodes,               
-                 biasWeights, ptfWeights, ptfThresh,
-                 nx, nxxyy, adaptWeights):
+    def __init__(self, memD, memK, numNodes, nx, nxxyy, param):
     
         self.NN = numNodes      # number of parallel nodes        
         self.numNodes = numNodes        
         self.memD = memD        
         self.K = memK        
-        self.biasWeights = biasWeights
-        self.ptfWeights = ptfWeights
-        self.ptfThresh = ptfThresh
+        self.param = param
 
-        #self.dataMax = 2**self.K - 1.0
-        self.dataMax = 63
-        self.input = self.ScaleData(nx, self.dataMax)
-        self.xxyy = self.ScaleData(nxxyy, self.dataMax)
+        #self.dataMax = 2**self.K - 1.0        
+        self.input = self.ScaleData(nx, param['scaleTo'])
+        self.xxyy = self.ScaleData(nxxyy, param['scaleTo'])
 
         first = self.input[0].tolist()        
 
-        self.ohm = RunOHMS(memD, memK, numNodes, first, 
-                           biasWeights, ptfWeights, ptfThresh, 
-                           0) #adapt ptf weights
+        self.ohm = RunOHMS(memD, memK, numNodes, first, param)
 
 
-    def Run(self, adaptWeights) -> None:
+    def Run(self, param) -> None:
         print(f"Running on {len(self.input)} samples")
         ticks = list()
         #self.ohm.SetAdaptWeights(adaptWeights)        
@@ -38,15 +31,15 @@ class MLRunner:
 
             sample = self.input[ni].tolist()
 
-            atick = self.ohm.Run(sample, ni)
+            atick = self.ohm.Run(sample, ni, param)
 
             if atick < 0: 
                 atick = self.K
             ticks.append(atick)            
 
             outIndex = self.ohm.doneIndexOut[0]
-
             stackInputs = self.ohm.biasMem[0].GetLSBInts()
+
             if True:
             #if ni == 0:                
                 print(f"------------------------------")            
@@ -58,7 +51,7 @@ class MLRunner:
                 thresh = self.ohm.paramThreshMem[0].GetLSBIntsHack()                                                        
                 print(f"       Thresh: {thresh}")                                       
             #weights = self.ohm.paramBiasMem[0].GetLSBIntsHack()
-            if adaptWeights == 1:
+            if param['adaptBias'] == 1:
                 biases = self.ohm.paramBiasMem[0].GetLSBInts()                                        
                 biases[outIndex] = biases[outIndex] + 1 
                 self.ohm.paramBiasMem[0].LoadList(biases)
