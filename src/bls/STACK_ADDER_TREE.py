@@ -70,21 +70,18 @@ class STACK_ADDER_TREE:
                     self.flags[i] = 1
                     self.latchInput[i] = self.inputs[i]
 
-        #################################################                                
         # Thresh update
-        #thresh = memThresh.GetLSBIntsHack()                    
-        if self.pbfOut == 1:
-            self.threshCount = self.threshCount + 1
-            #thresh[0] = thresh[0] + 1
-        else:
-            self.threshCount = self.threshCount - 1
-            #thresh[0] = thresh[0] - 1                    
-        #if thresh[0] < 1:
-        #    thresh[0] = 1
-        #memThresh.SetLSBIntsHack(thresh)
-        
-        #thresh = memThresh.GetLSBIntsHack()                    
-        #print(f"Thresh on output: {thresh}")
+        if self.param['adaptThresh'] == 1:                                
+            thresh = memThresh.GetLSBIntsHack()                    
+            if self.pbfOut == 1:
+                self.threshCount = self.threshCount + 1                
+            else:
+                self.threshCount = self.threshCount - 1
+                thresh[0] = thresh[0] + 1
+                #thresh[0] = thresh[0] - 1                    
+            #if thresh[0] < 1:
+            #    thresh[0] = 1
+            memThresh.SetLSBIntsHack(thresh)        
         
         # Weight update
         if self.param['adaptWeights'] == 1:            

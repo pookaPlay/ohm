@@ -55,6 +55,10 @@ def test_RUN():
     numNodes = memD
     
     param = {
+    'memD': memD,
+    'memK': memK,
+    'numNodes': numNodes,
+    'numStack': 1,
     'biasWeights': numNodes * [0],
     'ptfWeights': numNodes * [1],
     'ptfThresh': [int(numNodes/2)],
@@ -71,7 +75,7 @@ def test_RUN():
     #biasWeights = [125, 125, 100, 103, 98, 94, 38, 17]
     #biasWeights[0] = numNodes
 
-    runner = MLRunner(memD, memK, numNodes, nx, nxxyy, param)        
+    runner = MLRunner(nx, nxxyy, param)        
     
 
     for iter in range(numIterations):

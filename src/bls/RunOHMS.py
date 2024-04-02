@@ -1,19 +1,21 @@
 from bls.BSMEM import BSMEM
 from bls.OHM_ADDER_CHAN import OHM_ADDER_CHAN
 from bls.STACK_ADDER_TREE import STACK_ADDER_TREE
+from bls.BSMEM import BSMEM
+from bls.OHM_ADDER_CHAN import OHM_ADDER_CHAN
 
 class RunOHMS:
 
-    def __init__(self, memD, memK, numNodes, input, param):
+    def __init__(self, input, param):
     
         self.param = param
         self.input = input
 
-        self.NN = numNodes      # number of parallel nodes        
-        self.numNodes = numNodes        
+        self.NN = param['numNodes']      # number of parallel nodes        
+        self.numNodes = param['numNodes']        
         #print(input)
-        self.memD = memD        
-        self.K = memK
+        self.memD = param['memD']        
+        self.K = param['memK']
         
         self.dataMem = BSMEM(self.memD, self.K)                
 
@@ -23,10 +25,10 @@ class RunOHMS:
         self.paramBiasMem = [BSMEM(self.memD, self.K) for _ in range(self.NN)]
         self.bias = [OHM_ADDER_CHAN(self.NN, self.memD) for _ in range(self.NN)]         
         
-        self.paramStackMem = [BSMEM(self.memD, self.K) for _ in range(self.NN)]
-        self.paramThreshMem = [BSMEM(1, self.K) for _ in range(self.NN)]
+        self.paramStackMem = [BSMEM(self.memD, self.K) for _ in range(param['numStack'])]
+        self.paramThreshMem = [BSMEM(1, self.K) for _ in range(param['numStack'])]
 
-        self.stack = [STACK_ADDER_TREE(self.NN, self.memD, self.K, param) for _ in range(1)] #self.NN)]
+        self.stack = [STACK_ADDER_TREE(self.NN, self.memD, self.K, param) for _ in range(param['numStack'])] #self.NN)]
         
         self.doneOut = list(self.NN * [-1])
         self.doneIndexOut = list(self.NN * [-1])
@@ -95,12 +97,12 @@ class RunOHMS:
 
         self.results = self.stackMem.GetMSBInts()
 
-        if param['adaptThresh'] == 1:
-            print(f"Thresh count: {self.stack[0].threshCount}")
+        if param['adaptThresh'] == -1:
+            print(f"       Thresh count: {self.stack[0].threshCount}")
             thresh = self.paramThreshMem[0].GetLSBIntsHack()
             thresh[0] = thresh[0] + self.stack[0].threshCount
-            if thresh[0] < 1:
-                thresh[0] = 1
+            #if thresh[0] < 1:
+            #    thresh[0] = 1
             self.paramThreshMem[0].SetLSBIntsHack(thresh)
                 
         return self.doneOut[0]
