@@ -45,6 +45,7 @@ class STACK_ADDER_TREE:
             self.done = 0
             self.doneIndex = -1
             self.threshCount = 0
+            self.weightCount = list(len(self.inputs) * [0])
         else:
             for i in range(len(self.inputs)):    
                 if self.flags[i] == 1:
@@ -54,8 +55,7 @@ class STACK_ADDER_TREE:
         #self.HackPTF(memParam)
         intParam = memParam.GetLSBIntsHack()
         threshParam = memThresh.GetLSBIntsHack()        
-
-        #halfSum = sum(intParam)/2
+        
         halfSum = threshParam[0]
 
         self.treeInputs = list(self.numInputs * [0])
@@ -63,6 +63,7 @@ class STACK_ADDER_TREE:
             self.treeInputs[i] = self.inputs[i] * intParam[i]
         
         self.pbfOut = 1 if (sum(self.treeInputs) >= halfSum) else 0        
+        signOut = self.pbfOut*2-1
 
         for i in range(len(self.inputs)):
             if self.flags[i] == 0:
@@ -70,31 +71,22 @@ class STACK_ADDER_TREE:
                     self.flags[i] = 1
                     self.latchInput[i] = self.inputs[i]
 
+
         # Thresh update
         if self.param['adaptThresh'] == 1:                                
-            thresh = memThresh.GetLSBIntsHack()                    
-            if self.pbfOut == 1:
-                self.threshCount = self.threshCount + 1                
-            else:
-                self.threshCount = self.threshCount - 1
-                thresh[0] = thresh[0] + 1
-                #thresh[0] = thresh[0] - 1                    
-            #if thresh[0] < 1:
-            #    thresh[0] = 1
-            memThresh.SetLSBIntsHack(thresh)        
+            self.threshCount = self.threshCount + signOut            
         
         # Weight update
         if self.param['adaptWeights'] == 1:            
-            if self.done == 0:
-                
-                intParam = memParam.GetLSBIntsHack()
-
+            if self.done == 0:                                
                 for i in range(len(intParam)):
                     if self.flags[i] == 0:
-                        if self.inputs[i] == 1:
-                            intParam[i] = intParam[i] + 1                        
-            
-                memParam.SetLSBIntsHack(intParam)
+                        #signInput = self.inputs[i] * 2 - 1
+                        self.weightCount[i] = self.weightCount[i] + signOut
+                        #else:
+                        #    self.weightCount[i] = self.weightCount[i] - 1
+
+                                        
                 #if msb == 1:
                 #    for i in range(len(intParam)):
                 #        #if intParam[i] > 0:

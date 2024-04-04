@@ -97,14 +97,48 @@ class RunOHMS:
 
         self.results = self.stackMem.GetMSBInts()
 
-        if param['adaptThresh'] == -1:
-            print(f"       Thresh count: {self.stack[0].threshCount}")
+        if param['adaptThresh'] == 1:
+            #print(f"       Result: {self.results[0]} and ThreshCount: {self.stack[0].threshCount}")
+            #print(f"       Thresh count: {self.stack[0].threshCount}")
+            weights = self.paramStackMem[0].GetLSBIntsHack()
             thresh = self.paramThreshMem[0].GetLSBIntsHack()
-            thresh[0] = thresh[0] + self.stack[0].threshCount
-            #if thresh[0] < 1:
-            #    thresh[0] = 1
-            self.paramThreshMem[0].SetLSBIntsHack(thresh)
-                
+            
+            thresh[0] = thresh[0] + self.stack[0].threshCount            
+            
+            #if self.stack[0].threshCount > 0:
+            #    thresh[0] = thresh[0] + 1.0
+            if thresh[0] < 1:
+                thresh[0] = 1              
+                di = self.doneIndexOut[0]
+                assert(di >= 0)
+                weights[di] = weights[di] - 1                
+                print(f"I got an underdog: {di}")                                
+                                
+
+            if thresh[0] > sum(weights):
+                thresh[0] = sum(weights)
+                di = self.doneIndexOut[0]
+                print(f"I got a runaway: {di}")
+                assert(di >= 0)
+                weights[di] = weights[di] + 1                                
+
+            self.paramThreshMem[0].SetLSBIntsHack(thresh)            
+            self.paramStackMem[0].SetLSBIntsHack(weights)
+        
+        if param['adaptWeights'] == 1:
+            #print(self.stack[0].weightCount)
+            
+            weights = self.paramStackMem[0].GetLSBIntsHack()
+            assert(len(weights) == len(self.stack[0].weightCount))
+            for i in range(len(weights)):                                    
+                if self.stack[0].weightCount[i] > 0:
+                    weights[i] = weights[i] + 1
+                else:
+                    weights[i] = weights[i] - 1
+                #weights[i] = weights[i] + self.stack[0].weightCount[i]
+
+            self.paramStackMem[0].SetLSBIntsHack(weights)
+
         return self.doneOut[0]
                 
     

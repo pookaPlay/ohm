@@ -12,7 +12,7 @@ class MLRunner:
         self.memD = param['memD']
         self.K = param['memK']
         self.param = param
-
+        self.plotResults = dict()
         #self.dataMax = 2**self.K - 1.0        
         self.input = self.ScaleData(nx, param['scaleTo'])
         self.xxyy = self.ScaleData(nxxyy, param['scaleTo'])
@@ -26,18 +26,26 @@ class MLRunner:
         print(f"Running on {len(self.input)} samples")
         ticks = list()
         #self.ohm.SetAdaptWeights(adaptWeights)        
+        self.plotResults['thresh'] = list()
         
         for ni in range(len(self.input)):                                                
-            print(f"Sample {ni} ------------------")
+            if param['printSample'] == 1:
+                print(f"Sample {ni} ------------------")
+
             biases = self.ohm.paramBiasMem[0].GetLSBInts()                                                        
-            print(f"       Bias: {biases}")                                  
+            if param['printBias'] == 1:
+                print(f"       Bias: {biases}")                                  
             weights = self.ohm.paramStackMem[0].GetLSBIntsHack()                                                        
-            print(f"       Weights: {weights}")                                       
+            if param['printWeights'] == 1:
+                print(f"       Weights: {weights}")                                       
             thresh = self.ohm.paramThreshMem[0].GetLSBIntsHack()                                                        
-            print(f"       Thresh: {thresh}")                                       
+            if param['printThresh'] == 1:
+                print(f"       Thresh: {thresh}")                                       
+            
+            # Save stuff for plots
+            self.plotResults['thresh'].append(thresh[0])
 
             sample = self.input[ni].tolist()
-
             atick = self.ohm.Run(sample, ni, param)
 
             if atick < 0: 
@@ -47,7 +55,8 @@ class MLRunner:
             outIndex = self.ohm.doneIndexOut[0]
             stackInputs = self.ohm.biasMem[0].GetLSBInts()
 
-            print(f"{stackInputs} -> {self.ohm.results[0]}[{self.ohm.doneIndexOut[0]}] in {self.ohm.doneOut[0]}")
+            if param['printSample'] == 1:
+                print(f"{stackInputs} -> {self.ohm.results[0]}[{self.ohm.doneIndexOut[0]}] in {self.ohm.doneOut[0]}")
             
             if param['adaptBias'] == 1:
                 biases = self.ohm.paramBiasMem[0].GetLSBInts()                                        
@@ -67,7 +76,7 @@ class MLRunner:
             
         self.ohm.paramStackMem[0].SetLSBIntsHack(self.weights)
 
-    def ApplyToMap(self, adaptWeights) -> None:
+    def ApplyToMap(self, param) -> None:
         print(f"Running on {len(self.xxyy)} samples")
                 
         #self.ohm.SetAdaptWeights(adaptWeights)        
@@ -77,7 +86,7 @@ class MLRunner:
         for ni in range(len(self.xxyy)):            
             sample = self.xxyy[ni].tolist()
             #print(f"Sample {ni}\n{sample}")
-            atick = self.ohm.Run(sample)
+            atick = self.ohm.Run(sample, ni, param)
             results[ni] = self.ohm.results[0]
             
             if atick < 0: 
