@@ -17,18 +17,22 @@ class MLRunner:
         self.input = self.ScaleData(nx, param['scaleTo'])
         self.xxyy = self.ScaleData(nxxyy, param['scaleTo'])
 
-        first = self.input[0].tolist()        
-
-        self.ohm = RunOHMS(first, param)
+        self.first = self.input[0].tolist()        
+        self.posStatsSample = list(len(self.first) * [0.0])
+        self.threshStats = list(2 *[0.0])
+        self.weightStats = list(len(self.first) * [0.0])
+        self.ohm = RunOHMS(self.first, param)
 
 
     def Run(self, param) -> None:
         print(f"Running on {len(self.input)} samples")
         ticks = list()
+        
+        numSamples = len(self.input)
         #self.ohm.SetAdaptWeights(adaptWeights)        
         self.plotResults['thresh'] = list()
         
-        for ni in range(len(self.input)):                                                
+        for ni in range(numSamples):                                                
             if param['printSample'] == 1:
                 print(f"Sample {ni} ------------------")
 
@@ -45,9 +49,38 @@ class MLRunner:
             # Save stuff for plots
             self.plotResults['thresh'].append(thresh[0])
 
+            #########################################################
+            #########################################################
+            # Run the OHM
             sample = self.input[ni].tolist()
             atick = self.ohm.Run(sample, ni, param)
+            #########################################################
 
+            # Get some stats
+            posStats = list()
+            #negStats = list()            
+            for i in range(len(self.ohm.inputPosCount)):
+                assert(self.ohm.inputPosCount[i] + self.ohm.inputNegCount[i] == self.ohm.stepCount)
+                posStats.append(self.ohm.inputPosCount[i]/self.ohm.stepCount)
+                #negStats.append(self.ohm.inputNegCount[i]/self.ohm.stepCount)
+            for i in range(len(posStats)):                    
+                self.posStatsSample[i] = self.posStatsSample[i] + posStats[i]
+                #negStats.append(self.ohm.stack[i].negCount/self.ohm.stack[i].stepCount)
+
+            localThresh = [self.ohm.stack[0].posCount / self.ohm.stack[0].stepCount, 
+                           self.ohm.stack[0].negCount / self.ohm.stack[0].stepCount]          
+            
+            self.threshStats[0] = self.threshStats[0] + localThresh[0]
+            self.threshStats[1] = self.threshStats[1] + localThresh[1]
+            
+            for i in range(len(self.weightStats)):  
+                self.weightStats[i] = self.weightStats[i] + self.ohm.stack[0].weightCount[i]
+
+            if param['printSample'] == 1:                
+                print(f"1: {posStats}")
+                #print(f"0: {negStats}")
+                print(f"T: {localThresh}")
+            
             if atick < 0: 
                 atick = self.K
             ticks.append(atick)            
@@ -64,8 +97,25 @@ class MLRunner:
                 self.ohm.paramBiasMem[0].LoadList(biases)
                 #print(f"     Bias OUT: {weights}")                                  
 
-        avg = sum(ticks) / len(ticks)
-        print(f"Avg Ticks: {avg}")
+        if param['printIteration'] == 1:
+            avg = sum(ticks) / len(ticks)
+            print(f"Avg Ticks: {avg}")
+
+            for i in range(len(self.posStatsSample)):                    
+                    self.posStatsSample[i] = self.posStatsSample[i] / numSamples
+            
+            self.threshStats[0] = self.threshStats[0] / numSamples
+            self.threshStats[1] = self.threshStats[1] / numSamples
+            
+            totalMax = max(self.weightStats)
+            for i in range(len(self.weightStats)):
+                self.weightStats[i] = self.weightStats[i] / totalMax
+                self.weightStats[i] = self.weightStats[i] * len(self.weightStats)/2
+            
+            print(f"1 Rate: {self.posStatsSample}")
+            print(f"T Rate: {self.threshStats}")
+            print(f"W Stat: {self.weightStats}")
+
         
     def WeightAdjust(self) -> None:
         weights = self.ohm.paramBiasMem[0].GetLSBIntsHack()

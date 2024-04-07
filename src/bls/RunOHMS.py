@@ -4,6 +4,13 @@ from bls.STACK_ADDER_TREE import STACK_ADDER_TREE
 from bls.BSMEM import BSMEM
 from bls.OHM_ADDER_CHAN import OHM_ADDER_CHAN
 
+def GetNegativeIndex(din, N):
+    if din < N/2:
+        dout = int(din + N/2)
+    else:
+        dout = int(din - N/2)
+    return dout
+
 class RunOHMS:
 
     def __init__(self, input, param):
@@ -32,7 +39,9 @@ class RunOHMS:
         
         self.doneOut = list(self.NN * [-1])
         self.doneIndexOut = list(self.NN * [-1])
-
+        self.inputPosCount = list(self.NN * [0])
+        self.inputNegCount = list(self.NN * [0])
+        self.stepCount = 0
         self.Reset()
 
     def SetAdaptWeights(self, adaptWeights) -> None:
@@ -71,10 +80,10 @@ class RunOHMS:
         [paramStackMem.ResetIndex() for paramStackMem in self.paramStackMem]
         [paramThreshMem.ResetIndex() for paramThreshMem in self.paramThreshMem]
         
-    
+        
     def Run(self, input, sampleIndex, param) -> None:      
 
-        printIndex = -1
+        printIndex = -1        
 
         self.ResetIndex()
 
@@ -96,37 +105,43 @@ class RunOHMS:
         self.RunMSB(sampleIndex)                              
 
         self.results = self.stackMem.GetMSBInts()
-
-        if param['adaptThresh'] == 1:
+        #print(f"WC: {self.stack[0].weightCount}")
+        
+        if param['adaptThresh'] > 0:
             #print(f"       Result: {self.results[0]} and ThreshCount: {self.stack[0].threshCount}")
             #print(f"       Thresh count: {self.stack[0].threshCount}")
             weights = self.paramStackMem[0].GetLSBIntsHack()
             thresh = self.paramThreshMem[0].GetLSBIntsHack()
-            
-            thresh[0] = thresh[0] + self.stack[0].threshCount            
-            
-            #if self.stack[0].threshCount > 0:
-            #    thresh[0] = thresh[0] + 1.0
+                                    
+            if self.stack[0].posCount > self.stack[0].negCount:
+                thresh[0] = thresh[0] + 1
+            else:
+                thresh[0] = thresh[0] - 1
+
             if thresh[0] < 1:
                 thresh[0] = 1              
                 di = self.doneIndexOut[0]
                 assert(di >= 0)
-                weights[di] = weights[di] - 1                
-                print(f"I got an underdog: {di}")                                
+                dii = GetNegativeIndex(di, len(weights))                
+
+                #weights[di] = weights[di] + 1
+                #weights[dii] = weights[dii] + 1
+                print(f"I got an underdog: {di} -> {dii}")                                
                                 
 
             if thresh[0] > sum(weights):
                 thresh[0] = sum(weights)
-                di = self.doneIndexOut[0]
-                print(f"I got a runaway: {di}")
+                di = self.doneIndexOut[0]                
                 assert(di >= 0)
-                weights[di] = weights[di] + 1                                
+                dii = GetNegativeIndex(di, len(weights))
+                print(f"I got an runaway: {di} -> {dii}")
+                #weights[di] = weights[di] + 1
+                #weights[dii] = weights[dii] + 1                
 
             self.paramThreshMem[0].SetLSBIntsHack(thresh)            
             self.paramStackMem[0].SetLSBIntsHack(weights)
         
-        if param['adaptWeights'] == 1:
-            #print(self.stack[0].weightCount)
+        if param['adaptWeights'] == 1:            
             
             weights = self.paramStackMem[0].GetLSBIntsHack()
             assert(len(weights) == len(self.stack[0].weightCount))
@@ -136,24 +151,36 @@ class RunOHMS:
                 else:
                     weights[i] = weights[i] - 1
                 #weights[i] = weights[i] + self.stack[0].weightCount[i]
-
-            self.paramStackMem[0].SetLSBIntsHack(weights)
+            #self.paramStackMem[0].SetLSBIntsHack(weights)
 
         return self.doneOut[0]
                 
     
     def RunMSB(self, stepi=0) -> None:            
+            
             ti = 0                        
             msb = 1            
             self.denseOut = list(self.NN * [0])
             #self.doneOut = list(self.NN * [-1])
             self.doneOut = list(1 * [-1])
             self.doneIndexOut = list(1 * [-1])
+            self.stepCount = 0
+            self.inputPosCount = list(self.NN * [0])
+            self.inputNegCount = list(self.NN * [0])
+
             #print(f"     == {stepi}:{ti} ")            
             for si in range(len(self.stack)):     
                 
                 self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], self.paramThreshMem[si], msb, stepi)
-                
+                self.stepCount = self.stepCount + 1                
+                for i in range(len(self.stack[si].origInputs)):
+                    if self.stack[si].origInputs[i] > 0:    
+                        self.inputPosCount[i] = self.inputPosCount[i] + 1
+                    else:
+                        self.inputNegCount[i] = self.inputNegCount[i] + 1
+                    
+                    
+
                 if self.doneOut[si] < 0:
                     if self.stack[si].done == 1:
                         self.doneOut[si] = ti
@@ -177,7 +204,15 @@ class RunOHMS:
                 
                 for si in range(len(self.stack)):                    
                     self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], self.paramThreshMem[si], msb, stepi)
-                    
+                    # Get some input stats 
+                    self.stepCount = self.stepCount + 1
+                    for i in range(len(self.stack[si].origInputs)):
+                        if self.stack[si].origInputs[i] > 0:
+                            self.inputPosCount[i] = self.inputPosCount[i] + 1
+                        else:
+                            self.inputNegCount[i] = self.inputNegCount[i] + 1                    
+
+                    # Update the sticky latches                            
                     if self.doneOut[si] < 0:
                         if self.stack[si].done == 1:
                             self.doneOut[si] = ti
