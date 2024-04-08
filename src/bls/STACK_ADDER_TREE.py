@@ -54,6 +54,7 @@ class STACK_ADDER_TREE:
             self.posCount = 0
             self.negCount = 0
             self.stepCount = 0
+            self.lastOut = 0
         else:
             self.origInputs  = self.inputs.copy()
             for i in range(len(self.inputs)):    
@@ -74,12 +75,14 @@ class STACK_ADDER_TREE:
         self.pbfOut = 1 if (sum(self.treeInputs) >= halfSum) else 0        
         signOut = self.pbfOut*2-1
 
-        # Gets some stats on threshold
+        # # Gets some stats on threshold
         self.stepCount = self.stepCount + 1
         if signOut > 0:
             self.posCount = self.posCount + 1
         else:
             self.negCount = self.negCount + 1        
+
+        self.lastOut = self.pbfOut
 
         for i in range(len(self.inputs)):
             if self.flags[i] == 0:

@@ -124,7 +124,7 @@ class RunOHMS:
                 assert(di >= 0)
                 dii = GetNegativeIndex(di, len(weights))                
 
-                #weights[di] = weights[di] + 1
+                weights[di] = weights[di] + 1
                 #weights[dii] = weights[dii] + 1
                 print(f"I got an underdog: {di} -> {dii}")                                
                                 
@@ -135,7 +135,7 @@ class RunOHMS:
                 assert(di >= 0)
                 dii = GetNegativeIndex(di, len(weights))
                 print(f"I got an runaway: {di} -> {dii}")
-                #weights[di] = weights[di] + 1
+                weights[di] = weights[di] + 1
                 #weights[dii] = weights[dii] + 1                
 
             self.paramThreshMem[0].SetLSBIntsHack(thresh)            

@@ -107,10 +107,10 @@ class MLRunner:
             self.threshStats[0] = self.threshStats[0] / numSamples
             self.threshStats[1] = self.threshStats[1] / numSamples
             
-            totalMax = max(self.weightStats)
-            for i in range(len(self.weightStats)):
-                self.weightStats[i] = self.weightStats[i] / totalMax
-                self.weightStats[i] = self.weightStats[i] * len(self.weightStats)/2
+            #totalMax = max(self.weightStats)
+            #for i in range(len(self.weightStats)):
+            #    self.weightStats[i] = self.weightStats[i] / totalMax
+            #    self.weightStats[i] = self.weightStats[i] * len(self.weightStats)/2
             
             print(f"1 Rate: {self.posStatsSample}")
             print(f"T Rate: {self.threshStats}")

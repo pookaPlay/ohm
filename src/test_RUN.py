@@ -38,7 +38,7 @@ def test_RUN():
     threshSpac = 1.0   # 16
     thresholds = np.arange(-2.0, 2.0, threshSpac).tolist()     
     print(thresholds)
-    numPoints = 25
+    numPoints = 5000
         
     x, y, xv, yv, xxyy = LoadXor(numPoints, display)
     #x, y, xxyy = LoadLinear(numPoints, display)
@@ -48,7 +48,7 @@ def test_RUN():
 
     print(f"Thresh expand: {x.shape} -> {nx.shape}")
 
-    memK = 8       
+    memK = 12 
     #input = [8, -8, 4, -4, 2, -2, 1, -1]
     #input += [-x for x in input]  # Add the negative values
     dataN = nx.shape[0]
@@ -66,24 +66,25 @@ def test_RUN():
     'ptfThresh': [0],    
     'adaptBias': 0,
     'adaptWeights': 0,
-    'adaptThresh': 0,
-    'scaleTo': 127,
+    'adaptThresh': 1,
+    'scaleTo': 511,
     'printWeights': 0,
     'printThresh': 0,
     'printSample':0,
     'printBias': 0,
     'printIteration': 1, 
-    'postAdaptRun': 0,
+    'postAdaptRun': 1,
+    'plotThresh': 0,
     }
 
     #for i in range(halfD):
     #    param['ptfWeights'][i] = 1
     #    param['ptfWeights'][halfD+i] = -1
     
-    param['ptfWeights'] = numNodes * [1]
+    param['ptfWeights'] = numNodes * [1]    
     param['ptfThresh'] = [int(sum(param['ptfWeights'])/2)]
-    param['ptfThresh'] = [numNodes]
-    param['ptfThresh'] = [1]
+    #$param['ptfThresh'] = [numNodes]
+    #param['ptfThresh'] = [1]
     #print(f"Here: {param['ptfWeights']} and {param['ptfThresh']}")
     #return        
     #ptfThresh = [numNodes]    
@@ -114,11 +115,12 @@ def test_RUN():
 
         thresh = runner.plotResults['thresh']
         
-        plt.plot(thresh)
-        plt.xlabel('Threshold Index')
-        plt.ylabel('Threshold Value')
-        plt.title('Threshold Values')
-        plt.show()
+        if param['plotThresh'] == 1:
+            plt.plot(thresh)
+            plt.xlabel('Threshold Index')
+            plt.ylabel('Threshold Value')
+            plt.title('Threshold Values')
+            plt.show()
 
         #adaptWeights = 0
         #result = runner.ApplyToMap(adaptWeights)
