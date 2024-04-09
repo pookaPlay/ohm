@@ -31,14 +31,14 @@ def ThreshExpand(x, thresh):
 
 def test_RUN():
 
-    numIterations = 1
+    numIterations = 2
     
     display = 0
     threshSpac = 0.25   # 64
     threshSpac = 1.0   # 16
     thresholds = np.arange(-2.0, 2.0, threshSpac).tolist()     
     print(thresholds)
-    numPoints = 5000
+    numPoints = 500
         
     x, y, xv, yv, xxyy = LoadXor(numPoints, display)
     #x, y, xxyy = LoadLinear(numPoints, display)
@@ -48,7 +48,7 @@ def test_RUN():
 
     print(f"Thresh expand: {x.shape} -> {nx.shape}")
 
-    memK = 12 
+    memK = 8 
     #input = [8, -8, 4, -4, 2, -2, 1, -1]
     #input += [-x for x in input]  # Add the negative values
     dataN = nx.shape[0]
@@ -64,14 +64,13 @@ def test_RUN():
     'biasWeights': numNodes * [0],
     'ptfWeights': numNodes * [1],
     'ptfThresh': [0],    
-    'adaptBias': 0,
+    'adaptBias': 8,
     'adaptWeights': 0,
-    'adaptThresh': 1,
-    'scaleTo': 511,
-    'printWeights': 0,
-    'printThresh': 0,
+    'adaptThresh': 0,
+    'scaleTo': 63,
     'printSample':0,
-    'printBias': 0,
+    'printParameters': 0,
+    'printPTFStats': 0,    
     'printIteration': 1, 
     'postAdaptRun': 1,
     'plotThresh': 0,
@@ -83,7 +82,7 @@ def test_RUN():
     
     param['ptfWeights'] = numNodes * [1]    
     param['ptfThresh'] = [int(sum(param['ptfWeights'])/2)]
-    #$param['ptfThresh'] = [numNodes]
+    #param['ptfThresh'] = [numNodes]
     #param['ptfThresh'] = [1]
     #print(f"Here: {param['ptfWeights']} and {param['ptfThresh']}")
     #return        
@@ -101,17 +100,17 @@ def test_RUN():
         print("##################################################")
         print(f"ITERATION {iter}")
 
-        weights = runner.ohm.paramStackMem[0].GetLSBIntsHack()                                                                    
-        print(f"       Weights In: {weights}")                                       
-        thresh = runner.ohm.paramThreshMem[0].GetLSBIntsHack()                                                                
-        print(f"       Thresh In: {thresh}")                                       
+        #weights = runner.ohm.paramStackMem[0].GetLSBIntsHack()                                                                    
+        #print(f"       Weights In: {weights}")                                       
+        #thresh = runner.ohm.paramThreshMem[0].GetLSBIntsHack()                                                                
+        #print(f"       Thresh In: {thresh}")                                       
         
         runner.Run(param)
         
-        weights = runner.ohm.paramStackMem[0].GetLSBIntsHack()                                                                    
-        print(f"       Weights Out: {weights}")                                       
-        thresh = runner.ohm.paramThreshMem[0].GetLSBIntsHack()                                                                
-        print(f"       Thresh Out: {thresh} out of {sum(weights)}")                                       
+        # weights = runner.ohm.paramStackMem[0].GetLSBIntsHack()                                                                    
+        # print(f"       Weights Out: {weights}")                                       
+        # thresh = runner.ohm.paramThreshMem[0].GetLSBIntsHack()                                                                
+        # print(f"       Thresh Out: {thresh} out of {sum(weights)}")                                       
 
         thresh = runner.plotResults['thresh']
         
@@ -126,14 +125,18 @@ def test_RUN():
         #result = runner.ApplyToMap(adaptWeights)
         #PlotMap(result)
         if param['postAdaptRun'] == 1:
-            param['adaptThresh'] = 0
-            runner.Run(param)
-            
-            weights = runner.ohm.paramStackMem[0].GetLSBIntsHack()                                                                    
-            print(f"       Weights Out: {weights}")                                       
-            thresh = runner.ohm.paramThreshMem[0].GetLSBIntsHack()                                                                
-            print(f"       Thresh Out: {thresh} out of {sum(weights)}")                                       
+            was1 = param['adaptWeights']
+            was2 = param['adaptThresh']
+            was3 = param['adaptBias']
 
+            param['adaptWeights'] = 0
+            param['adaptThresh'] = 0
+            param['adaptBias'] = 0
+            runner.Run(param)            
+
+            param['adaptWeights'] = was1
+            param['adaptThresh'] = was2
+            param['adaptBias'] = was3
 
 
 

@@ -27,6 +27,11 @@ class MLRunner:
     def Run(self, param) -> None:
         print(f"Running on {len(self.input)} samples")
         ticks = list()
+        self.posStackStats = 0
+        self.negStackStats = 0
+        self.sampleCount = 0
+        self.posStack = 0
+        self.negStack = 0
         
         numSamples = len(self.input)
         #self.ohm.SetAdaptWeights(adaptWeights)        
@@ -37,18 +42,13 @@ class MLRunner:
                 print(f"Sample {ni} ------------------")
 
             biases = self.ohm.paramBiasMem[0].GetLSBInts()                                                        
-            if param['printBias'] == 1:
-                print(f"       Bias: {biases}")                                  
-            weights = self.ohm.paramStackMem[0].GetLSBIntsHack()                                                        
-            if param['printWeights'] == 1:
+            weights = self.ohm.paramStackMem[0].GetLSBIntsHack()
+            thresh = self.ohm.paramThreshMem[0].GetLSBIntsHack()
+            if param['printParameters'] == 1:
+                print(f"       Bias: {biases}")                                              
                 print(f"       Weights: {weights}")                                       
-            thresh = self.ohm.paramThreshMem[0].GetLSBIntsHack()                                                        
-            if param['printThresh'] == 1:
                 print(f"       Thresh: {thresh}")                                       
             
-            # Save stuff for plots
-            self.plotResults['thresh'].append(thresh[0])
-
             #########################################################
             #########################################################
             # Run the OHM
@@ -76,8 +76,8 @@ class MLRunner:
             for i in range(len(self.weightStats)):  
                 self.weightStats[i] = self.weightStats[i] + self.ohm.stack[0].weightCount[i]
 
-            if param['printSample'] == 1:                
-                print(f"1: {posStats}")
+            if param['printPTFStats'] == 1:                
+                #print(f"1: {posStats}")
                 #print(f"0: {negStats}")
                 print(f"T: {localThresh}")
             
@@ -86,16 +86,41 @@ class MLRunner:
             ticks.append(atick)            
 
             outIndex = self.ohm.doneIndexOut[0]
+            result = self.ohm.results[0]
+            resultSign = 1 if result > 0 else -1
             stackInputs = self.ohm.biasMem[0].GetLSBInts()
 
+            self.plotResults['thresh'].append(thresh[0])
+            if resultSign > 0:
+                self.posStack = self.posStack + 1
+            else:
+                self.negStack = self.negStack + 1
+            self.sampleCount = self.sampleCount + 1    
+
             if param['printSample'] == 1:
-                print(f"{stackInputs} -> {self.ohm.results[0]}[{self.ohm.doneIndexOut[0]}] in {self.ohm.doneOut[0]}")
+                print(f"{stackInputs} -> {result}[{self.ohm.doneIndexOut[0]}] in {self.ohm.doneOut[0]}")
             
-            if param['adaptBias'] == 1:
-                biases = self.ohm.paramBiasMem[0].GetLSBInts()                                        
-                biases[outIndex] = biases[outIndex] + 1 
-                self.ohm.paramBiasMem[0].LoadList(biases)
-                #print(f"     Bias OUT: {weights}")                                  
+            if (param['adaptBias'] > 0):
+                if resultSign > 0:
+                    self.posStackStats = self.posStackStats + 1
+                else:
+                    self.negStackStats = self.negStackStats + 1                
+                if ((ni % param['adaptBias'] == 0) and (ni > 0)):
+                    #print(f"    Stack: {resultSign} +ve: {self.posStackStats} -ve: {self.negStackStats}")
+                    #print(f"    BIAS UPDATE!!!!!!!!!!!!!!!!!")
+                    if self.posStackStats > self.negStackStats:
+                        resultSign = -1
+                    else:
+                        resultSign = 1
+                                    
+                    # Save stuff for plots                    
+                    biases = self.ohm.paramBiasMem[0].GetLSBInts()                                        
+                    biases[outIndex] = biases[outIndex] + resultSign 
+                    self.ohm.paramBiasMem[0].LoadList(biases)
+                    #print(f"     BIAS OUT!!!!!!!!!!!!!!!!!! : {weights}")                                  
+                    self.posStackStats = 0
+                    self.negStackStats = 0
+
 
         if param['printIteration'] == 1:
             avg = sum(ticks) / len(ticks)
@@ -111,10 +136,17 @@ class MLRunner:
             #for i in range(len(self.weightStats)):
             #    self.weightStats[i] = self.weightStats[i] / totalMax
             #    self.weightStats[i] = self.weightStats[i] * len(self.weightStats)/2
-            
-            print(f"1 Rate: {self.posStatsSample}")
-            print(f"T Rate: {self.threshStats}")
-            print(f"W Stat: {self.weightStats}")
+            print(f"Stack Stats: +ve: {self.posStack/self.sampleCount} -ve: {self.negStack/self.sampleCount}")
+            #print(f"1 Rate: {self.posStatsSample}")
+            print(f"  PTF Stats: +ve: {self.threshStats[0]} -ve: {self.threshStats[1]}")
+            #print(f"W Stat: {self.weightStats}")
+            biases = self.ohm.paramBiasMem[0].GetLSBInts()                                                        
+            weights = self.ohm.paramStackMem[0].GetLSBIntsHack()
+            thresh = self.ohm.paramThreshMem[0].GetLSBIntsHack()
+            print(f"       Bias: {biases}")                                              
+            print(f"       Weights: {weights}")                                       
+            print(f"       Thresh: {thresh}")                                       
+
 
         
     def WeightAdjust(self) -> None:
