@@ -29,7 +29,7 @@ def ThreshExpand(x, thresh):
     
     return nx
 
-def test_RUN():
+def test_RUN_AM():
 
     numIterations = 1
     
@@ -48,7 +48,7 @@ def test_RUN():
 
     print(f"Thresh expand: {x.shape} -> {nx.shape}")
 
-    memK = 4 
+    memK = 8
     #input = [8, -8, 4, -4, 2, -2, 1, -1]
     #input += [-x for x in input]  # Add the negative values
     dataN = nx.shape[0]
@@ -67,7 +67,7 @@ def test_RUN():
     'adaptBias': 0,
     'adaptWeights': 0,
     'adaptThresh': 0,
-    'scaleTo': 7,
+    'scaleTo': 127,
     'printSample':0,
     'printParameters': 0,    
     'printIteration': 1, 
@@ -140,4 +140,4 @@ def test_RUN():
 
 
 
-test_RUN()
+test_RUN_AM()

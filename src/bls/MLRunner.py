@@ -45,9 +45,9 @@ class MLRunner:
             weights = self.ohm.paramStackMem[0].GetLSBIntsHack()
             thresh = self.ohm.paramThreshMem[0].GetLSBIntsHack()
             if param['printParameters'] == 1:
-                print(f"       Bias: {biases}")                                              
+                print(f"          Bias: {biases}")                                              
                 print(f"       Weights: {weights}")                                       
-                print(f"       Thresh: {thresh}")                                       
+                print(f"        Thresh: {thresh}")                                       
             
             #########################################################
             #########################################################
@@ -76,10 +76,7 @@ class MLRunner:
             for i in range(len(self.weightStats)):  
                 self.weightStats[i] = self.weightStats[i] + self.ohm.stack[0].weightCount[i]
 
-            if param['printPTFStats'] == 1:                
-                #print(f"1: {posStats}")
-                #print(f"0: {negStats}")
-                print(f"T: {localThresh}")
+            #print(f"T: {localThresh}")
             
             if atick < 0: 
                 atick = self.K
@@ -144,8 +141,8 @@ class MLRunner:
             weights = self.ohm.paramStackMem[0].GetLSBIntsHack()
             thresh = self.ohm.paramThreshMem[0].GetLSBIntsHack()
             print(f"       Bias: {biases}")                                              
-            print(f"       Weights: {weights}")                                       
-            print(f"       Thresh: {thresh}")                                       
+            print(f"    Weights: {weights}")                                       
+            print(f"     Thresh: {thresh}")                                       
 
 
         
