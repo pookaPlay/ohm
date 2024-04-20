@@ -18,7 +18,7 @@ class RunOHMS:
         self.param = param
         self.input = input
 
-        self.NN = param['numNodes']      # number of parallel nodes        
+        self.numStack = param['numStack']      # number of parallel nodes        
         self.numNodes = param['numNodes']        
         #print(input)
         self.memD = param['memD']        
@@ -27,21 +27,21 @@ class RunOHMS:
         self.dataMem = BSMEM(self.memD, self.K)                
 
         self.stackMem = BSMEM(self.memD, self.K)                        
-        self.biasMem = [BSMEM(self.memD, self.K) for _ in range(self.NN)]
+        self.biasMem = [BSMEM(self.memD, self.K) for _ in range(self.numNodes)]
 
-        self.paramBiasMem = [BSMEM(self.memD, self.K) for _ in range(self.NN)]
-        self.bias = [OHM_ADDER_CHAN(self.NN, self.memD) for _ in range(self.NN)]         
+        self.paramBiasMem = [BSMEM(self.memD, self.K) for _ in range(self.numNodes)]
+        self.bias = [OHM_ADDER_CHAN(self.numNodes, self.memD) for _ in range(self.numNodes)]         
         
         self.paramStackMem = [BSMEM(self.memD, self.K) for _ in range(param['numStack'])]
         self.paramThreshMem = [BSMEM(1, self.K) for _ in range(param['numStack'])]
 
-        self.stack = [STACK_ADDER_TREE(self.NN, self.memD, self.K, param) for _ in range(param['numStack'])] #self.NN)]
+        self.stack = [STACK_ADDER_TREE(self.numStack, self.memD, self.K, param) for _ in range(param['numStack'])] 
         
-        self.doneOut = list(self.NN * [-1])
-        self.doneIndexOut = list(self.NN * [-1])
-        self.inputPosCount = list(self.NN * [0])
-        self.inputNegCount = list(self.NN * [0])
-        self.stepCount = 0
+        self.doneOut = list(self.numStack * [-1])
+        self.doneIndexOut = list(self.numStack * [-1])
+        #self.inputPosCount = list([0])
+        #self.inputNegCount = list([0])
+        #self.stepCount = 0
         self.Reset()
 
     def SetAdaptWeights(self, adaptWeights) -> None:
@@ -66,9 +66,9 @@ class RunOHMS:
                
         for mi in range(len(self.paramStackMem)):
             self.paramStackMem[mi].Reset()            
-            self.paramStackMem[mi].LoadList(self.param['ptfWeights'])
+            self.paramStackMem[mi].LoadList(self.param['ptfWeights'][mi])
             self.paramThreshMem[mi].Reset()
-            self.paramThreshMem[mi].LoadList(self.param['ptfThresh'])
+            self.paramThreshMem[mi].LoadList(self.param['ptfThresh'][mi])
         
         [stack.Reset() for stack in self.stack]
 
@@ -106,6 +106,8 @@ class RunOHMS:
 
         self.results = self.stackMem.GetMSBInts()
         #print(f"WC: {self.stack[0].weightCount}")
+        
+        self.stackMem.Print("STACK")
         
         if param['adaptThresh'] > 0:
             #print(f"       Result: {self.results[0]} and ThreshCount: {self.stack[0].threshCount}")
@@ -160,27 +162,18 @@ class RunOHMS:
             
             ti = 0                        
             msb = 1            
-            self.denseOut = list(self.NN * [0])
-            #self.doneOut = list(self.NN * [-1])
-            self.doneOut = list(1 * [-1])
-            self.doneIndexOut = list(1 * [-1])
-            self.stepCount = 0
-            self.inputPosCount = list(self.NN * [0])
-            self.inputNegCount = list(self.NN * [0])
+            self.denseOut = list(self.numStack * [0])            
+            self.doneOut = list(self.numStack * [-1])
+            self.doneIndexOut = list(self.numStack * [-1])
+            #self.stepCount = 0
+            #self.inputPosCount = list([0])
+            #self.inputNegCount = list([0])
 
             #print(f"     == {stepi}:{ti} ")            
             for si in range(len(self.stack)):     
                 
                 self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], self.paramThreshMem[si], msb, stepi)
-                self.stepCount = self.stepCount + 1                
-                for i in range(len(self.stack[si].origInputs)):
-                    if self.stack[si].origInputs[i] > 0:    
-                        self.inputPosCount[i] = self.inputPosCount[i] + 1
-                    else:
-                        self.inputNegCount[i] = self.inputNegCount[i] + 1
-                    
-                    
-
+                                                        
                 if self.doneOut[si] < 0:
                     if self.stack[si].done == 1:
                         self.doneOut[si] = ti
@@ -191,7 +184,14 @@ class RunOHMS:
             # Save output
             #print(f"     == {stepi}:{ti} {self.denseOut}")
             self.stackMem.Step(self.denseOut)
-            
+
+            # self.stepCount = self.stepCount + 1
+            # for i in range(len(self.stack[0].origInputs)):
+            #     if self.stack[0].origInputs[i] > 0:    
+            #         self.inputPosCount[i] = self.inputPosCount[i] + 1
+            #     else:
+            #         self.inputNegCount[i] = self.inputNegCount[i] + 1
+
             #[stack.Step() for stack in self.stack]
 
             #self.lsbMem.Print("LSB")
@@ -204,25 +204,26 @@ class RunOHMS:
                 
                 for si in range(len(self.stack)):                    
                     self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], self.paramThreshMem[si], msb, stepi)
-                    # Get some input stats 
-                    self.stepCount = self.stepCount + 1
-                    for i in range(len(self.stack[si].origInputs)):
-                        if self.stack[si].origInputs[i] > 0:
-                            self.inputPosCount[i] = self.inputPosCount[i] + 1
-                        else:
-                            self.inputNegCount[i] = self.inputNegCount[i] + 1                    
 
                     # Update the sticky latches                            
                     if self.doneOut[si] < 0:
                         if self.stack[si].done == 1:
                             self.doneOut[si] = ti
-                            self.doneIndexOut[si] = self.stack[si].doneIndex[si]
+                            self.doneIndexOut[si] = self.stack[si].doneIndex
 
                     self.denseOut[si] = self.stack[si].Output()            
 
                 #print(f"     == {stepi}:{ti} {self.denseOut}")
                 self.stackMem.Step(self.denseOut)
-                                
+
+                # # Get some input stats 
+                # self.stepCount = self.stepCount + 1
+                # for i in range(len(self.stack[0].origInputs)):
+                #     if self.stack[0].origInputs[i] > 0:
+                #         self.inputPosCount[i] = self.inputPosCount[i] + 1
+                #     else:
+                #         self.inputNegCount[i] = self.inputNegCount[i] + 1                    
+
                 #[stack.Step() for stack in self.stack]
             
             # fix dones for duplicates

@@ -48,49 +48,36 @@ def test_RUN_AM():
 
     print(f"Thresh expand: {x.shape} -> {nx.shape}")
 
-    memK = 8
+    memK = 12
     #input = [8, -8, 4, -4, 2, -2, 1, -1]
     #input += [-x for x in input]  # Add the negative values
     dataN = nx.shape[0]
     memD = len(nx[0])
     numNodes = memD
+    numStack = memD
     halfD = int(memD/2)
 
     param = {
     'memD': memD,
     'memK': memK,
     'numNodes': numNodes,
-    'numStack': 1,
+    'numStack': numStack,
     'biasWeights': numNodes * [0],
-    'ptfWeights': numNodes * [1],
-    'ptfThresh': [0],    
+    'ptfWeights': numStack * [numNodes * [1]],
+    'ptfThresh': numStack * [ [ 1 ] ],    
     'adaptBias': 0,
     'adaptWeights': 0,
     'adaptThresh': 0,
     'scaleTo': 127,
     'printSample':0,
-    'printParameters': 0,    
+    'printParameters': 1,    
     'printIteration': 1, 
     'postAdaptRun': 0,
     'plotThresh': 0,
     }
 
-    #for i in range(halfD):
-    #    param['ptfWeights'][i] = 1
-    #    param['ptfWeights'][halfD+i] = -1
-    
-    param['ptfWeights'] = numNodes * [1]    
-    param['ptfThresh'] = [int(sum(param['ptfWeights'])/2)]
-    #param['ptfThresh'] = [numNodes]
-    #param['ptfThresh'] = [1]
-    #print(f"Here: {param['ptfWeights']} and {param['ptfThresh']}")
-    #return        
-    #ptfThresh = [numNodes]    
-    
-    
-    #ptfWeights[0] = numNodes
-    #biasWeights = [125, 125, 100, 103, 98, 94, 38, 17]
-    #biasWeights[0] = numNodes
+    for i in range(len(param['ptfThresh'])):
+        param['ptfThresh'][i] = [i+1]
 
     runner = MLRunner(nx, nxxyy, param)        
     posStatsSample = param['numNodes'] * [0.0]
