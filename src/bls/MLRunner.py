@@ -89,7 +89,7 @@ class MLRunner:
             resultSign = 1 if result > 0 else -1
             stackInputs = self.ohm.biasMem[0].GetLSBInts()
 
-            self.plotResults['thresh'].append(thresh[0])
+            #self.plotResults['thresh'].append(thresh[0])
             if resultSign > 0:
                 self.posStack = self.posStack + 1
             else:

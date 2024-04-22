@@ -48,12 +48,13 @@ def test_RUN():
 
     print(f"Thresh expand: {x.shape} -> {nx.shape}")
 
-    memK = 4 
+    memK = 8 
     #input = [8, -8, 4, -4, 2, -2, 1, -1]
     #input += [-x for x in input]  # Add the negative values
     dataN = nx.shape[0]
     memD = len(nx[0])
     numNodes = memD
+    numStack = 1
     halfD = int(memD/2)
 
     param = {
@@ -62,8 +63,8 @@ def test_RUN():
     'numNodes': numNodes,
     'numStack': 1,
     'biasWeights': numNodes * [0],
-    'ptfWeights': numNodes * [1],
-    'ptfThresh': [0],    
+    'ptfWeights': [numNodes * [1]],
+    'ptfThresh': [ [ 1 ] ],    
     'adaptBias': 0,
     'adaptWeights': 0,
     'adaptThresh': 0,
@@ -79,8 +80,8 @@ def test_RUN():
     #    param['ptfWeights'][i] = 1
     #    param['ptfWeights'][halfD+i] = -1
     
-    param['ptfWeights'] = numNodes * [1]    
-    param['ptfThresh'] = [int(sum(param['ptfWeights'])/2)]
+    #param['ptfWeights'] = numNodes * [1]    
+    #param['ptfThresh'] = [int(sum(param['ptfWeights'])/2)]
     #param['ptfThresh'] = [numNodes]
     #param['ptfThresh'] = [1]
     #print(f"Here: {param['ptfWeights']} and {param['ptfThresh']}")

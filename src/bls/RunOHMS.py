@@ -65,7 +65,9 @@ class RunOHMS:
         [bias.Reset() for bias in self.bias]
                
         for mi in range(len(self.paramStackMem)):
-            self.paramStackMem[mi].Reset()            
+            self.paramStackMem[mi].Reset() 
+            print(f"###################################################") 
+            print(self.param['ptfWeights'])
             self.paramStackMem[mi].LoadList(self.param['ptfWeights'][mi])
             self.paramThreshMem[mi].Reset()
             self.paramThreshMem[mi].LoadList(self.param['ptfThresh'][mi])
@@ -107,7 +109,8 @@ class RunOHMS:
         self.results = self.stackMem.GetMSBInts()
         #print(f"WC: {self.stack[0].weightCount}")
         
-        self.stackMem.Print("STACK")
+        if param['printMem'] > 0:
+            self.stackMem.Print("STACK")
         
         if param['adaptThresh'] > 0:
             #print(f"       Result: {self.results[0]} and ThreshCount: {self.stack[0].threshCount}")
