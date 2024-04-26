@@ -40,12 +40,14 @@ class MLRunner:
         if param['printParameters'] == 1:
             for i in range(len(self.ohm.paramBiasMem)):
                     biases = self.ohm.paramBiasMem[i].GetLSBInts()                                                        
+                    #print(f"{i}          Bias: {biases}")                                                                  
+            
+            for i in range(len(self.ohm.paramStackMem)):                    
                     weights = self.ohm.paramStackMem[i].GetLSBIntsHack()
-                    thresh = self.ohm.paramThreshMem[i].GetLSBIntsHack()
-                    print(f"{i}          Bias: {biases}")                                              
+                    thresh = self.ohm.paramThreshMem[i].GetLSBIntsHack()                    
                     print(f"{i}       Weights: {weights}")                                       
                     print(f"{i}        Thresh: {thresh}")
-                    
+
 
         for ni in range(numSamples):                                                
             if param['printSample'] == 1:
@@ -57,7 +59,7 @@ class MLRunner:
             sample = self.input[ni].tolist()
             atick = self.ohm.Run(sample, ni, param)
             #########################################################
-
+            
             # # Get some stats
             # posStats = list()
             # #negStats = list()            
@@ -143,9 +145,11 @@ class MLRunner:
             if param['printParameters'] == 1:
                 for i in range(len(self.ohm.paramBiasMem)):
                     biases = self.ohm.paramBiasMem[i].GetLSBInts()                                                        
+                    #print(f"{i}          Bias: {biases}")                                                              
+
+                for i in range(len(self.ohm.paramStackMem)):                    
                     weights = self.ohm.paramStackMem[i].GetLSBIntsHack()
-                    thresh = self.ohm.paramThreshMem[i].GetLSBIntsHack()
-                    print(f"{i}          Bias: {biases}")                                              
+                    thresh = self.ohm.paramThreshMem[i].GetLSBIntsHack()                    
                     print(f"{i}       Weights: {weights}")                                       
                     print(f"{i}        Thresh: {thresh}")
 

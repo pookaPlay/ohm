@@ -35,7 +35,7 @@ class RunOHMS:
         self.paramStackMem = [BSMEM(self.memD, self.K) for _ in range(param['numStack'])]
         self.paramThreshMem = [BSMEM(1, self.K) for _ in range(param['numStack'])]
 
-        self.stack = [STACK_ADDER_TREE(self.numStack, self.memD, self.K, param) for _ in range(param['numStack'])] 
+        self.stack = [STACK_ADDER_TREE(self.memD, self.memD, self.K, param) for _ in range(param['numStack'])] 
         
         self.doneOut = list(self.numStack * [-1])
         self.doneIndexOut = list(self.numStack * [-1])
@@ -66,8 +66,8 @@ class RunOHMS:
                
         for mi in range(len(self.paramStackMem)):
             self.paramStackMem[mi].Reset() 
-            print(f"###################################################") 
-            print(self.param['ptfWeights'])
+            #print(f"###################################################") 
+            #print(self.param['ptfWeights'])
             self.paramStackMem[mi].LoadList(self.param['ptfWeights'][mi])
             self.paramThreshMem[mi].Reset()
             self.paramThreshMem[mi].LoadList(self.param['ptfThresh'][mi])
@@ -110,6 +110,7 @@ class RunOHMS:
         #print(f"WC: {self.stack[0].weightCount}")
         
         if param['printMem'] > 0:
+            self.biasMem[0].Print("INPUT")
             self.stackMem.Print("STACK")
         
         if param['adaptThresh'] > 0:
@@ -125,7 +126,8 @@ class RunOHMS:
 
             if thresh[0] < 1:
                 thresh[0] = 1              
-                di = self.doneIndexOut[0]
+                di = self.doneIndexOut[0][0]
+                #print(self.doneIndexOut)
                 assert(di >= 0)
                 dii = GetNegativeIndex(di, len(weights))                
 
@@ -136,7 +138,7 @@ class RunOHMS:
 
             if thresh[0] > sum(weights):
                 thresh[0] = sum(weights)
-                di = self.doneIndexOut[0]                
+                di = self.doneIndexOut[0][0]
                 assert(di >= 0)
                 dii = GetNegativeIndex(di, len(weights))
                 print(f"I got an runaway: {di} -> {dii}")
@@ -172,7 +174,9 @@ class RunOHMS:
             #self.inputPosCount = list([0])
             #self.inputNegCount = list([0])
 
-            #print(f"     == {stepi}:{ti} ")            
+            if self.param['printTicks'] == 1:
+                print(f"     == {stepi}:{ti} ")            
+
             for si in range(len(self.stack)):     
                 
                 self.stack[si].Calc(self.biasMem[si], self.paramStackMem[si], self.paramThreshMem[si], msb, stepi)
@@ -202,7 +206,9 @@ class RunOHMS:
             msb = 0                
             for ti in range(1, self.K):
                 
-                #print(f"     == {stepi}:{ti} ")                
+                if self.param['printTicks'] == 1:
+                    print(f"     == {stepi}:{ti} ")                
+                    
                 [biasMem.Step() for biasMem in self.biasMem]
                 
                 for si in range(len(self.stack)):                    

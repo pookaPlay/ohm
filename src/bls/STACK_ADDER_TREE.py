@@ -74,6 +74,9 @@ class STACK_ADDER_TREE:
         
         self.pbfOut = 1 if (sum(self.treeInputs) >= halfSum) else 0        
         signOut = self.pbfOut*2-1
+        
+
+        #print(f"     PBF is {self.pbfOut} from {self.treeInputs}")
 
         # # Gets some stats on threshold
         self.stepCount = self.stepCount + 1

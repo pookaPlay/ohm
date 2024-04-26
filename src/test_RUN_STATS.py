@@ -38,7 +38,7 @@ def test_RUN():
     threshSpac = 1.0   # 16
     thresholds = np.arange(-2.0, 2.0, threshSpac).tolist()     
     print(thresholds)
-    numPoints = 5
+    numPoints = 500
         
     x, y, xv, yv, xxyy = LoadXor(numPoints, display)
     #x, y, xxyy = LoadLinear(numPoints, display)
@@ -48,34 +48,36 @@ def test_RUN():
 
     print(f"Thresh expand: {x.shape} -> {nx.shape}")
 
-    memK = 8 
+    memK = 8
     #input = [8, -8, 4, -4, 2, -2, 1, -1]
     #input += [-x for x in input]  # Add the negative values
     dataN = nx.shape[0]
     memD = len(nx[0])
     numNodes = memD
-    numStack = 1
+    numStack = 2
     halfD = int(memD/2)
 
     param = {
     'memD': memD,
     'memK': memK,
     'numNodes': numNodes,
-    'numStack': 1,
+    'numStack': numStack,
     'biasWeights': numNodes * [0],
-    'ptfWeights': [numNodes * [1]],
-    'ptfThresh': [ [ 1 ] ],    
+    'ptfWeights': numStack * [numNodes * [1]],
+    'ptfThresh': numStack * [ 1 * [halfD]],    
     'adaptBias': 0,
     'adaptWeights': 0,
-    'adaptThresh': 0,
-    'scaleTo': 7,
-    'printSample':0,
-    'printParameters': 0,    
+    'adaptThresh': 1,
+    'scaleTo': 127,
+    'printSample': 0,
+    'printParameters': 1,    
     'printIteration': 1, 
     'printMem': 0,
     'postAdaptRun': 0,
-    'plotThresh': 0,
+    'plotThresh': 0,    
+    'printTicks' : 0,
     }
+
 
     #for i in range(halfD):
     #    param['ptfWeights'][i] = 1
@@ -85,8 +87,10 @@ def test_RUN():
     #param['ptfThresh'] = [int(sum(param['ptfWeights'])/2)]
     #param['ptfThresh'] = [numNodes]
     #param['ptfThresh'] = [1]
-    #print(f"Here: {param['ptfWeights']} and {param['ptfThresh']}")
-    #return        
+    
+    print(f"PTF Weights: {param['ptfWeights']}")
+    print(f"PTF  Thresh: {param['ptfThresh']}")
+        
     #ptfThresh = [numNodes]    
     
     
