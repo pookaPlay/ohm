@@ -116,6 +116,8 @@ class RunOHMS:
         if param['adaptThresh'] > 0:
             #print(f"       Result: {self.results[0]} and ThreshCount: {self.stack[0].threshCount}")
             #print(f"       Thresh count: {self.stack[0].threshCount}")
+            #print(f" Done Indicies: {self.doneIndexOut}")
+
             weights = self.paramStackMem[0].GetLSBIntsHack()
             thresh = self.paramThreshMem[0].GetLSBIntsHack()
                                     
@@ -126,19 +128,19 @@ class RunOHMS:
 
             if thresh[0] < 1:
                 thresh[0] = 1              
-                di = self.doneIndexOut[0][0]
+                di = self.doneIndexOut[0]
                 #print(self.doneIndexOut)
                 assert(di >= 0)
                 dii = GetNegativeIndex(di, len(weights))                
 
                 weights[di] = weights[di] + 1
                 #weights[dii] = weights[dii] + 1
-                print(f"I got an underdog: {di} -> {dii}")                                
+                #print(f"I got an underdog: {di} -> {dii}")                                
                                 
 
             if thresh[0] > sum(weights):
                 thresh[0] = sum(weights)
-                di = self.doneIndexOut[0][0]
+                di = self.doneIndexOut[0]
                 assert(di >= 0)
                 dii = GetNegativeIndex(di, len(weights))
                 print(f"I got an runaway: {di} -> {dii}")
@@ -167,9 +169,10 @@ class RunOHMS:
             
             ti = 0                        
             msb = 1            
-            self.denseOut = list(self.numStack * [0])            
-            self.doneOut = list(self.numStack * [-1])
-            self.doneIndexOut = list(self.numStack * [-1])
+            self.denseOut = self.numStack * [0]            
+            self.doneOut = self.numStack * [-1]
+            self.doneIndexOut = self.numStack * [-1]
+            
             #self.stepCount = 0
             #self.inputPosCount = list([0])
             #self.inputNegCount = list([0])
@@ -184,7 +187,7 @@ class RunOHMS:
                 if self.doneOut[si] < 0:
                     if self.stack[si].done == 1:
                         self.doneOut[si] = ti
-                        self.doneIndexOut[si] = self.stack[si].doneIndex
+                        self.doneIndexOut[si] = self.stack[si].doneIndex[0]
 
                 self.denseOut[si] = self.stack[si].Output()            
                         
@@ -208,7 +211,7 @@ class RunOHMS:
                 
                 if self.param['printTicks'] == 1:
                     print(f"     == {stepi}:{ti} ")                
-                    
+
                 [biasMem.Step() for biasMem in self.biasMem]
                 
                 for si in range(len(self.stack)):                    
@@ -217,8 +220,8 @@ class RunOHMS:
                     # Update the sticky latches                            
                     if self.doneOut[si] < 0:
                         if self.stack[si].done == 1:
-                            self.doneOut[si] = ti
-                            self.doneIndexOut[si] = self.stack[si].doneIndex
+                            self.doneOut[si] = ti                                                        
+                            self.doneIndexOut[si] = self.stack[si].doneIndex[0]
 
                     self.denseOut[si] = self.stack[si].Output()            
 
@@ -236,12 +239,12 @@ class RunOHMS:
                 #[stack.Step() for stack in self.stack]
             
             # fix dones for duplicates
-            for si in range(len(self.stack)):                    
+            for si in range(len(self.stack)):                        
                 if self.doneOut[si] < 0:
                     self.doneOut[si] = self.K
                     dups = [i for i, flag in enumerate(self.stack[si].flags) if flag == 0]
                     self.doneIndexOut[si] = dups[0] if len(dups) > 0 else -1
-
+                            
 
     def RunLSB(self, stepi=0) -> None:            
             ti = 0                        

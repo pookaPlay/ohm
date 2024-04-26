@@ -38,7 +38,7 @@ def test_RUN():
     threshSpac = 1.0   # 16
     thresholds = np.arange(-2.0, 2.0, threshSpac).tolist()     
     print(thresholds)
-    numPoints = 500
+    numPoints = 5
         
     x, y, xv, yv, xxyy = LoadXor(numPoints, display)
     #x, y, xxyy = LoadLinear(numPoints, display)
@@ -48,13 +48,13 @@ def test_RUN():
 
     print(f"Thresh expand: {x.shape} -> {nx.shape}")
 
-    memK = 8
+    memK = 16
     #input = [8, -8, 4, -4, 2, -2, 1, -1]
     #input += [-x for x in input]  # Add the negative values
     dataN = nx.shape[0]
     memD = len(nx[0])
     numNodes = memD
-    numStack = 2
+    numStack = 1
     halfD = int(memD/2)
 
     param = {
