@@ -135,7 +135,7 @@ class RunOHMS:
 
                 weights[di] = weights[di] + 1
                 #weights[dii] = weights[dii] + 1
-                #print(f"I got an underdog: {di} -> {dii}")                                
+                print(f"I got an underdog: {di} -> {dii}")                                
                                 
 
             if thresh[0] > sum(weights):

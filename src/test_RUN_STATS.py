@@ -38,7 +38,7 @@ def test_RUN():
     threshSpac = 1.0   # 16
     thresholds = np.arange(-2.0, 2.0, threshSpac).tolist()     
     print(thresholds)
-    numPoints = 5
+    numPoints = 500
         
     x, y, xv, yv, xxyy = LoadXor(numPoints, display)
     #x, y, xxyy = LoadLinear(numPoints, display)
@@ -48,7 +48,7 @@ def test_RUN():
 
     print(f"Thresh expand: {x.shape} -> {nx.shape}")
 
-    memK = 16
+    memK = 8
     #input = [8, -8, 4, -4, 2, -2, 1, -1]
     #input += [-x for x in input]  # Add the negative values
     dataN = nx.shape[0]
@@ -64,11 +64,13 @@ def test_RUN():
     'numStack': numStack,
     'biasWeights': numNodes * [0],
     'ptfWeights': numStack * [numNodes * [1]],
+    'ptfDeltas': np.zeros([numNodes, numNodes]),
     'ptfThresh': numStack * [ 1 * [halfD]],    
     'adaptBias': 0,
     'adaptWeights': 0,
     'adaptThresh': 1,
     'scaleTo': 127,
+    'clipAt': 127,
     'printSample': 0,
     'printParameters': 1,    
     'printIteration': 1, 

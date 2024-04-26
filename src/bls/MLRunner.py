@@ -14,8 +14,8 @@ class MLRunner:
         self.param = param
         self.plotResults = dict()
         #self.dataMax = 2**self.K - 1.0        
-        self.input = self.ScaleData(nx, param['scaleTo'])
-        self.xxyy = self.ScaleData(nxxyy, param['scaleTo'])
+        self.input = self.ScaleData(nx, param['scaleTo'], param['clipAt'])
+        self.xxyy = self.ScaleData(nxxyy, param['scaleTo'], param['clipAt'])
 
         self.first = self.input[0].tolist()        
         self.posStatsSample = list(len(self.first) * [0.0])
@@ -184,7 +184,7 @@ class MLRunner:
         print(f"Ticks: {avg}")
         return(results)
 
-    def ScaleData(self, data, maxValOut) -> None:
+    def ScaleData(self, data, maxValOut, clipValOut) -> None:
         self.min_value = torch.min(data)
         self.max_value = torch.max(data)        
         
@@ -201,6 +201,9 @@ class MLRunner:
         
         data = data * maxValOut
         
+        data[data > clipValOut] = clipValOut
+        data[data < -clipValOut] = -clipValOut
+                
         data = torch.round(data)
         data = data.int()        
         return data
