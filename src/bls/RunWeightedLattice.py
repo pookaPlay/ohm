@@ -1,8 +1,9 @@
 from bls.BSMEM import BSMEM
 from bls.OHM_ADDER_CHAN import OHM_ADDER_CHAN
-from bls.STACK_ADDER_TREE import STACK_ADDER_TREE
+from bls.STACK_WEIGHTED_LATTICE import STACK_WEIGHTED_LATTICE
 from bls.BSMEM import BSMEM
-from bls.OHM_ADDER_CHAN import OHM_ADDER_CHAN
+
+import networkx as nx
 
 def GetNegativeIndex(din, N):
     if din < N/2:
@@ -11,7 +12,7 @@ def GetNegativeIndex(din, N):
         dout = int(din - N/2)
     return dout
 
-class RunOHMS:
+class RunWeightedLattice:
 
     def __init__(self, input, param):
     
@@ -35,12 +36,12 @@ class RunOHMS:
         self.paramStackMem = [BSMEM(self.memD, self.K) for _ in range(param['numStack'])]
         self.paramThreshMem = [BSMEM(1, self.K) for _ in range(param['numStack'])]
 
-        self.stack = [STACK_ADDER_TREE(self.memD, self.memD, self.K, param) for _ in range(param['numStack'])] 
+        self.stack = [STACK_WEIGHTED_LATTICE(self.memD, self.memD, self.K, param) for _ in range(param['numStack'])] 
         
         self.doneOut = list(self.numStack * [-1])
         self.doneIndexOut = list(self.numStack * [-1])
-
-        self.deltas = [param['ptfDeltas'] for _ in range(param['numStack'])]
+        
+        self.paramStackGraph = [nx.Graph() for _ in range(param['numStack'])]
         
         #self.inputPosCount = list([0])
         #self.inputNegCount = list([0])

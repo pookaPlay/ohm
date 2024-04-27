@@ -1,4 +1,5 @@
-from bls.RunOHMS import RunOHMS
+from bls.RunWeightedLattice import RunWeightedLattice
+#from bls.RunOHMS import RunOHMS
 import math
 import pickle
 import torch
@@ -21,7 +22,7 @@ class MLRunner:
         self.posStatsSample = list(len(self.first) * [0.0])
         self.threshStats = list(2 *[0.0])
         self.weightStats = list(len(self.first) * [0.0])
-        self.ohm = RunOHMS(self.first, param)
+        self.ohm = RunWeightedLattice(self.first, param)
 
 
     def Run(self, param) -> None:

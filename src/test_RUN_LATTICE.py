@@ -1,7 +1,6 @@
 from ml.TorchSynData import LoadXor
 from ml.TorchSynData import LoadLinear
 from ml.TorchSynData import PlotMap
-from bls.RunOHMS import RunOHMS
 from bls.MLRunner import MLRunner
 import torch
 import numpy as np
@@ -64,8 +63,7 @@ def test_RUN():
     'numStack': numStack,
     'biasWeights': numNodes * [0],
     'ptfWeights': numStack * [numNodes * [1]],    
-    'ptfThresh': numStack * [ 1 * [halfD]],   
-    'ptfDeltas': np.zeros([numNodes, numNodes]),     
+    'ptfThresh': numStack * [ 1 * [halfD]],       
     'adaptBias': 0,
     'adaptWeights': 0,
     'adaptThresh': 1,
