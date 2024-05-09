@@ -36,13 +36,17 @@ def test_RUN():
     display = 0
     threshSpac = 0.25   # 64
     threshSpac = 1.0   # 16
+    threshSpac = 2.0   # 16
     thresholds = np.arange(-2.0, 2.0, threshSpac).tolist()     
-    print(thresholds)
-    numPoints = 5
+    print(f"Thresholds @ dim: {thresholds}")
+
+    numPoints = 50
         
     x, y, xv, yv, xxyy = LoadXor(numPoints, display)
-    #x, y, xxyy = LoadLinear(numPoints, display)
-        
+    #x, y, xxyy = LoadLinear(numPoints, display)    
+    plt.scatter(x[:,0], x[:,1])
+    plt.show()
+    
     nx = ThreshExpand(x, thresholds)        
     nxxyy = ThreshExpand(xxyy, thresholds)        
 
@@ -68,36 +72,27 @@ def test_RUN():
     'ptfDeltas': np.zeros([numNodes, numNodes]),     
     'adaptBias': 1,
     'adaptWeights': 0,
-    'adaptThresh': 0,
+    'adaptThreshOuter': 0,
+    'adaptThreshInner': 1,
     'scaleTo': 127,
     'clipAt': 127,
     'printSample': 1,
     'printParameters': 1,    
     'printIteration': 1, 
-    'printMem': 0,
+    'printMem': -1,  # set this to the sample index to print
     'postAdaptRun': 0,
     'plotThresh': 0,    
     'printTicks' : 0,
     }
-
-    #for i in range(halfD):
-    #    param['ptfWeights'][i] = 1
-    #    param['ptfWeights'][halfD+i] = -1
-    
+   
     #param['ptfWeights'] = numNodes * [1]    
     #param['ptfThresh'] = [int(sum(param['ptfWeights'])/2)]
     #param['ptfThresh'] = [numNodes]
     #param['ptfThresh'] = [1]
     
-    print(f"PTF Weights: {param['ptfWeights']}")
-    print(f"PTF  Thresh: {param['ptfThresh']}")
-        
-    #ptfThresh = [numNodes]    
+    #print(f"PTF Weights: {param['ptfWeights']}")
+    #print(f"PTF  Thresh: {param['ptfThresh']}")     
     
-    
-    #ptfWeights[0] = numNodes
-    #biasWeights = [125, 125, 100, 103, 98, 94, 38, 17]
-    #biasWeights[0] = numNodes
 
     runner = MLRunner(nx, nxxyy, param)        
     posStatsSample = param['numNodes'] * [0.0]
@@ -105,31 +100,9 @@ def test_RUN():
     for iter in range(numIterations):
         print("##################################################")
         print(f"ITERATION {iter}")
-
-        #weights = runner.ohm.paramStackMem[0].GetLSBIntsHack()                                                                    
-        #print(f"       Weights In: {weights}")                                       
-        #thresh = runner.ohm.paramThreshMem[0].GetLSBIntsHack()                                                                
-        #print(f"       Thresh In: {thresh}")                                       
         
         runner.Run(param)
         
-        # weights = runner.ohm.paramStackMem[0].GetLSBIntsHack()                                                                    
-        # print(f"       Weights Out: {weights}")                                       
-        # thresh = runner.ohm.paramThreshMem[0].GetLSBIntsHack()                                                                
-        # print(f"       Thresh Out: {thresh} out of {sum(weights)}")                                       
-
-        thresh = runner.plotResults['thresh']
-        
-        if param['plotThresh'] == 1:
-            plt.plot(thresh)
-            plt.xlabel('Threshold Index')
-            plt.ylabel('Threshold Value')
-            plt.title('Threshold Values')
-            plt.show()
-
-        #adaptWeights = 0
-        #result = runner.ApplyToMap(adaptWeights)
-        #PlotMap(result)
         if param['postAdaptRun'] == 1:
             was1 = param['adaptWeights']
             was2 = param['adaptThresh']
@@ -146,5 +119,12 @@ def test_RUN():
 
 
 
-
+"""         thresh = runner.plotResults['thresh']        
+        if param['plotThresh'] == 1:
+            plt.plot(thresh)
+            plt.xlabel('Threshold Index')
+            plt.ylabel('Threshold Value')
+            plt.title('Threshold Values')
+            plt.show()
+ """
 test_RUN()

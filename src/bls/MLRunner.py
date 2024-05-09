@@ -1,5 +1,6 @@
 from bls.RunWeightedLattice import RunWeightedLattice
 #from bls.RunOHMS import RunOHMS
+import matplotlib.pyplot as plt
 import math
 import pickle
 import torch
@@ -38,14 +39,12 @@ class MLRunner:
         #self.ohm.SetAdaptWeights(adaptWeights)        
         self.plotResults['thresh'] = list()
 
-        if param['printParameters'] == 1:
-            for i in range(len(self.ohm.paramBiasMem)):
-                    biases = self.ohm.paramBiasMem[i].GetLSBInts()                                                        
-                    #print(f"{i}          Bias: {biases}")                                                                  
-            
+        if param['printParameters'] == 1:            
             for i in range(len(self.ohm.paramStackMem)):                    
                     weights = self.ohm.paramStackMem[i].GetLSBIntsHack()
                     thresh = self.ohm.paramThreshMem[i].GetLSBIntsHack()                    
+                    biases = self.ohm.paramBiasMem[i].GetLSBInts()                                                        
+                    print(f"{i}          Bias: {biases}")                                                                  
                     print(f"{i}       Weights: {weights}")                                       
                     print(f"{i}        Thresh: {thresh}")
 
@@ -100,17 +99,27 @@ class MLRunner:
             self.sampleCount = self.sampleCount + 1    
 
             if param['printSample'] == 1:
-                print(f"{stackInputs} -> {result}[{self.ohm.doneIndexOut[0]}] in {self.ohm.doneOut[0]}")
+                print(f"{stackInputs} -> {result}[{outIndex}] in {self.ohm.doneOut[0]}")
+                if param['printParameters'] == 1:            
+                    for i in range(len(self.ohm.paramStackMem)):                    
+                            weights = self.ohm.paramStackMem[i].GetLSBIntsHack()
+                            thresh = self.ohm.paramThreshMem[i].GetLSBIntsHack()                    
+                            biases = self.ohm.paramBiasMem[i].GetLSBInts()                                                        
+                            print(f"               Bias{i}: {biases}")                                                                  
+                            print(f"            Weights{i}: {weights}")                                       
+                            print(f"             Thresh{i}: {thresh}")
+
             
             if (param['adaptBias'] > 0):
                 biases = self.ohm.paramBiasMem[0].GetLSBInts()                                                        
                 assert(len(stackInputs) == len(biases))
-                
-                for i in range(len(stackInputs)):
-                    if stackInputs[i] > biases[i]:
-                        biases[i] = biases[i] + 1
-                    else:
-                        biases[i] = biases[i] - 1                    
+
+                #biases[outIndex] = biases[outIndex] + 1
+                #for i in range(len(stackInputs)):
+                #    if stackInputs[i] > biases[i]:
+                #        biases[i] = biases[i] + 1
+                #    else:
+                #        biases[i] = biases[i] - 1                    
                 
                 self.ohm.paramBiasMem[0].LoadList(biases)
                 
@@ -200,6 +209,7 @@ class MLRunner:
                 
         data = torch.round(data)
         data = data.int()        
+
         return data
     
     def SaveScale(self, filename) -> None:

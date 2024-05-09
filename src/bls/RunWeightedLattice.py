@@ -115,10 +115,7 @@ class RunWeightedLattice:
         if sampleIndex == param['printMem']:        
             self.stackMem.Print("STACK")
         
-        if param['adaptThresh'] > 0:
-            #print(f"       Result: {self.results[0]} and ThreshCount: {self.stack[0].threshCount}")
-            #print(f"       Thresh count: {self.stack[0].threshCount}")
-            #print(f" Done Indicies: {self.doneIndexOut}")
+        if param['adaptThreshOuter'] > 0:           
 
             weights = self.paramStackMem[0].GetLSBIntsHack()
             thresh = self.paramThreshMem[0].GetLSBIntsHack()
@@ -137,7 +134,7 @@ class RunWeightedLattice:
 
                 weights[di] = weights[di] + 1
                 #weights[dii] = weights[dii] + 1
-                print(f"I got an underdog: {di} -> {dii}")                                
+                print(f"LOWER Thresh: {di} -> {dii}")                                
                                 
 
             if thresh[0] > sum(weights):
@@ -145,7 +142,7 @@ class RunWeightedLattice:
                 di = self.doneIndexOut[0]
                 assert(di >= 0)
                 dii = GetNegativeIndex(di, len(weights))
-                print(f"I got an runaway: {di} -> {dii}")
+                print(f"UPPER Thresh: {di} -> {dii}")
                 weights[di] = weights[di] + 1
                 #weights[dii] = weights[dii] + 1                
 

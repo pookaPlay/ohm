@@ -61,8 +61,6 @@ class STACK_WEIGHTED_LATTICE:
                 if self.flags[i] == 1:
                     self.inputs[i] = self.latchInput[i]
                 
-        #################################################                                        
-        #self.HackPTF(memParam)
         intParam = memParam.GetLSBIntsHack()
         threshParam = memThresh.GetLSBIntsHack()        
         
@@ -72,20 +70,15 @@ class STACK_WEIGHTED_LATTICE:
         for i in range(len(self.inputs)):                                    
             self.treeInputs[i] = self.inputs[i] * intParam[i]
         
-        self.pbfOut = 1 if (sum(self.treeInputs) >= halfSum) else 0        
+        self.pbfOut = 1 if (sum(self.treeInputs) >= halfSum) else 0                
         signOut = self.pbfOut*2-1
         
-        #print(f"     PBF is {self.pbfOut} from {self.treeInputs}")
-
-        # # Gets some stats on threshold
         self.stepCount = self.stepCount + 1
         if signOut > 0:
             self.posCount = self.posCount + 1
         else:
             self.negCount = self.negCount + 1        
-
-        self.lastOut = self.pbfOut
-
+        
         for i in range(len(self.inputs)):
             if self.flags[i] == 0:
                 if self.inputs[i] != self.pbfOut:
@@ -101,6 +94,36 @@ class STACK_WEIGHTED_LATTICE:
             self.done = 1
             self.doneIndex = [i for i, flag in enumerate(self.flags) if flag == 0]
                 
+        if self.param['adaptThreshInner'] > 0:
+
+            ptfWeights = memParam.GetLSBIntsHack()
+            totalWeight = sum(ptfWeights)
+            ptfThresh = memThresh.GetLSBIntsHack()        
+            wasThresh = ptfThresh[0]
+
+            if signOut > 0:            
+                ptfThresh[0] = ptfThresh[0] + 1
+                if ptfThresh[0] > totalWeight:
+                    ptfThresh[0] = totalWeight
+                    di = self.doneIndexOut[0]
+                    assert(di >= 0)
+                    ptfWeights[di] = ptfWeights[di] + 1                    
+                    print(f"UPPER Thresh: {di}")       
+
+            else:
+                ptfThresh[0] = ptfThresh[0] - 1
+                if ptfThresh[0] < 1:
+                    ptfThresh[0] = 1              
+                    di = self.doneIndexOut[0]
+                    assert(di >= 0)
+                    ptfWeights[di] = ptfWeights[di] + 1                    
+                    print(f"LOWER Thresh: {di}")       
+
+            memParam.SetLSBIntsHack(ptfWeights)            
+            memThresh.SetLSBIntsHack(ptfThresh)
+            print(f" Before {wasThresh} and after {ptfThresh[0]}")
+
+
         if msb == 1:
             self.pbfOut = 1 - self.pbfOut
 
@@ -112,3 +135,10 @@ class STACK_WEIGHTED_LATTICE:
     def Print(self, prefix="", verbose=1) -> None:        
         print(f"{prefix}STACK_WEIGHTED_LATTICE")
 
+
+def GetNegativeIndex(din, N):
+    if din < N/2:
+        dout = int(din + N/2)
+    else:
+        dout = int(din - N/2)
+    return dout
