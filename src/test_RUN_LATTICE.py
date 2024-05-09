@@ -30,14 +30,14 @@ def ThreshExpand(x, thresh):
 
 def test_RUN():
 
-    numIterations = 1
+    numIterations = 5
     
     display = 0
     threshSpac = 0.25   # 64
-    threshSpac = 1.0   # 16
+    #threshSpac = 1.0   # 16
     thresholds = np.arange(-2.0, 2.0, threshSpac).tolist()     
     print(thresholds)
-    numPoints = 500
+    numPoints = 5
         
     x, y, xv, yv, xxyy = LoadXor(numPoints, display)
     #x, y, xxyy = LoadLinear(numPoints, display)
@@ -72,7 +72,7 @@ def test_RUN():
     'printSample': 0,
     'printParameters': 1,    
     'printIteration': 1, 
-    'printMem': 0,
+    'printMem': 19,
     'postAdaptRun': 0,
     'plotThresh': 0,    
     'printTicks' : 0,
@@ -89,7 +89,7 @@ def test_RUN():
     
     print(f"PTF Weights: {param['ptfWeights']}")
     print(f"PTF  Thresh: {param['ptfThresh']}")
-        
+    
     #ptfThresh = [numNodes]    
     
     

@@ -88,8 +88,7 @@ class RunWeightedLattice:
         
         
     def Run(self, input, sampleIndex, param) -> None:      
-
-        printIndex = -1        
+        
 
         self.ResetIndex()
 
@@ -102,8 +101,9 @@ class RunWeightedLattice:
         self.RunLSB(sampleIndex)
         #for bi in range(len(self.bias)):
         #    self.biasMem[bi].Print(f"LSB {bi}")
-        #if sampleIndex == printIndex:
-        #    self.biasMem[0].Print("LSB")
+
+        if sampleIndex == param['printMem']:
+            self.biasMem[0].Print("INPUT")
         
         #print(f">>>>>>>>>>> MSB PASS ")
         [biasMem.ResetIndex() for biasMem in self.biasMem]            
@@ -112,9 +112,7 @@ class RunWeightedLattice:
 
         self.results = self.stackMem.GetMSBInts()
         #print(f"WC: {self.stack[0].weightCount}")
-        
-        if param['printMem'] > 0:
-            self.biasMem[0].Print("INPUT")
+        if sampleIndex == param['printMem']:        
             self.stackMem.Print("STACK")
         
         if param['adaptThresh'] > 0:

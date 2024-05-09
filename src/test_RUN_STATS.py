@@ -38,7 +38,7 @@ def test_RUN():
     threshSpac = 1.0   # 16
     thresholds = np.arange(-2.0, 2.0, threshSpac).tolist()     
     print(thresholds)
-    numPoints = 500
+    numPoints = 5
         
     x, y, xv, yv, xxyy = LoadXor(numPoints, display)
     #x, y, xxyy = LoadLinear(numPoints, display)
@@ -66,12 +66,12 @@ def test_RUN():
     'ptfWeights': numStack * [numNodes * [1]],    
     'ptfThresh': numStack * [ 1 * [halfD]],   
     'ptfDeltas': np.zeros([numNodes, numNodes]),     
-    'adaptBias': 0,
+    'adaptBias': 1,
     'adaptWeights': 0,
-    'adaptThresh': 1,
+    'adaptThresh': 0,
     'scaleTo': 127,
     'clipAt': 127,
-    'printSample': 0,
+    'printSample': 1,
     'printParameters': 1,    
     'printIteration': 1, 
     'printMem': 0,

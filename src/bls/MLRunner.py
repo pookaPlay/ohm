@@ -103,26 +103,17 @@ class MLRunner:
                 print(f"{stackInputs} -> {result}[{self.ohm.doneIndexOut[0]}] in {self.ohm.doneOut[0]}")
             
             if (param['adaptBias'] > 0):
-                if resultSign > 0:
-                    self.posStackStats = self.posStackStats + 1
-                else:
-                    self.negStackStats = self.negStackStats + 1                
-                if ((ni % param['adaptBias'] == 0) and (ni > 0)):
-                    #print(f"    Stack: {resultSign} +ve: {self.posStackStats} -ve: {self.negStackStats}")
-                    #print(f"    BIAS UPDATE!!!!!!!!!!!!!!!!!")
-                    if self.posStackStats > self.negStackStats:
-                        resultSign = -1
+                biases = self.ohm.paramBiasMem[0].GetLSBInts()                                                        
+                assert(len(stackInputs) == len(biases))
+                
+                for i in range(len(stackInputs)):
+                    if stackInputs[i] > biases[i]:
+                        biases[i] = biases[i] + 1
                     else:
-                        resultSign = 1
-                                    
-                    # Save stuff for plots                    
-                    biases = self.ohm.paramBiasMem[0].GetLSBInts()                                        
-                    biases[outIndex] = biases[outIndex] + resultSign 
-                    self.ohm.paramBiasMem[0].LoadList(biases)
-                    #print(f"     BIAS OUT!!!!!!!!!!!!!!!!!! : {weights}")                                  
-                    self.posStackStats = 0
-                    self.negStackStats = 0
-
+                        biases[i] = biases[i] - 1                    
+                
+                self.ohm.paramBiasMem[0].LoadList(biases)
+                
 
         if param['printIteration'] == 1:
             avg = sum(ticks) / len(ticks)
@@ -138,17 +129,19 @@ class MLRunner:
             #for i in range(len(self.weightStats)):
             #    self.weightStats[i] = self.weightStats[i] / totalMax
             #    self.weightStats[i] = self.weightStats[i] * len(self.weightStats)/2
-            print(f"Stack Stats: +ve: {self.posStack/self.sampleCount} -ve: {self.negStack/self.sampleCount}")
+            print(f"Stack Stats: +ve: {self.posStack/(self.posStack+self.negStack)} -ve: {self.negStack/(self.posStack+self.negStack)}")
             #print(f"1 Rate: {self.posStatsSample}")
             print(f"  PTF Stats: +ve: {self.threshStats[0]} -ve: {self.threshStats[1]}")
             #print(f"W Stat: {self.weightStats}")
 
             if param['printParameters'] == 1:
-                for i in range(len(self.ohm.paramBiasMem)):
-                    biases = self.ohm.paramBiasMem[i].GetLSBInts()                                                        
+                #for i in range(len(self.ohm.paramBiasMem)):
+                    #biases = self.ohm.paramBiasMem[i].GetLSBInts()
                     #print(f"{i}          Bias: {biases}")                                                              
-
+                                
                 for i in range(len(self.ohm.paramStackMem)):                    
+                    biases = self.ohm.paramBiasMem[i].GetLSBInts()
+                    print(f"{i}          Bias: {biases}")                                    
                     weights = self.ohm.paramStackMem[i].GetLSBIntsHack()
                     thresh = self.ohm.paramThreshMem[i].GetLSBIntsHack()                    
                     print(f"{i}       Weights: {weights}")                                       
