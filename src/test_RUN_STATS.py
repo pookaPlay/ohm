@@ -1,4 +1,4 @@
-from ml.TorchSynData import LoadXor
+from ml.TorchSynData import LoadXor, LoadGaussian
 from ml.TorchSynData import LoadLinear
 from ml.TorchSynData import PlotMap
 from bls.RunOHMS import RunOHMS
@@ -33,19 +33,20 @@ def test_RUN():
 
     numIterations = 1
     
-    display = 0
+    display = 1
+    #threshSpac = 0.1   # 240
     threshSpac = 0.25   # 64
-    threshSpac = 1.0   # 16
-    threshSpac = 2.0   # 16
+    #threshSpac = 1.0   # 16
+    #threshSpac = 2.0   # 8    
     thresholds = np.arange(-2.0, 2.0, threshSpac).tolist()     
+    #thresholds = [0.0]
     print(f"Thresholds @ dim: {thresholds}")
-
-    numPoints = 50
+    
+    numPoints = 5
         
     x, y, xv, yv, xxyy = LoadXor(numPoints, display)
+    #x, y, xv, yv, xxyy = LoadGaussian(numPoints, display)
     #x, y, xxyy = LoadLinear(numPoints, display)    
-    plt.scatter(x[:,0], x[:,1])
-    plt.show()
     
     nx = ThreshExpand(x, thresholds)        
     nxxyy = ThreshExpand(xxyy, thresholds)        
@@ -59,8 +60,8 @@ def test_RUN():
     memD = len(nx[0])
     numNodes = memD
     numStack = 1
-    halfD = int(memD/2)
-
+    halfD = int(memD/2)    
+    
     param = {
     'memD': memD,
     'memK': memK,
@@ -70,13 +71,13 @@ def test_RUN():
     'ptfWeights': numStack * [numNodes * [1]],    
     'ptfThresh': numStack * [ 1 * [halfD]],   
     'ptfDeltas': np.zeros([numNodes, numNodes]),     
-    'adaptBias': 1,
+    'adaptBias': 0,
     'adaptWeights': 0,
-    'adaptThreshOuter': 0,
-    'adaptThreshInner': 1,
+    'adaptThresh': 1,
+    'adaptThreshCrazy': 0,
     'scaleTo': 127,
     'clipAt': 127,
-    'printSample': 1,
+    'printSample': 0,
     'printParameters': 1,    
     'printIteration': 1, 
     'printMem': -1,  # set this to the sample index to print

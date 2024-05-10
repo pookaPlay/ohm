@@ -115,51 +115,52 @@ class RunWeightedLattice:
         if sampleIndex == param['printMem']:        
             self.stackMem.Print("STACK")
         
-        if param['adaptThreshOuter'] > 0:           
+        if param['adaptThresh'] > 0:           
 
             weights = self.paramStackMem[0].GetLSBIntsHack()
             thresh = self.paramThreshMem[0].GetLSBIntsHack()
                                     
+            #print(f"Result: {self.results}")
+
             if self.stack[0].posCount > self.stack[0].negCount:
+            #if self.results[0] > 0:
                 thresh[0] = thresh[0] + 1
             else:
                 thresh[0] = thresh[0] - 1
 
             if thresh[0] < 1:
-                thresh[0] = 1              
-                di = self.doneIndexOut[0]
-                #print(self.doneIndexOut)
-                assert(di >= 0)
-                dii = GetNegativeIndex(di, len(weights))                
-
-                weights[di] = weights[di] + 1
-                #weights[dii] = weights[dii] + 1
-                print(f"LOWER Thresh: {di} -> {dii}")                                
+                thresh[0] = 1
+                if param['adaptWeights'] > 0:
+                    di = self.doneIndexOut[0]
+                    assert(di >= 0)
+                    #dii = GetNegativeIndex(di, len(weights))                
+                    weights[di] = weights[di] + 1                
+                    print(f"LOWER Thresh: {di} -> {di}")                                
                                 
 
             if thresh[0] > sum(weights):
                 thresh[0] = sum(weights)
-                di = self.doneIndexOut[0]
-                assert(di >= 0)
-                dii = GetNegativeIndex(di, len(weights))
-                print(f"UPPER Thresh: {di} -> {dii}")
-                weights[di] = weights[di] + 1
-                #weights[dii] = weights[dii] + 1                
+                if param['adaptWeights'] > 0:
+                    di = self.doneIndexOut[0]
+                    assert(di >= 0)
+                    #dii = GetNegativeIndex(di, len(weights))
+                    weights[di] = weights[di] + 1
+                    print(f"UPPER Thresh: {di} -> {di}")
 
             self.paramThreshMem[0].SetLSBIntsHack(thresh)            
             self.paramStackMem[0].SetLSBIntsHack(weights)
         
-        if param['adaptWeights'] == 1:            
+        # if param['adaptWeights'] == 1:            
             
-            weights = self.paramStackMem[0].GetLSBIntsHack()
-            assert(len(weights) == len(self.stack[0].weightCount))
-            for i in range(len(weights)):                                    
-                if self.stack[0].weightCount[i] > 0:
-                    weights[i] = weights[i] + 1
-                else:
-                    weights[i] = weights[i] - 1
-                #weights[i] = weights[i] + self.stack[0].weightCount[i]
-            #self.paramStackMem[0].SetLSBIntsHack(weights)
+        #     weights = self.paramStackMem[0].GetLSBIntsHack()
+        #     assert(len(weights) == len(self.stack[0].weightCount))
+        #     for i in range(len(weights)):                                    
+        #         if self.stack[0].weightCount[i] > 0:
+        #             weights[i] = weights[i] + 1
+        #         else:
+        #             weights[i] = weights[i] - 1
+        #         #weights[i] = weights[i] + self.stack[0].weightCount[i]
+        #     #self.paramStackMem[0].SetLSBIntsHack(weights)
 
         return self.doneOut[0]
                 

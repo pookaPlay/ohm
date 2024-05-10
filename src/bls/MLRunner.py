@@ -24,7 +24,7 @@ class MLRunner:
         self.threshStats = list(2 *[0.0])
         self.weightStats = list(len(self.first) * [0.0])
         self.ohm = RunWeightedLattice(self.first, param)
-
+    
 
     def Run(self, param) -> None:
         print(f"Running on {len(self.input)} samples")
@@ -56,7 +56,7 @@ class MLRunner:
             #########################################################
             #########################################################
             # Run the OHM
-            sample = self.input[ni].tolist()
+            sample = self.input[0].tolist()
             atick = self.ohm.Run(sample, ni, param)
             #########################################################
             

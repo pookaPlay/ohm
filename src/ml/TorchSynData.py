@@ -136,3 +136,68 @@ def LoadLinear(N, show = 1):
     
     return(x,y, xxyy)
     
+def SampleGaussian(mymean, myvar, N):
+
+    mean1 = torch.Tensor([mymean, mymean])
+    cov1 = torch.eye(2) * myvar
+
+    m1 = MultivariateNormal(mean1, cov1)
+    x1 = m1.sample((N, 1)).squeeze()
+    y1 = torch.ones(N,1)
+
+    m2 = MultivariateNormal(mean1, cov1)
+    x2 = m2.sample((N, 1)).squeeze()
+    y2 = torch.ones(N,1)
+
+    m3 = MultivariateNormal(mean1, cov1)
+    x3 = m3.sample((N, 1)).squeeze()
+    y3 = -torch.ones(N,1)
+
+    m4 = MultivariateNormal(mean1, cov1)
+    x4 = m4.sample((N, 1)).squeeze()
+    y4 = -torch.ones(N,1)
+
+    #x1netOut.detach().numpy()      
+    x = torch.cat((x1, x2, x3, x4), 0)    
+    y = torch.cat((y1, y2, y3, y4), 0)
+
+    indices = torch.randperm(x.shape[0])
+    x = x[indices]
+    y = y[indices]
+
+    return(x,y)
+    
+def LoadGaussian(N, show = 1):
+    
+    mymean = 1
+    myvar = 0.1
+    myrange = 2
+    mySpace = 0.1
+
+    (x, y) = SampleGaussian(mymean, myvar, N)
+    
+    indices = torch.randperm(x.shape[0])
+    x = x[indices]
+    y = y[indices]
+
+    (xv, yv) = SampleGaussian(mymean, myvar, N)
+
+    if show == 1:    
+        plt.scatter(x[ y[:,0] > 0 , 0], x[ y[:,0] > 0 , 1], color='g', marker='o')
+        plt.scatter(x[ y[:,0] < 0 , 0], x[ y[:,0] < 0 , 1], color='r', marker='x')
+        plt.show()
+
+    #   X = np.arange(-domain+mean, domain+mean, variance)
+    #   Y = np.arange(-domain+mean, domain+mean, variance)
+    #   X, Y = np.meshgrid(X, Y)
+    xi = np.arange(-myrange, myrange, mySpace)
+    yi = np.arange(-myrange, myrange, mySpace)
+    xx, yy = np.meshgrid(xi, yi)
+    xx = xx.reshape((xx.shape[0]*xx.shape[1], 1))
+    yy = yy.reshape((yy.shape[0]*yy.shape[1], 1))
+    xxt = torch.Tensor(xx)
+    yyt = torch.Tensor(yy)
+    
+    xxyy = torch.cat([xxt, yyt], 1)
+        
+    return(x, y, xv, yv, xxyy)    

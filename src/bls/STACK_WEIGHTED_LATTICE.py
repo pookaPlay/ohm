@@ -94,34 +94,41 @@ class STACK_WEIGHTED_LATTICE:
             self.done = 1
             self.doneIndex = [i for i, flag in enumerate(self.flags) if flag == 0]
                 
-        if self.param['adaptThreshInner'] > 0:
+        if self.param['adaptThreshCrazy'] > 0:
 
             ptfWeights = memParam.GetLSBIntsHack()
             totalWeight = sum(ptfWeights)
+            halfWeight = sum(ptfWeights)/2
             ptfThresh = memThresh.GetLSBIntsHack()        
-            wasThresh = ptfThresh[0]
-
-            if signOut > 0:            
-                ptfThresh[0] = ptfThresh[0] + 1
-                if ptfThresh[0] > totalWeight:
-                    ptfThresh[0] = totalWeight
-                    di = self.doneIndexOut[0]
-                    assert(di >= 0)
-                    ptfWeights[di] = ptfWeights[di] + 1                    
-                    print(f"UPPER Thresh: {di}")       
-
+            if msb == 1: 
+                self.memK                         
+                self.stepWeight = halfWeight/2
             else:
-                ptfThresh[0] = ptfThresh[0] - 1
-                if ptfThresh[0] < 1:
-                    ptfThresh[0] = 1              
-                    di = self.doneIndexOut[0]
-                    assert(di >= 0)
-                    ptfWeights[di] = ptfWeights[di] + 1                    
-                    print(f"LOWER Thresh: {di}")       
+                self.stepWeight = self.stepWeight/2
 
-            memParam.SetLSBIntsHack(ptfWeights)            
+            #print(f"Step Weight: {self.stepWeight} at step {self.stepCount}")
+            if self.stepWeight >= 1:
+                if signOut > 0:            
+                    ptfThresh[0] = ptfThresh[0] + self.stepWeight
+                    if ptfThresh[0] > totalWeight:
+                        ptfThresh[0] = totalWeight
+                        di = self.doneIndexOut[0]
+                        assert(di >= 0)
+                        ptfWeights[di] = ptfWeights[di] + 1                    
+                        print(f"UPPER Thresh: {di}")       
+
+                else:
+                    ptfThresh[0] = ptfThresh[0] - self.stepWeight
+                    if ptfThresh[0] < 1:
+                        ptfThresh[0] = 1              
+                        di = self.doneIndexOut[0]
+                        assert(di >= 0)
+                        ptfWeights[di] = ptfWeights[di] + 1                    
+                        print(f"LOWER Thresh: {di}")       
+
+            #memParam.SetLSBIntsHack(ptfWeights)            
             memThresh.SetLSBIntsHack(ptfThresh)
-            print(f" Before {wasThresh} and after {ptfThresh[0]}")
+            #print(f" {self.stepCount}: setting to  {ptfThresh[0]}")
 
 
         if msb == 1:
