@@ -55,7 +55,7 @@ def SampleData(mymean, myvar, N):
 
     return(x,y)
 
-def LoadXor(N, show = 1):
+def LoadXor(N, show = 0):
     
     mymean = 1
     myvar = 0.1
@@ -92,7 +92,7 @@ def LoadXor(N, show = 1):
 
 
 
-def LoadLinear(N, show = 1):
+def LoadLinear(N, show = 0):
     mymean1 = 1
     mymean2 = 1
     myvar1 = 0.1
@@ -167,7 +167,7 @@ def SampleGaussian(mymean, myvar, N):
 
     return(x,y)
     
-def LoadGaussian(N, show = 1):
+def LoadGaussian(N, show = 0):
     
     mymean = 1
     myvar = 0.1

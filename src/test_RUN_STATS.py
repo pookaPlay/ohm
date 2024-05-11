@@ -33,20 +33,20 @@ def test_RUN():
 
     numIterations = 1
     
-    display = 1
+    
     #threshSpac = 0.1   # 240
     threshSpac = 0.25   # 64
     #threshSpac = 1.0   # 16
     #threshSpac = 2.0   # 8    
-    thresholds = np.arange(-2.0, 2.0, threshSpac).tolist()     
-    #thresholds = [0.0]
+    #thresholds = np.arange(-2.0, 2.0, threshSpac).tolist()     
+    thresholds = [0.0]
     print(f"Thresholds @ dim: {thresholds}")
     
-    numPoints = 5
-        
-    x, y, xv, yv, xxyy = LoadXor(numPoints, display)
-    #x, y, xv, yv, xxyy = LoadGaussian(numPoints, display)
-    #x, y, xxyy = LoadLinear(numPoints, display)    
+    numPoints = 50
+    
+    x, y, xv, yv, xxyy = LoadXor(numPoints)
+    #x, y, xv, yv, xxyy = LoadGaussian(numPoints)
+    #x, y, xxyy = LoadLinear(numPoints)    
     
     nx = ThreshExpand(x, thresholds)        
     nxxyy = ThreshExpand(xxyy, thresholds)        
@@ -54,8 +54,6 @@ def test_RUN():
     print(f"Thresh expand: {x.shape} -> {nx.shape}")
 
     memK = 8
-    #input = [8, -8, 4, -4, 2, -2, 1, -1]
-    #input += [-x for x in input]  # Add the negative values
     dataN = nx.shape[0]
     memD = len(nx[0])
     numNodes = memD
@@ -71,9 +69,9 @@ def test_RUN():
     'ptfWeights': numStack * [numNodes * [1]],    
     'ptfThresh': numStack * [ 1 * [halfD]],   
     'ptfDeltas': np.zeros([numNodes, numNodes]),     
-    'adaptBias': 0,
+    'adaptBias': 1,
     'adaptWeights': 0,
-    'adaptThresh': 1,
+    'adaptThresh': 0,
     'adaptThreshCrazy': 0,
     'scaleTo': 127,
     'clipAt': 127,
@@ -81,8 +79,8 @@ def test_RUN():
     'printParameters': 1,    
     'printIteration': 1, 
     'printMem': -1,  # set this to the sample index to print
-    'postAdaptRun': 0,
-    'plotThresh': 0,    
+    'postAdaptRun': 1,
+    'plotResults': 1,    
     'printTicks' : 0,
     }
    
@@ -120,12 +118,27 @@ def test_RUN():
 
 
 
-"""         thresh = runner.plotResults['thresh']        
-        if param['plotThresh'] == 1:
-            plt.plot(thresh)
-            plt.xlabel('Threshold Index')
-            plt.ylabel('Threshold Value')
-            plt.title('Threshold Values')
-            plt.show()
- """
+    if param['plotResults'] == 1:
+        
+        #min_value = torch.min(runner.input)
+        #max_value = torch.max(runner.input)        
+        minScale = -150
+        maxScale = 150
+
+        offsets = runner.ohm.paramBiasMem[0].GetLSBInts()        
+        off = torch.tensor(offsets)        
+
+        plt.scatter(runner.input[ y[:,0] > 0 , 0], runner.input[ y[:,0] > 0 , 1], color='g', marker='o')
+        plt.scatter(runner.input[ y[:,0] < 0 , 0], runner.input[ y[:,0] < 0 , 1], color='r', marker='x')
+
+        plt.axvline(x=off[0], color='b', linestyle='--')
+        plt.axhline(y=off[1], color='b', linestyle='--')        
+        plt.axvline(x=-off[2], color='g', linestyle='--')
+        plt.axhline(y=-off[3], color='g', linestyle='--')
+
+        plt.xlim(minScale, maxScale)
+        plt.ylim(minScale, maxScale)
+        plt.show()
+                
+
 test_RUN()

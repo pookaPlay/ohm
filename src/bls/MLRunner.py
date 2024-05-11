@@ -56,7 +56,7 @@ class MLRunner:
             #########################################################
             #########################################################
             # Run the OHM
-            sample = self.input[0].tolist()
+            sample = self.input[ni].tolist()
             atick = self.ohm.Run(sample, ni, param)
             #########################################################
             
@@ -113,13 +113,13 @@ class MLRunner:
             if (param['adaptBias'] > 0):
                 biases = self.ohm.paramBiasMem[0].GetLSBInts()                                                        
                 assert(len(stackInputs) == len(biases))
-
-                #biases[outIndex] = biases[outIndex] + 1
-                #for i in range(len(stackInputs)):
-                #    if stackInputs[i] > biases[i]:
-                #        biases[i] = biases[i] + 1
-                #    else:
-                #        biases[i] = biases[i] - 1                    
+                
+                #sample = self.input[ni].tolist()                
+                for i in range(len(sample)):
+                    if sample[i] > biases[i]:
+                        biases[i] = biases[i] + 1
+                    else:
+                        biases[i] = biases[i] - 1                    
                 
                 self.ohm.paramBiasMem[0].LoadList(biases)
                 
@@ -188,8 +188,8 @@ class MLRunner:
         return(results)
 
     def ScaleData(self, data, maxValOut, clipValOut) -> None:
-        self.min_value = torch.min(data)
-        self.max_value = torch.max(data)        
+        #self.min_value = torch.min(data)
+        #self.max_value = torch.max(data)        
         
         self.minScale = -3.0
         self.maxScale = 3.0
@@ -211,7 +211,18 @@ class MLRunner:
         data = data.int()        
 
         return data
-    
+
+    def ReverseScaleData(self, data, maxValOut, clipValOut) -> None:
+        #self.min_value = torch.min(data)
+        #self.max_value = torch.max(data)        
+        
+        #self.minScale = -3.0
+        #self.maxScale = 3.0
+        # maxValOut = 127
+        data = (data / maxValOut) * self.maxScale        
+
+        return data
+
     def SaveScale(self, filename) -> None:
         # Save self.minScale, self.maxScale
         with open(filename, 'wb') as f:
