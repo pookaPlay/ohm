@@ -17,7 +17,7 @@ def PlotMap(ynp):
     #h = plt.contourf(x,y,z)
     plt.show()
 
-def SampleData(mymean, myvar, N):
+def SampleData(mymean, myvar, N, distType = 'uniform'):
 
     mean1 = torch.Tensor([mymean, -mymean])
     cov1 = torch.eye(2) * myvar
@@ -29,20 +29,39 @@ def SampleData(mymean, myvar, N):
     mean4 = torch.Tensor([-mymean, -mymean])
     cov4 = torch.eye(2) * myvar
 
-    m1 = MultivariateNormal(mean1, cov1)
-    x1 = m1.sample((N, 1)).squeeze()
+    D = mean1.shape[0]
+    
+    if distType == 'uniform':
+        x1 = torch.rand((N, D)) * (2 * myvar) - myvar
+        x1 = x1 + mean1
+    else:        
+        m1 = MultivariateNormal(mean1, cov1)
+        x1 = m1.sample((N, 1)).squeeze()
     y1 = torch.ones(N,1)
 
-    m2 = MultivariateNormal(mean2, cov2)
-    x2 = m2.sample((N, 1)).squeeze()
+    if distType == 'uniform':        
+        x2 = torch.rand((N, D)) * (2 * myvar) - myvar
+        x2 = x2 + mean2
+    else:
+        m2 = MultivariateNormal(mean2, cov2)        
+        x2 = m2.sample((N, 1)).squeeze()
     y2 = torch.ones(N,1)
 
-    m3 = MultivariateNormal(mean3, cov3)
-    x3 = m3.sample((N, 1)).squeeze()
+    if distType == 'uniform':
+        x3 = torch.rand((N, D)) * (2 * myvar) - myvar  
+        x3 = x3 + mean3
+    else:
+        m3 = MultivariateNormal(mean3, cov3)
+        x3 = m3.sample((N, 1)).squeeze()
+
     y3 = -torch.ones(N,1)
 
-    m4 = MultivariateNormal(mean4, cov4)
-    x4 = m4.sample((N, 1)).squeeze()
+    if distType == 'uniform':
+        x4 = torch.rand((N, D)) * (2 * myvar) - myvar        
+        x4 = x4 + mean4
+    else:
+        m4 = MultivariateNormal(mean4, cov4)
+        x4 = m4.sample((N, 1)).squeeze()
     y4 = -torch.ones(N,1)
 
     #x1netOut.detach().numpy()      
@@ -55,20 +74,25 @@ def SampleData(mymean, myvar, N):
 
     return(x,y)
 
-def LoadXor(N, show = 0):
+def LoadXor(N, distType = 'uniform', show = 0):
     
-    mymean = 1
-    myvar = 0.1
+    if distType == 'uniform':
+        mymean = 1.5
+        myvar = 1
+    else:
+        mymean = 1
+        myvar = 0.1
+
     myrange = 2
     mySpace = 0.1
 
-    (x, y) = SampleData(mymean, myvar, N)
+    (x, y) = SampleData(mymean, myvar, N, distType)
     
     indices = torch.randperm(x.shape[0])
     x = x[indices]
     y = y[indices]
 
-    (xv, yv) = SampleData(mymean, myvar, N)
+    (xv, yv) = SampleData(mymean, myvar, N, distType)
 
     if show == 1:    
         plt.scatter(x[ y[:,0] > 0 , 0], x[ y[:,0] > 0 , 1], color='g', marker='o')

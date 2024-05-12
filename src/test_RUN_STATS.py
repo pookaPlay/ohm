@@ -32,8 +32,7 @@ def ThreshExpand(x, thresh):
 def test_RUN():
 
     numIterations = 1
-    
-    
+        
     #threshSpac = 0.1   # 240
     threshSpac = 0.25   # 64
     #threshSpac = 1.0   # 16
@@ -50,7 +49,7 @@ def test_RUN():
     
     nx = ThreshExpand(x, thresholds)        
     nxxyy = ThreshExpand(xxyy, thresholds)        
-
+    
     print(f"Thresh expand: {x.shape} -> {nx.shape}")
 
     memK = 8
