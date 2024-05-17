@@ -41,9 +41,9 @@ def test_RUN():
     thresholds = [0.0]
     print(f"Thresholds @ dim: {thresholds}")
     
-    numPoints = 50
+    numPoints = 5
     
-    x, y, xv, yv, xxyy = LoadXor(numPoints)
+    x, y, xv, yv, xxyy = LoadXor(numPoints, 'uniform')
     #x, y, xv, yv, xxyy = LoadGaussian(numPoints)
     #x, y, xxyy = LoadLinear(numPoints)    
     
@@ -70,7 +70,7 @@ def test_RUN():
     'ptfDeltas': np.zeros([numNodes, numNodes]),     
     'adaptBias': 1,
     'adaptWeights': 0,
-    'adaptThresh': 0,
+    'adaptThresh': 1,
     'adaptThreshCrazy': 0,
     'scaleTo': 127,
     'clipAt': 127,
@@ -78,7 +78,7 @@ def test_RUN():
     'printParameters': 1,    
     'printIteration': 1, 
     'printMem': -1,  # set this to the sample index to print
-    'postAdaptRun': 1,
+    'postAdaptRun': 0,
     'plotResults': 1,    
     'printTicks' : 0,
     }

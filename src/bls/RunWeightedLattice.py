@@ -114,14 +114,15 @@ class RunWeightedLattice:
         #print(f"WC: {self.stack[0].weightCount}")
         if sampleIndex == param['printMem']:        
             self.stackMem.Print("STACK")
+
         
         if param['adaptThresh'] > 0:           
-
+            
             weights = self.paramStackMem[0].GetLSBIntsHack()
             thresh = self.paramThreshMem[0].GetLSBIntsHack()
                                     
             #print(f"Result: {self.results}")
-
+            #print(f"Pos: {self.stack[0].posCount} Neg: {self.stack[0].negCount} Thresh: {thresh[0]}")
             if self.stack[0].posCount > self.stack[0].negCount:
             #if self.results[0] > 0:
                 thresh[0] = thresh[0] + 1
