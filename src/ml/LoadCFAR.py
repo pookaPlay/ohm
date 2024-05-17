@@ -23,7 +23,7 @@ def LoadSomeData():
 
 
     if True:
-        with open(f'plane_car.pkl', 'rb') as f:
+        with open(f'data/plane_car.pkl', 'rb') as f:
             images = pickle.load(f)
     else:
         transform = transforms.Compose(
@@ -47,7 +47,7 @@ def LoadSomeData():
                     images[cls].append(image)
 
         print("Saving images")
-        with open(f'plane_car.pkl', 'wb') as f:
+        with open(f'data/plane_car.pkl', 'wb') as f:
             pickle.dump(images, f)
     
 
