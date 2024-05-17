@@ -79,12 +79,14 @@ def TestDataset():
     #print(M)
     print(W.shape)
     #print(M.shape)
-
-    return W, M
+    imgData, imgLabels = LoadSomeData()
+    print(f"Data: {imgData.shape} Labels: {imgLabels.shape}")
+    ShowMNIST(imgData[0])
+    
 
 
 if __name__ == "__main__":
     #LoadSomeData()    
-    ProcessDataset()    
-    #TestDataset()
+    #ProcessDataset()    
+    TestDataset()
     print("Done")
