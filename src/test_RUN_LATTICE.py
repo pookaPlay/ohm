@@ -5,6 +5,7 @@ from bls.MLRunner import MLRunner
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+from ml.LoadMnist import LoadSomeData, ShowMNIST
 
 seed = 0
 torch.manual_seed(seed)
@@ -30,18 +31,34 @@ def ThreshExpand(x, thresh):
 
 def test_RUN():
 
-    numIterations = 5
+    numIterations = 1
+    imgData, imgLabels = LoadData()
+    print(f"Data: {imgData.shape} Labels: {imgLabels.shape}")
+    ShowMNIST(imgData[0])
     
-    display = 0
+    img = imgData[0]    
+    imgW = img.shape[1]
+    imgH = img.shape[2]
+    print(f"Image: {img.shape} W: {imgW} H: {imgH}")
+    
+    imgVec = img.flatten()
+    imgD = imgW * imgH
+    print(f"Image Flat: {imgVec.shape} D: {imgD}")
+
+    return
+    #threshSpac = 0.1   # 240
     threshSpac = 0.25   # 64
     #threshSpac = 1.0   # 16
-    thresholds = np.arange(-2.0, 2.0, threshSpac).tolist()     
-    print(thresholds)
+    #threshSpac = 2.0   # 8    
+    #thresholds = np.arange(-2.0, 2.0, threshSpac).tolist()     
+    thresholds = [0.0]
+    print(f"Thresholds @ dim: {thresholds}")
     numPoints = 5
         
-    x, y, xv, yv, xxyy = LoadXor(numPoints, display)
     #x, y, xxyy = LoadLinear(numPoints, display)
-        
+    x, y, xv, yv, xxyy = LoadXor(numPoints, 'uniform')
+    #x, y, xv, yv, xxyy = LoadGaussian(numPoints)
+    #x, y, xxyy = LoadLinear(numPoints)         
     nx = ThreshExpand(x, thresholds)        
     nxxyy = ThreshExpand(xxyy, thresholds)        
 
@@ -73,7 +90,7 @@ def test_RUN():
     'printSample': 0,
     'printParameters': 1,    
     'printIteration': 1, 
-    'printMem': 19,
+    'printMem': -1,
     'postAdaptRun': 0,
     'plotThresh': 0,    
     'printTicks' : 0,
