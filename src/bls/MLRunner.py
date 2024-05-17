@@ -4,6 +4,10 @@ import matplotlib.pyplot as plt
 import math
 import pickle
 import torch
+import sys
+
+smallest_int = -sys.maxsize - 1
+largest_int = sys.maxsize - 1
 
 class MLRunner:
 
@@ -23,8 +27,7 @@ class MLRunner:
         self.posStatsSample = list(len(self.first) * [0.0])
         self.threshStats = list(2 *[0.0])
         self.weightStats = list(len(self.first) * [0.0])
-        self.ohm = RunWeightedLattice(self.first, param)
-    
+        self.ohm = RunWeightedLattice(self.first, param)   
 
     def Run(self, param) -> None:
         print(f"Running on {len(self.input)} samples")

@@ -66,8 +66,8 @@ def ProcessDataset():
             W = torch.max(W, imgMat)
             M = torch.min(M, imgMat)
             
-    torch.save(W, 'W.pt')
-    torch.save(M, 'M.pt')
+    #torch.save(W, 'W.pt')
+    #torch.save(M, 'M.pt')
     return W, M
 
 

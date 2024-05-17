@@ -3,6 +3,7 @@ from ml.TorchSynData import LoadLinear
 from ml.TorchSynData import PlotMap
 from bls.RunOHMS import RunOHMS
 from bls.MLRunner import MLRunner
+from bls.BatchMAM import BatchMAM
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -36,19 +37,19 @@ def test_RUN_AM():
     display = 0
     threshSpac = 0.25   # 64
     threshSpac = 1.0   # 16
-    thresholds = np.arange(-2.0, 2.0, threshSpac).tolist()     
-    print(thresholds)
+    thresholds = [0.0]
+    print(f"Thresholds @ dim: {thresholds}")
     numPoints = 5
         
-    x, y, xv, yv, xxyy = LoadXor(numPoints, display)
     #x, y, xxyy = LoadLinear(numPoints, display)
-        
+    x, y, xv, yv, xxyy = LoadXor(numPoints, 'uniform', 1)
+            
     nx = ThreshExpand(x, thresholds)        
     nxxyy = ThreshExpand(xxyy, thresholds)        
 
     print(f"Thresh expand: {x.shape} -> {nx.shape}")
 
-    memK = 12
+    memK = 8
     #input = [8, -8, 4, -4, 2, -2, 1, -1]
     #input += [-x for x in input]  # Add the negative values
     dataN = nx.shape[0]
@@ -68,21 +69,29 @@ def test_RUN_AM():
     'adaptBias': 0,
     'adaptWeights': 0,
     'adaptThresh': 0,
+    'adaptThreshCrazy': 0,
     'scaleTo': 127,
+    'clipAt': 127,
     'printSample':0,
     'printParameters': 1,    
     'printIteration': 1, 
-    'printMem': 1,
+    'printMem': 0,
+    'printTicks': 0,
     'postAdaptRun': 0,
     'plotThresh': 0,
-    }
+    }   
 
     for i in range(len(param['ptfThresh'])):
         param['ptfThresh'][i] = [i+1]
 
-    runner = MLRunner(nx, nxxyy, param)        
+    #runner = MLRunner(nx, nxxyy, param)        
     posStatsSample = param['numNodes'] * [0.0]
 
+    mam = BatchMAM(nx, nxxyy, param)    
+    mam.BatchTrainMAM()
+    mam.BatchTestMAM()
+
+    return
     for iter in range(numIterations):
         print("##################################################")
         print(f"ITERATION {iter}")
