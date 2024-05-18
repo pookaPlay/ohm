@@ -37,7 +37,7 @@ def test_MAM():
     threshSpac = 1.0   # 16
     thresholds = [0.0]
     print(f"Thresholds @ dim: {thresholds}")
-    numPoints = 5
+    numPoints = 3
         
     #x, y, xxyy = LoadLinear(numPoints, display)
     x, y, xv, yv, xxyy = LoadXor(numPoints, 'uniform', 1)

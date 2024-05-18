@@ -26,35 +26,48 @@ class BatchMAM:
     
     def BatchTrainMAM(self) -> None:
         D = self.input.shape[-1]
+        N = len(self.input)
+     
+        print(f"Processing {N} samples with D={D}")
         
-        print(f"Processing {len(self.input)} samples with D={D}")
+        self.W = torch.ones([D, D]) * largest_int
+        self.M = torch.ones([D, D]) * smallest_int
         
-        self.W = torch.ones([D, D]) * smallest_int                
-        self.M = torch.ones([D, D]) * largest_int
-        
-        for ni in range(len(self.input)):            
+        for ni in range(N):            
             imgMat = self.input[ni].view(D, 1) - self.input[ni].view(1, D)            
-            self.W = torch.max(self.W, imgMat)
-            self.M = torch.min(self.M, imgMat)
+            self.W = torch.min(self.W, imgMat)
+            self.M = torch.max(self.M, imgMat)
 
-            #print(f"{self.input[ni].tolist()}")        
-                
+            #print(f"{self.input[ni].tolist()}")     
 
     def BatchTestMAM(self) -> None:
         D = self.input.shape[-1]
         N = len(self.input)
+   
         print(f"Testing  {N} samples with D={D}")
-                
-        self.output = torch.ones([D]) * smallest_int
+
+        self.outputW = torch.zeros([D])
+        self.outputM = torch.zeros([D])
 
         for ni in range(N):
-            for di in range(D):            
-                diff = self.input[ni, :] - self.W[:, di]
-                self.output[di] = torch.max(diff)
-            
-            self.output = self.output.int()
-            print(f"{self.input[ni].tolist()} -> {self.output.tolist()}")
 
+            for di in range(D):            
+                #diffW = self.input[ni, :] + self.W[:, di]
+                diffW = self.input[ni, :] + self.W[di, :]                
+                self.outputW[di] = torch.max(diffW)
+
+                #diffM = self.input[ni, :] + self.M[:, di]                
+                diffM = self.input[ni, :] + self.M[di,:]                
+                self.outputM[di] = torch.min(diffM)
+            
+            self.outputW = self.outputW.int()
+            self.outputM = self.outputM.int()
+
+            print(f"W: {self.input[ni].tolist()} -> {self.outputW.tolist()}")
+            print(f"M: {self.input[ni].tolist()} -> {self.outputM.tolist()}")
+
+        return
+    
         input = torch.tensor([-47, -43, 47, 43])
         for di in range(D):            
             diff = input - self.W[:, di]
