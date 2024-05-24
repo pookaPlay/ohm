@@ -31,14 +31,29 @@ class BatchMAM:
         print(f"Processing {N} samples with D={D}")
         
         self.W = torch.ones([D, D]) * largest_int
-        self.M = torch.ones([D, D]) * smallest_int
-        
+        self.M = torch.ones([D, D]) * smallest_int        
+
+        imgMatList = []
         for ni in range(N):            
             imgMat = self.input[ni].view(D, 1) - self.input[ni].view(1, D)            
-            self.W = torch.min(self.W, imgMat)
-            self.M = torch.max(self.M, imgMat)
+            self.W = torch.min(self.W, imgMat)                
+            self.M = torch.max(self.M, imgMat)    
 
-            #print(f"{self.input[ni].tolist()}")     
+            imgMatList.append(imgMat)
+        
+        imgMatTensor = torch.stack(imgMatList)        
+        #print(f"imgMatTensor: {imgMatTensor.shape}")
+        
+        #self.MED, self.IND = torch.median(imgMatTensor, dim=0)
+        kval = int(D/2)    # smallest
+        #kval = 3
+        self.MED, self.IND = torch.kthvalue(imgMatTensor, k=kval, dim=0)
+        #print(f"MED: {self.MED.shape} and IND: {self.IND.shape}")
+        
+        print(f"W: {self.W}")
+        print(f"MED: {self.MED}")
+
+        #print(f"{self.input[ni].tolist()}")     
 
     def BatchTestMAM(self) -> None:
         D = self.input.shape[-1]
@@ -48,6 +63,8 @@ class BatchMAM:
 
         self.outputW = torch.zeros([D])
         self.outputM = torch.zeros([D])
+        self.outputMED = torch.zeros([D])
+        self.outputIND = torch.zeros([D])
 
         for ni in range(N):
 
@@ -60,21 +77,43 @@ class BatchMAM:
                 diffM = self.input[ni, :] + self.M[di,:]                
                 self.outputM[di] = torch.min(diffM)
             
+                diffMED = self.input[ni, :] + self.MED[di,:]
+                #self.outputMED[di] = torch.median(diffMED)
+                kval = int(D/2)
+                #kval = D-2
+                self.outputMED[di], self.outputIND[di] = torch.kthvalue(diffMED, k=kval)
+
+
+
             self.outputW = self.outputW.int()
             self.outputM = self.outputM.int()
+            self.outputMED = self.outputMED.int()
 
             print(f"W: {self.input[ni].tolist()} -> {self.outputW.tolist()}")
             print(f"M: {self.input[ni].tolist()} -> {self.outputM.tolist()}")
-
-        return
-    
-        input = torch.tensor([-47, -43, 47, 43])
-        for di in range(D):            
-            diff = input - self.W[:, di]
-            self.output[di] = torch.max(diff)
+            print(f"MED: {self.input[ni].tolist()} -> {self.outputMED.tolist()}")
         
-        self.output = self.output.int()
-        print(f"T {input.tolist()} -> {self.output.tolist()}")
+    
+        #input = torch.tensor([-110, 119, 110, -119])
+        tpl = [[23, 35], [99, 99], [47, -53]]
+        tpl = []
+        for ni in range(len(tpl)):
+            tp = torch.tensor(tpl[ni])
+            input = torch.cat((tp, -tp), dim=0)            
+
+            self.outputW = torch.zeros([D])
+            self.outputM = torch.zeros([D])
+            for di in range(D):            
+                diffW = input + self.W[di, :]
+                self.outputW[di] = torch.max(diffW)
+                diffM= input + self.M[di, :]
+                self.outputM[di] = torch.min(diffM)
+            
+            self.outputW = self.outputW.int()
+            self.outputM = self.outputM.int()
+            
+            print(f"Test W: {input.tolist()} -> {self.outputW.tolist()}")
+            print(f"Test M: {input.tolist()} -> {self.outputM.tolist()}")
 
 
     def ScaleData(self, data, maxValOut, clipValOut) -> None:
