@@ -30,7 +30,7 @@ def ThreshExpand(x, thresh):
     
     return nx
 
-def test_RUN_AM():
+def test_RUN_MAM():
 
     numIterations = 1
     
@@ -81,45 +81,24 @@ def test_RUN_AM():
     'plotThresh': 0,
     }   
 
-    for i in range(len(param['ptfThresh'])):
+    for i in range(numStack):
         param['ptfThresh'][i] = [i+1]
-
-    #runner = MLRunner(nx, nxxyy, param)        
-    posStatsSample = param['numNodes'] * [0.0]
+        #param['ptfThresh'][i] = [numNodes]  # min
+    
 
     mam = BatchMAM(nx, nxxyy, param)    
     mam.BatchTrainMAM()
-    mam.BatchTestMAM()
+    #mam.BatchTestMAM()
+    
+    runner = MLRunner(nx, nxxyy, param)            
 
-    return
     for iter in range(numIterations):
         print("##################################################")
         print(f"ITERATION {iter}")
 
-        #weights = runner.ohm.paramStackMem[0].GetLSBIntsHack()                                                                    
-        #print(f"       Weights In: {weights}")                                       
-        #thresh = runner.ohm.paramThreshMem[0].GetLSBIntsHack()                                                                
-        #print(f"       Thresh In: {thresh}")                                       
         
         runner.Run(param)
         
-        # weights = runner.ohm.paramStackMem[0].GetLSBIntsHack()                                                                    
-        # print(f"       Weights Out: {weights}")                                       
-        # thresh = runner.ohm.paramThreshMem[0].GetLSBIntsHack()                                                                
-        # print(f"       Thresh Out: {thresh} out of {sum(weights)}")                                       
-
-        thresh = runner.plotResults['thresh']
-        
-        if param['plotThresh'] == 1:
-            plt.plot(thresh)
-            plt.xlabel('Threshold Index')
-            plt.ylabel('Threshold Value')
-            plt.title('Threshold Values')
-            plt.show()
-
-        #adaptWeights = 0
-        #result = runner.ApplyToMap(adaptWeights)
-        #PlotMap(result)
         if param['postAdaptRun'] == 1:
             was1 = param['adaptWeights']
             was2 = param['adaptThresh']
@@ -137,4 +116,4 @@ def test_RUN_AM():
 
 
 
-test_RUN_AM()
+test_RUN_MAM()

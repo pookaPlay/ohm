@@ -1,7 +1,7 @@
 from ml.TorchSynData import LoadXor
 from ml.TorchSynData import LoadLinear
 from ml.TorchSynData import PlotMap
-from bls.BatchMAM import BatchMAM
+from bls.SortingMAM import SortingMAM
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -37,16 +37,19 @@ def test_MAM():
     threshSpac = 1.0   # 16
     thresholds = [0.0]
     print(f"Thresholds @ dim: {thresholds}")
-    numPoints = 3
+    numPoints = 2
         
     #x, y, xxyy = LoadLinear(numPoints, display)
-    x, y, xv, yv, xxyy = LoadXor(numPoints, 'uniform', 1)
+    x, y, xv, yv, xxyy = LoadXor(numPoints, 'uniform', display)
             
     nx = ThreshExpand(x, thresholds)        
     nxxyy = ThreshExpand(xxyy, thresholds)        
 
     print(f"Thresh expand: {x.shape} -> {nx.shape}")
 
+    #nx = torch.tensor([[0, 0, 0], [0, -2, -4], [0, -3, 0]])
+    #y = torch.tensor([[0, 1, 0], [-1, -1, 0], [0, -2, 0]])    
+    
     memK = 8
     #input = [8, -8, 4, -4, 2, -2, 1, -1]
     #input += [-x for x in input]  # Add the negative values
@@ -80,9 +83,8 @@ def test_MAM():
     }   
 
 
-    mam = BatchMAM(nx, nxxyy, param)    
-    mam.BatchTrainMAM()
-    #mam.BatchPlayMAM()
-    mam.BatchTestMAM()
+    mam = SortingMAM(nx, nxxyy, param)    
+    mam.BatchTrain(nx, y)    
+    mam.BatchTest(nx, y)
 
 test_MAM()
