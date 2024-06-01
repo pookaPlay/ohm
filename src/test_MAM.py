@@ -82,6 +82,11 @@ def test_MAM():
     y = torch.tensor([[1, 2, 3], [0, -2, -4], [-1, 0, 1]])    
     run_MAM(exp, nx, y)
 
+    exp = "mag"
+    nx = torch.tensor([[2, 1, 3], [0, -2, -4], [-3, 1, 0]])
+    y = torch.tensor([[1, 2, 3], [-4, -2, 0], [-3, 0, 1]])    
+    run_MAM(exp, nx, y)
+
 
 
 test_MAM()
