@@ -42,7 +42,7 @@ class SortingMAM:
             
             sinput, sindex = torch.sort(input, dim=1, descending=True)            
             sinput = sinput.view(D, 1)
-            #print(sinput)
+            print(f"sorted input: {sinput.tolist()}")
             #sinput = y[ni].view(D, 1)
             
             imgMat = sinput - input            
