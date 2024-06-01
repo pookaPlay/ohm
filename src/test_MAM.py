@@ -1,10 +1,10 @@
 from ml.TorchSynData import LoadXor
 from ml.TorchSynData import LoadLinear
 from ml.TorchSynData import PlotMap
-from bls.BatchMAM import BatchMAM
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+import sys 
 
 seed = 0
 torch.manual_seed(seed)
@@ -12,77 +12,76 @@ np.random.seed(seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-def ThreshExpand(x, thresh):
+smallest_int = -sys.maxsize - 1
+largest_int = sys.maxsize - 1
+
+def run_MAM(expName, nx, y):
+
+    D = nx.shape[-1]
+    N = len(nx)
     
-    N = x.shape[0]
-    D = x.shape[1]
-    ND = 2 * D * len(thresh)
-    #print(x)
-    #print(f"Expanding {N} samples to {ND} dimensions")
-    nx = torch.zeros([N, ND])
-    for t in range(len(thresh)):
-        nx[:, t*D:(t+1)*D] = x - thresh[t]
+    #print("DATA")
+    #for ni in range(N):
+    #    print(f"{nx[ni].tolist()} -> {y[ni].tolist()}")
+
+    #print(f"Processing {N} samples with D={D}")
+        
+    W = torch.ones([D, D]) * largest_int
+    M = torch.ones([D, D]) * smallest_int        
     
-    for t in range(len(thresh)):        
-        nx[:, (t+len(thresh))*D:(t+len(thresh)+1)*D] = thresh[t] - x
+    for ni in range(N):            
+        
+        input = nx[ni]                
+        sinput = y[ni].view(D, 1)                 
+        imgMat = sinput - input
+        
+        W = torch.min(W, imgMat)                
+        M = torch.max(M, imgMat)            
+
+    outputW = torch.zeros([D])
+    outputM = torch.zeros([D])
     
-    return nx
+    for ni in range(N):
+        input = nx[ni, :]        
+        for di in range(D):            
+            
+            diffW = input + W[di, :]                
+            outputW[di] = torch.max(diffW)
+            
+            diffM = input + M[di,:]                
+            outputM[di] = torch.min(diffM)
+
+        outputW = outputW.int()
+        outputM = outputM.int()
+
+        #print(f"W: {input.tolist()} -> {outputW.tolist()}")
+        #print(f"M: {input.tolist()} -> {outputM.tolist()}")
+        if (not torch.all(torch.eq(outputW, outputM))):
+            print(f"{expName} result difference")
+            print(f"{y[ni].tolist()}: {outputW.tolist()} != {outputM.tolist()}")
+    
 
 def test_MAM():
+    exp = "paper"
+    nx = torch.tensor([[0, 0, 0], [0, -2, -4], [0, -3, 0]])
+    y = torch.tensor([[0, 1, 0], [-1, -1, 0], [0, -2, 0]])    
+    run_MAM(exp, nx, y)
 
-    numIterations = 1
+    exp = "inc"
+    nx = torch.tensor([[2, 1, 3], [0, -2, -4], [-1, 1, 0]])
+    y = torch.tensor([[1, 2, 3], [-4, -2, 0], [-1, 0, 1]])    
+    run_MAM(exp, nx, y)
     
-    display = 0
-    threshSpac = 0.25   # 64
-    threshSpac = 1.0   # 16
-    thresholds = [0.0]
-    print(f"Thresholds @ dim: {thresholds}")
-    numPoints = 3
-        
-    #x, y, xxyy = LoadLinear(numPoints, display)
-    x, y, xv, yv, xxyy = LoadXor(numPoints, 'uniform', 1)
-            
-    nx = ThreshExpand(x, thresholds)        
-    nxxyy = ThreshExpand(xxyy, thresholds)        
-
-    print(f"Thresh expand: {x.shape} -> {nx.shape}")
-
-    memK = 8
-    #input = [8, -8, 4, -4, 2, -2, 1, -1]
-    #input += [-x for x in input]  # Add the negative values
-    dataN = nx.shape[0]
-    memD = len(nx[0])
-    numNodes = memD
-    numStack = memD
-    halfD = int(memD/2)
-
-    param = {
-    'memD': memD,
-    'memK': memK,
-    'numNodes': numNodes,
-    'numStack': numStack,
-    'biasWeights': numNodes * [0],
-    'ptfWeights': numStack * [numNodes * [1]],
-    'ptfThresh': numStack * [ [ 1 ] ],    
-    'adaptBias': 0,
-    'adaptWeights': 0,
-    'adaptThresh': 0,
-    'adaptThreshCrazy': 0,
-    'scaleTo': 127,
-    'clipAt': 127,
-    'printSample':0,
-    'printParameters': 1,    
-    'printIteration': 1, 
-    'printMem': 0,
-    'printTicks': 0,
-    'postAdaptRun': 0,
-    'plotThresh': 0,
-    }   
+    exp = "dec"
+    nx = torch.tensor([[2, 1, 3], [0, -2, -4], [-1, 1, 0]])
+    y = torch.tensor([[3, 2, 1], [0, -2, -4], [1, 0, -1]])    
+    run_MAM(exp, nx, y)
+    
+    exp = "combo"
+    nx = torch.tensor([[2, 1, 3], [0, -2, -4], [-1, 1, 0]])
+    y = torch.tensor([[1, 2, 3], [0, -2, -4], [-1, 0, 1]])    
+    run_MAM(exp, nx, y)
 
 
-    mam = BatchMAM(nx, nxxyy, param)    
-    mam.BatchTrainMAM()
-    #mam.BatchPlayMAM()
-    mam.BatchTestMAM()
 
 test_MAM()

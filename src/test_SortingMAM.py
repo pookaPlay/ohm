@@ -15,45 +15,28 @@ torch.backends.cudnn.benchmark = False
 smallest_int = -sys.maxsize - 1
 largest_int = sys.maxsize - 1
 
-def test_MAM():
+def run_MAM(expName, nx, y):
 
-    nx = torch.tensor([[0, 0, 0], [0, -2, -4], [0, -3, 0]])
-    y = torch.tensor([[0, 1, 0], [-1, -1, 0], [0, -2, 0]])    
-    
     D = nx.shape[-1]
     N = len(nx)
+    
+    #print("DATA")
+    #for ni in range(N):
+    #    print(f"{nx[ni].tolist()} -> {y[ni].tolist()}")
 
-    print(f"Processing {N} samples with D={D}")
+    #print(f"Processing {N} samples with D={D}")
         
     W = torch.ones([D, D]) * largest_int
     M = torch.ones([D, D]) * smallest_int        
     
     for ni in range(N):            
-        #input = nx[ni].view(1, D)        
-        input = nx[ni]
-        #print(f"        input: {input.tolist()}")
         
-        #sinput, sindex = torch.sort(input, dim=0, descending=False)
-        #sinput = sinput.view(D, 1)
-        sinput = y[ni].view(D, 1)  
-        #print(f"sorted input: {sinput.tolist()}")
-       
+        input = nx[ni]                
+        sinput = y[ni].view(D, 1)                 
         imgMat = sinput - input
-        #print(f"   mat: {imgMat.tolist()}")
+        
         W = torch.min(W, imgMat)                
-        M = torch.max(M, imgMat)    
-        #imgMatList.append(input)
-    
-    #imgMatTensor = torch.stack(imgMatList)        
-    #print(f"imgMatTensor: {imgMatTensor.shape}")
-    
-    #self.MED, self.IND = torch.median(imgMatTensor, dim=0)
-    #kval = int(D/2)    # smallest        
-    #self.MED, self.IND = torch.kthvalue(imgMatTensor, k=kval, dim=0)
-    
-    print(f"W: {W}")
-    print(f"M: {M}")
-
+        M = torch.max(M, imgMat)            
 
     outputW = torch.zeros([D])
     outputM = torch.zeros([D])
@@ -71,7 +54,34 @@ def test_MAM():
         outputW = outputW.int()
         outputM = outputM.int()
 
-        print(f"W: {input.tolist()} -> {outputW.tolist()}")
-        print(f"M: {input.tolist()} -> {outputM.tolist()}")
+        #print(f"W: {input.tolist()} -> {outputW.tolist()}")
+        #print(f"M: {input.tolist()} -> {outputM.tolist()}")
+        if (not torch.all(torch.eq(outputW, outputM))):
+            print(f"{expName} result difference")
+            print(f"{y[ni].tolist()}: {outputW.tolist()} != {outputM.tolist()}")
     
+
+def test_MAM():
+    exp = "paper"
+    nx = torch.tensor([[0, 0, 0], [0, -2, -4], [0, -3, 0]])
+    y = torch.tensor([[0, 1, 0], [-1, -1, 0], [0, -2, 0]])    
+    run_MAM(exp, nx, y)
+
+    exp = "inc"
+    nx = torch.tensor([[2, 1, 3], [0, -2, -4], [-1, 1, 0]])
+    y = torch.tensor([[1, 2, 3], [-4, -2, 0], [-1, 0, 1]])    
+    run_MAM(exp, nx, y)
+    
+    exp = "dec"
+    nx = torch.tensor([[2, 1, 3], [0, -2, -4], [-1, 1, 0]])
+    y = torch.tensor([[3, 2, 1], [0, -2, -4], [1, 0, -1]])    
+    run_MAM(exp, nx, y)
+    
+    exp = "combo"
+    nx = torch.tensor([[2, 1, 3], [0, -2, -4], [-1, 1, 0]])
+    y = torch.tensor([[1, 2, 3], [0, -2, -4], [-1, 0, 1]])    
+    run_MAM(exp, nx, y)
+
+
+
 test_MAM()
