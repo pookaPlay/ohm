@@ -88,8 +88,8 @@ def test_RUN_MAM():
 
     mam = BatchMAM(nx, nxxyy, param)    
     mam.BatchTrainMAM()
-    #mam.BatchTestMAM()
-    
+    mam.BatchTestMAM()
+    return
     runner = MLRunner(nx, nxxyy, param)            
 
     for iter in range(numIterations):

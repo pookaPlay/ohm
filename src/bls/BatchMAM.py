@@ -26,8 +26,8 @@ class BatchMAM:
     
     def BatchTrainMAM(self) -> None:
         D = self.input.shape[-1]
-        N = len(self.input)
-     
+        N = len(self.input)        
+
         print(f"Processing {N} samples with D={D}")
         
         self.W = torch.ones([D, D]) * largest_int
@@ -42,24 +42,27 @@ class BatchMAM:
             imgMatList.append(imgMat)
         
         imgMatTensor = torch.stack(imgMatList)        
-        #print(f"imgMatTensor: {imgMatTensor.shape}")
-        
-        #self.MED, self.IND = torch.median(imgMatTensor, dim=0)
-        kval = int(D/2)    # smallest
-        #kval = 3
-        self.MED, self.IND = torch.kthvalue(imgMatTensor, k=kval, dim=0)
+        print(f"imgMatTensor: {imgMatTensor.shape}")
+                
+        self.kval = int(N/2)    # 1 is smallest
+        print(f"Kth value: {self.kval}")
+        #kval = 2
+        self.MED, self.IND = torch.kthvalue(imgMatTensor, k=self.kval, dim=0)
         #print(f"MED: {self.MED.shape} and IND: {self.IND.shape}")
         
         print(f"W: {self.W}")
         print(f"MED: {self.MED}")
-
+        for di in range(D):            
+            print(f"Node {di}: {self.MED[:,di].tolist()}")            
         #print(f"{self.input[ni].tolist()}")     
 
     def BatchTestMAM(self) -> None:
         D = self.input.shape[-1]
         N = len(self.input)
    
-        print(f"Testing  {N} samples with D={D}")
+        kval = int(D/2)
+
+        print(f"Testing  {N} samples with D={D} and kval={kval}")
 
         self.outputW = torch.zeros([D])
         self.outputM = torch.zeros([D])
@@ -69,18 +72,16 @@ class BatchMAM:
         for ni in range(N):
 
             for di in range(D):            
-                #diffW = self.input[ni, :] + self.W[:, di]
-                diffW = self.input[ni, :] + self.W[di, :]                
-                self.outputW[di] = torch.max(diffW)
+                diffW = self.input[ni, :] - self.W[:, di]
+                #diffW = self.input[ni, :] + self.W[di, :]  // and max              
+                self.outputW[di] = torch.min(diffW)
 
                 #diffM = self.input[ni, :] + self.M[:, di]                
                 diffM = self.input[ni, :] + self.M[di,:]                
                 self.outputM[di] = torch.min(diffM)
             
-                diffMED = self.input[ni, :] + self.MED[di,:]
-                #self.outputMED[di] = torch.median(diffMED)
-                kval = int(D/2)
-                #kval = D-2
+                diffMED = self.input[ni, :] - self.MED[:,di]                                
+
                 self.outputMED[di], self.outputIND[di] = torch.kthvalue(diffMED, k=kval)
 
 
@@ -89,8 +90,8 @@ class BatchMAM:
             self.outputM = self.outputM.int()
             self.outputMED = self.outputMED.int()
 
-            print(f"W: {self.input[ni].tolist()} -> {self.outputW.tolist()}")
-            print(f"M: {self.input[ni].tolist()} -> {self.outputM.tolist()}")
+            print(f"W  : {self.input[ni].tolist()} -> {self.outputW.tolist()}")
+            print(f"M  : {self.input[ni].tolist()} -> {self.outputM.tolist()}")
             print(f"MED: {self.input[ni].tolist()} -> {self.outputMED.tolist()}")
         
     
