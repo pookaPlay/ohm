@@ -42,19 +42,23 @@ class BatchMAM:
             imgMatList.append(imgMat)
         
         imgMatTensor = torch.stack(imgMatList)        
-        print(f"imgMatTensor: {imgMatTensor.shape}")
+        #print(f"imgMatTensor: {imgMatTensor.shape}")
                 
         self.kval = int(N/2)    # 1 is smallest
-        print(f"Kth value: {self.kval}")
-        #kval = 2
+        #print(f"Kth value: {self.kval}")
+        
         self.MED, self.IND = torch.kthvalue(imgMatTensor, k=self.kval, dim=0)
         #print(f"MED: {self.MED.shape} and IND: {self.IND.shape}")
         
         print(f"W: {self.W}")
         print(f"MED: {self.MED}")
+        results = list()
         for di in range(D):            
-            print(f"Node {di}: {self.MED[:,di].tolist()}")            
+            #print(f"Node {di}: {self.MED[:,di].tolist()}")
+            results.append(self.MED[:,di].tolist())
+
         #print(f"{self.input[ni].tolist()}")     
+        return results
 
     def BatchTestMAM(self) -> None:
         D = self.input.shape[-1]

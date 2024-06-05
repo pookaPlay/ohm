@@ -32,14 +32,14 @@ def ThreshExpand(x, thresh):
 
 def test_RUN_MAM():
 
-    numIterations = 1
+    numIterations = 5
     
     display = 0
     threshSpac = 0.25   # 64
     threshSpac = 1.0   # 16
-    thresholds = [0.0]
+    thresholds = [0.0, 1.0]
     print(f"Thresholds @ dim: {thresholds}")
-    numPoints = 5
+    numPoints = 50
         
     #x, y, xxyy = LoadLinear(numPoints, display)
     x, y, xv, yv, xxyy = LoadXor(numPoints, 'uniform', 1)
@@ -63,34 +63,38 @@ def test_RUN_MAM():
     'memK': memK,
     'numNodes': numNodes,
     'numStack': numStack,
-    'biasWeights': numNodes * [0],
+    'biasWeights': numNodes * [ numNodes * [0] ],
     'ptfWeights': numStack * [numNodes * [1]],
     'ptfThresh': numStack * [ [ 1 ] ],    
     'adaptBias': 0,
-    'adaptWeights': 0,
-    'adaptThresh': 0,
+    'adaptWeights': 1,
+    'adaptThresh': 1,
     'adaptThreshCrazy': 0,
     'scaleTo': 127,
     'clipAt': 127,
     'printSample':0,
-    'printParameters': 1,    
+    'printParameters': 0,    
     'printIteration': 1, 
-    'printMem': 0,
+    'printMem': -1,              # this will print at iteration #
     'printTicks': 0,
     'postAdaptRun': 0,
     'plotThresh': 0,
     }   
 
     for i in range(numStack):
-        param['ptfThresh'][i] = [i+1]
+        #param['ptfThresh'][i] = [i+1]
+        param['ptfThresh'][i] = [halfD]
         #param['ptfThresh'][i] = [numNodes]  # min
     
 
     mam = BatchMAM(nx, nxxyy, param)    
-    mam.BatchTrainMAM()
-    mam.BatchTestMAM()
-    return
+    param['biasWeights'] = mam.BatchTrainMAM()
+    #mam.BatchTestMAM()     
+    print(f"param: {param['biasWeights']}")    
+
+    
     runner = MLRunner(nx, nxxyy, param)            
+    
 
     for iter in range(numIterations):
         print("##################################################")

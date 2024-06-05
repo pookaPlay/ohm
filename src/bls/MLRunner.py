@@ -79,30 +79,20 @@ class MLRunner:
             
             self.threshStats[0] = self.threshStats[0] + localThresh[0]
             self.threshStats[1] = self.threshStats[1] + localThresh[1]
+                       
+            #if atick < 0: 
+            #    atick = self.K
+            #ticks.append(atick)            
+
+            outIndex = self.ohm.doneIndexOut
+            results = self.ohm.results
             
-            #for i in range(len(self.weightStats)):  
-            #    self.weightStats[i] = self.weightStats[i] + self.ohm.stack[0].weightCount[i]
-
-            #print(f"T: {localThresh}")
             
-            if atick < 0: 
-                atick = self.K
-            ticks.append(atick)            
-
-            outIndex = self.ohm.doneIndexOut[0]
-            result = self.ohm.results[0]
-            resultSign = 1 if result > 0 else -1
-            stackInputs = self.ohm.biasMem[0].GetLSBInts()
-
-            #self.plotResults['thresh'].append(thresh[0])
-            if resultSign > 0:
-                self.posStack = self.posStack + 1
-            else:
-                self.negStack = self.negStack + 1
-            self.sampleCount = self.sampleCount + 1    
-
             if param['printSample'] == 1:
-                print(f"{stackInputs} -> {result}[{outIndex}] in {self.ohm.doneOut[0]}")
+                for si in range(len(self.ohm.biasMem)):
+                    stackInputs = self.ohm.biasMem[si].GetLSBInts()
+                    print(f"{stackInputs} -> {results[si]}[{outIndex[si]}] in {self.ohm.doneOut[si]}")
+
                 if param['printParameters'] == 1:            
                     for i in range(len(self.ohm.paramStackMem)):                    
                             weights = self.ohm.paramStackMem[i].GetLSBIntsHack()
@@ -128,29 +118,10 @@ class MLRunner:
                 
 
         if param['printIteration'] == 1:
-            avg = sum(ticks) / len(ticks)
-            print(f"Avg Ticks: {avg}")
+            #avg = sum(ticks) / len(ticks)
+            #print(f"Avg Ticks: {avg}")
 
-            # for i in range(len(self.posStatsSample)):                    
-            #         self.posStatsSample[i] = self.posStatsSample[i] / numSamples
-            
-            self.threshStats[0] = self.threshStats[0] / numSamples
-            self.threshStats[1] = self.threshStats[1] / numSamples
-            
-            #totalMax = max(self.weightStats)
-            #for i in range(len(self.weightStats)):
-            #    self.weightStats[i] = self.weightStats[i] / totalMax
-            #    self.weightStats[i] = self.weightStats[i] * len(self.weightStats)/2
-            print(f"Stack Stats: +ve: {self.posStack/(self.posStack+self.negStack)} -ve: {self.negStack/(self.posStack+self.negStack)}")
-            #print(f"1 Rate: {self.posStatsSample}")
-            print(f"  PTF Stats: +ve: {self.threshStats[0]} -ve: {self.threshStats[1]}")
-            #print(f"W Stat: {self.weightStats}")
-
-            if param['printParameters'] == 1:
-                #for i in range(len(self.ohm.paramBiasMem)):
-                    #biases = self.ohm.paramBiasMem[i].GetLSBInts()
-                    #print(f"{i}          Bias: {biases}")                                                              
-                                
+            if param['printParameters'] == 1:                                
                 for i in range(len(self.ohm.paramStackMem)):                    
                     biases = self.ohm.paramBiasMem[i].GetLSBInts()
                     print(f"{i}          Bias: {biases}")                                    
@@ -161,8 +132,7 @@ class MLRunner:
 
         
     def WeightAdjust(self) -> None:
-        weights = self.ohm.paramBiasMem[0].GetLSBIntsHack()
-        #self.weights = self.ohm.paramStackMem[0].GetLSBIntsHack()
+        weights = self.ohm.paramBiasMem[0].GetLSBIntsHack()        
         for i in range(len(self.weights)):                    
             if (self.weights[i] > 1):
                 self.weights[i] = int(math.floor(self.weights[i] / 2))
@@ -172,8 +142,6 @@ class MLRunner:
     def ApplyToMap(self, param) -> None:
         print(f"Running on {len(self.xxyy)} samples")
                 
-        #self.ohm.SetAdaptWeights(adaptWeights)        
-
         ticks = 0
         results = torch.zeros(len(self.xxyy))
         for ni in range(len(self.xxyy)):            

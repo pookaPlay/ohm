@@ -28,16 +28,33 @@ def run_MAM(expName, nx, y):
         
     W = torch.ones([D, D]) * largest_int
     M = torch.ones([D, D]) * smallest_int        
+    imgMatList = []
     
-    for ni in range(N):            
-        
-        input = nx[ni]                
-        sinput = y[ni].view(D, 1)                 
-        imgMat = sinput - input
-        
-        W = torch.min(W, imgMat)                
-        M = torch.max(M, imgMat)            
+    
+    imgMatList = []
 
+    for ni in range(N):            
+
+        imgMat = nx[ni].view(D, 1) - nx[ni].view(1, D)            
+        W = torch.min(W, imgMat)                
+        M = torch.max(M, imgMat)    
+        imgMatList.append(imgMat)
+
+    imgMatTensor = torch.stack(imgMatList)        
+    print(f"imgMatTensor: {imgMatTensor.shape}")
+            
+    kval = int(N/2)    # 1 is smallest
+    print(f"Kth value: {kval}")
+    
+    MED, IND = torch.kthvalue(imgMatTensor, k=kval, dim=0)
+    #print(f"MED: {self.MED.shape} and IND: {self.IND.shape}")
+    
+    print(f"W: {W}")
+    print(f"MED: {MED}")
+
+
+
+    # Now test
     outputW = torch.zeros([D])
     outputM = torch.zeros([D])
     
