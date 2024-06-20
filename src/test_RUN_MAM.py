@@ -32,17 +32,17 @@ def ThreshExpand(x, thresh):
 
 def test_RUN_MAM():
 
-    numIterations = 5
+    numIterations = 1
     
     display = 0
     threshSpac = 0.25   # 64
     threshSpac = 1.0   # 16
-    thresholds = [0.0, 1.0]
+    thresholds = [0.0, 1.0, 2.0]
     print(f"Thresholds @ dim: {thresholds}")
     numPoints = 50
         
     #x, y, xxyy = LoadLinear(numPoints, display)
-    x, y, xv, yv, xxyy = LoadXor(numPoints, 'uniform', 1)
+    x, y, xv, yv, xxyy = LoadXor(numPoints, 'uniform', display)
             
     nx = ThreshExpand(x, thresholds)        
     nxxyy = ThreshExpand(xxyy, thresholds)        
@@ -71,9 +71,9 @@ def test_RUN_MAM():
     'adaptThresh': 1,
     'adaptThreshCrazy': 0,
     'scaleTo': 127,
-    'clipAt': 127,
+    'clipAt': 127,    
+    'printParameters': 1,    
     'printSample':0,
-    'printParameters': 0,    
     'printIteration': 1, 
     'printMem': -1,              # this will print at iteration #
     'printTicks': 0,

@@ -15,11 +15,10 @@ torch.backends.cudnn.benchmark = False
 smallest_int = -sys.maxsize - 1
 largest_int = sys.maxsize - 1
 
-def run_MAM(expName, nx, y):
-
+def run_MAM(expName, nx, y):    
     D = nx.shape[-1]
-    N = len(nx)
-    
+    N = len(nx)    
+
     #print("DATA")
     #for ni in range(N):
     #    print(f"{nx[ni].tolist()} -> {y[ni].tolist()}")
@@ -43,7 +42,7 @@ def run_MAM(expName, nx, y):
     imgMatTensor = torch.stack(imgMatList)        
     print(f"imgMatTensor: {imgMatTensor.shape}")
             
-    kval = int(N/2)    # 1 is smallest
+    kval = int(N/2)    # 1 is smallest    
     print(f"Kth value: {kval}")
     
     MED, IND = torch.kthvalue(imgMatTensor, k=kval, dim=0)
@@ -57,25 +56,34 @@ def run_MAM(expName, nx, y):
     # Now test
     outputW = torch.zeros([D])
     outputM = torch.zeros([D])
-    
+    outputMED = torch.zeros([D])
+    outputIND = torch.zeros([D])
+
+    imgMatList = []    
     for ni in range(N):
         input = nx[ni, :]        
         for di in range(D):            
             
-            diffW = input + W[di, :]                
-            outputW[di] = torch.max(diffW)
+            diffW = input - W[:, di]                
+            outputW[di] = torch.min(diffW)
             
             diffM = input + M[di,:]                
             outputM[di] = torch.min(diffM)
 
+
+            kval = int(D/2)
+            diffMED = input - MED[:,di]                                
+            outputMED[di], outputIND[di] = torch.kthvalue(diffMED, k=kval)
+
         outputW = outputW.int()
         outputM = outputM.int()
+        outputMED = outputMED.int()
 
         #print(f"W: {input.tolist()} -> {outputW.tolist()}")
         #print(f"M: {input.tolist()} -> {outputM.tolist()}")
-        if (not torch.all(torch.eq(outputW, outputM))):
-            print(f"{expName} result difference")
-            print(f"{y[ni].tolist()}: {outputW.tolist()} != {outputM.tolist()}")
+        #if (not torch.all(torch.eq(outputW, outputM))):
+        #    print(f"{expName} result difference")
+        #    print(f"{y[ni].tolist()}: {outputW.tolist()} != {outputM.tolist()}")
     
 
 def test_MAM():
