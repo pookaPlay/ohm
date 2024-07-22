@@ -52,7 +52,6 @@ def run_MAM(expName, nx, y):
     print(f"MED: {MED}")
 
 
-
     # Now test
     outputW = torch.zeros([D])
     outputM = torch.zeros([D])

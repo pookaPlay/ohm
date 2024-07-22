@@ -34,12 +34,12 @@ def test_RUN_MAM():
 
     numIterations = 1
     
-    display = 0
+    display = 1
     threshSpac = 0.25   # 64
     threshSpac = 1.0   # 16
     thresholds = [0.0, 1.0, 2.0]
     print(f"Thresholds @ dim: {thresholds}")
-    numPoints = 50
+    numPoints = 5
         
     #x, y, xxyy = LoadLinear(numPoints, display)
     x, y, xv, yv, xxyy = LoadXor(numPoints, 'uniform', display)
@@ -67,18 +67,20 @@ def test_RUN_MAM():
     'ptfWeights': numStack * [numNodes * [1]],
     'ptfThresh': numStack * [ [ 1 ] ],    
     'adaptBias': 0,
-    'adaptWeights': 1,
-    'adaptThresh': 1,
+    'adaptWeights': 0,
+    'adaptThresh': 0,
     'adaptThreshCrazy': 0,
     'scaleTo': 127,
     'clipAt': 127,    
-    'printParameters': 1,    
-    'printSample':0,
-    'printIteration': 1, 
+    'printParameters': 0,    
+    'printSample':1,
+    'printIteration': 0, 
     'printMem': -1,              # this will print at iteration #
     'printTicks': 0,
     'postAdaptRun': 0,
-    'plotThresh': 0,
+    'preAdaptInit': 0,
+    'plotThresh': 0,    
+    'applyToMap': 0,
     }   
 
     for i in range(numStack):
@@ -87,14 +89,14 @@ def test_RUN_MAM():
         #param['ptfThresh'][i] = [numNodes]  # min
     
 
-    mam = BatchMAM(nx, nxxyy, param)    
-    param['biasWeights'] = mam.BatchTrainMAM()
-    #mam.BatchTestMAM()     
-    print(f"param: {param['biasWeights']}")    
+    if param['preAdaptInit'] == 1:
+        mam = BatchMAM(nx, nxxyy, param)    
+        param['biasWeights'] = mam.BatchTrainMAM()
+        #mam.BatchTestMAM()     
+        print(f"param: {param['biasWeights']}")    
 
     
-    runner = MLRunner(nx, nxxyy, param)            
-    
+    runner = MLRunner(nx, nxxyy, param)                
 
     for iter in range(numIterations):
         print("##################################################")
@@ -118,6 +120,22 @@ def test_RUN_MAM():
             param['adaptBias'] = was3
 
 
+        if param['applyToMap'] == 1:
+            
+            was1 = param['adaptWeights']
+            was2 = param['adaptThresh']
+            was3 = param['adaptBias']
+
+            param['adaptWeights'] = 0
+            param['adaptThresh'] = 0
+            param['adaptBias'] = 0
+
+            result = runner.ApplyToMap(param)
+            PlotMap(result)       
+            
+            param['adaptWeights'] = was1
+            param['adaptThresh'] = was2
+            param['adaptBias'] = was3
 
 
 test_RUN_MAM()

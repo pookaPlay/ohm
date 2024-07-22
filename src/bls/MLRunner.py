@@ -105,7 +105,6 @@ class MLRunner:
             
             if (param['adaptBias'] > 0):
                 biases = self.ohm.paramBiasMem[0].GetLSBInts()                                                        
-                assert(len(stackInputs) == len(biases))
                 
                 #sample = self.input[ni].tolist()                
                 for i in range(len(sample)):
@@ -147,15 +146,12 @@ class MLRunner:
         for ni in range(len(self.xxyy)):            
             sample = self.xxyy[ni].tolist()
             #print(f"Sample {ni}\n{sample}")
+            # Run the OHM
             atick = self.ohm.Run(sample, ni, param)
-            results[ni] = self.ohm.results[0]
-            
-            if atick < 0: 
-                atick = self.K
-            ticks += atick
 
-        avg = ticks / len(self.xxyy)
-        print(f"Ticks: {avg}")
+            results[ni] = self.ohm.results[0]
+                        
+        
         return(results)
 
     def ScaleData(self, data, maxValOut, clipValOut) -> None:

@@ -32,7 +32,7 @@ def ThreshExpand(x, thresh):
 def test_RUN():
 
     numIterations = 1
-    imgData, imgLabels = LoadData()
+    imgData, imgLabels = LoadSomeData()
     print(f"Data: {imgData.shape} Labels: {imgLabels.shape}")
     ShowMNIST(imgData[0])
     
@@ -78,9 +78,9 @@ def test_RUN():
     'memK': memK,
     'numNodes': numNodes,
     'numStack': numStack,
-    'biasWeights': numNodes * [0],
-    'ptfWeights': numStack * [numNodes * [1]],    
-    'ptfThresh': numStack * [ 1 * [halfD]],       
+    'biasWeights': numNodes * [ numNodes * [0] ],
+    'ptfWeights': numStack * [numNodes * [1]],
+    'ptfThresh': numStack * [ [ 1 ] ],       
     'adaptBias': 0,
     'adaptWeights': 0,
     'adaptThresh': 0,

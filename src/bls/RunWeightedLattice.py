@@ -26,7 +26,6 @@ class RunWeightedLattice:
         self.K = param['memK']
         
         self.dataMem = BSMEM(self.memD, self.K)                
-
         self.stackMem = BSMEM(self.memD, self.K)                        
         self.biasMem = [BSMEM(self.memD, self.K) for _ in range(self.numNodes)]
 

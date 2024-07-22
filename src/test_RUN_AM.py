@@ -78,6 +78,7 @@ def test_RUN_AM():
     'printMem': 0,
     'printTicks': 0,
     'postAdaptRun': 0,
+    'applyToMap': 1,
     'plotThresh': 0,
     }   
 
@@ -117,9 +118,11 @@ def test_RUN_AM():
             plt.title('Threshold Values')
             plt.show()
 
-        #adaptWeights = 0
-        #result = runner.ApplyToMap(adaptWeights)
-        #PlotMap(result)
+        if param['applyToMap'] == 1:
+            adaptWeights = 0
+            result = runner.ApplyToMap(adaptWeights)
+            PlotMap(result)
+
         if param['postAdaptRun'] == 1:
             was1 = param['adaptWeights']
             was2 = param['adaptThresh']

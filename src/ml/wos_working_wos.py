@@ -5,8 +5,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Function
 
-
-
 def SmartSort(x, permutation):
     d1 = x.shape[0]
     d2 = x.shape[1]
@@ -16,7 +14,6 @@ def SmartSort(x, permutation):
         permutation.flatten()
     ].view(d1, d2)
     return ret
-
 
 class OHMWosFunction(Function):
 
