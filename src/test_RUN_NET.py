@@ -70,7 +70,7 @@ def test_RUN():
     'numStack': numStack,
     'biasWeights': numNodes * [ numNodes * [0] ],
     'ptfWeights': numStack * [numNodes * [1]],
-    'ptfThresh': numStack * [ [ 1 ] ],     
+    'ptfThresh': numStack * [ [ halfD ] ],     
     'ptfDeltas': np.zeros([numNodes, numNodes]),     
     'adaptBias': 0,
     'adaptWeights': 0,
@@ -84,7 +84,7 @@ def test_RUN():
     'printMem': -1,  # set this to the sample 1index to print
     'postAdaptRun': 0,
     'preAdaptInit': 0,    
-    'plotResults': 1,    
+    'plotResults': 0,    
     'printTicks' : 0,
     'applyToMap': 0,
     }    
