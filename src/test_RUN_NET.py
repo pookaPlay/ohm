@@ -55,7 +55,7 @@ def test_RUN():
     dataN = nx.shape[0]
     memD = len(nx[0])
     numNodes = memD
-    numLayers = 1
+    numLayers = 2
     numStack = 4
     halfD = int(memD/2)    
     
@@ -78,14 +78,14 @@ def test_RUN():
     'adaptThreshCrazy': 0,
     'scaleTo': 127,
     'clipAt': 127,
-    'printSample': 0,
+    'printSample': 1,
     'printParameters': 1,    
     'printIteration': 1, 
     'printMem': -1,  # set this to the sample 1index to print
     'postAdaptRun': 0,
     'preAdaptInit': 0,    
     'plotResults': 0,    
-    'printTicks' : 0,
+    'printTicks' : 1,
     'applyToMap': 0,
     }    
 

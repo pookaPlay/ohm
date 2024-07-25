@@ -26,9 +26,6 @@ class NetRunner:
         self.xxyy = self.ScaleData(nxxyy, param['scaleTo'], param['clipAt'])
 
         self.first = self.input[0].tolist()        
-        self.posStatsSample = list(len(self.first) * [0.0])
-        self.threshStats = list(2 *[0.0])
-        self.weightStats = list(len(self.first) * [0.0])
         self.ohm = RunNetwork(self.first, param)   
 
     def Run(self, param) -> None:
