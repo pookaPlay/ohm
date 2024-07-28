@@ -16,6 +16,24 @@ class BSMEM():
         self.rib = self.K-1
         self.wi = 0
 
+    def ReverseContent(self):
+        self.ResetIndex()
+        #print("##########################")
+        #print(self.mem)
+        for d in range(len(self.mem)):
+            temp = self.mem[d].copy()
+            #print(">>>>>")
+            #print(temp)
+            #print(">>>>>")
+            for i in range(len(temp)):
+                self.mem[d][i] = temp[len(temp)-i-1]
+            #print(self.mem[d])
+            #print(">>>>>")
+            #self.mem[d] = self.mem[d].reverse()
+
+        #print("##########################")
+        #print(self.mem)
+
     def Reset(self):
         self.ResetIndex()        
         self.mem = [list(self.K * [0]) for _ in range(self.D)]        

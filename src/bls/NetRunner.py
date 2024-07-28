@@ -38,6 +38,7 @@ class NetRunner:
         self.negStack = 0
         
         numSamples = len(self.input)
+        numSamples = 1
         #self.ohm.SetAdaptWeights(adaptWeights)        
         self.plotResults['thresh'] = list()
 

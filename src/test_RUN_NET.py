@@ -85,7 +85,7 @@ def test_RUN():
     'postAdaptRun': 0,
     'preAdaptInit': 0,    
     'plotResults': 0,    
-    'printTicks' : 1,
+    'printTicks' : 0,
     'applyToMap': 0,
     }    
 
