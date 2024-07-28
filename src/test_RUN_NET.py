@@ -55,7 +55,7 @@ def test_RUN():
     dataN = nx.shape[0]
     memD = len(nx[0])
     numNodes = memD
-    numLayers = 2
+    numLayers = 3
     numStack = 4
     halfD = int(memD/2)    
     
@@ -78,7 +78,7 @@ def test_RUN():
     'adaptThreshCrazy': 0,
     'scaleTo': 127,
     'clipAt': 127,
-    'printSample': 1,
+    'printSample': 0,
     'printParameters': 1,    
     'printIteration': 1, 
     'printMem': -1,  # set this to the sample 1index to print
@@ -103,12 +103,13 @@ def test_RUN():
     
 
     runner = NetRunner(nx, nxxyy, param)            
-
+    print(runner.input)
+    
     for iter in range(numIterations):
         print("##################################################")
         print(f"ITERATION {iter}")
         
-        runner.Run(param)
+        results = runner.Run(param)
         
         if param['postAdaptRun'] == 1:
             was1 = param['adaptWeights']
@@ -124,7 +125,8 @@ def test_RUN():
             param['adaptThresh'] = was2
             param['adaptBias'] = was3
 
-
+    
+    print(results)
 
     if param['plotResults'] == 1:
         

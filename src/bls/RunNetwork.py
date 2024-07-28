@@ -90,22 +90,21 @@ class RunNetwork:
     def Run(self, input, sampleIndex, param) -> None:      
                 
         assert(len(input) > 0)
-
+        
         self.input = input
         self.dataMem.LoadList(self.input)
 
         for layerIndex in range(self.numLayers):
 
-            print(f"Layer {layerIndex}")            
-
-            print(f"   >> LSB PASS ")        
+            #print(f"Layer {layerIndex}")            
+            #print(f"   >> LSB PASS ")        
             if layerIndex == 0:
                 inputMem = self.dataMem
             else:
                 inputMem = self.stackMem[layerIndex-1]
             
             #print(f"Mem {layerIndex}: {inputMem}")
-            inputMem.Print(f"INPUT@{layerIndex}")
+            #inputMem.Print(f"INPUT@{layerIndex}")
 
             self.RunLSB(inputMem, layerIndex, sampleIndex)                            
 
@@ -115,25 +114,19 @@ class RunNetwork:
             #if sampleIndex == param['printMem']:
             #    self.biasMem[0].Print("INPUT")                                
             
-            self.biasMem[layerIndex][0].Print(f"BIAS@{layerIndex}-0")
+            #self.biasMem[layerIndex][0].Print(f"BIAS@{layerIndex}-0")
             #self.biasMem[layerIndex][1].Print(f"BIAS@{layerIndex}-1")
             #self.paramBiasMem[layerIndex][0].Print(f"PARAM@{layerIndex}-0")
 
-            print(f"   >> MSB PASS ")
+            #print(f"   >> MSB PASS ")
             self.RunMSB(layerIndex, sampleIndex)                              
             
             self.stackMem[layerIndex].ReverseContent()
 
-            self.stackMem[layerIndex].Print(f"STACK@{layerIndex}")
+            #self.stackMem[layerIndex].Print(f"STACK@{layerIndex}")
 
             #self.results = self.stackMem[layerIndex].GetMSBInts()
-            self.results = self.stackMem[layerIndex].GetLSBInts()
-            print(f"Results: {self.results}")
-
-        #self.results = self.stackMem[self.numLayers-1].GetMSBInts()
-        print("Made it out alive")
-        #if sampleIndex == param['printMem']:        
-        #    self.stackMem.Print("STACK")
+            self.results = self.stackMem[layerIndex].GetLSBInts()            
 
         
         if param['adaptThresh'] > 0:           
@@ -172,7 +165,7 @@ class RunNetwork:
                 self.paramThreshMem[si].SetLSBIntsHack(thresh)            
                 self.paramStackMem[si].SetLSBIntsHack(weights)        
 
-        return self.doneOut
+        return self.results
                 
     
     def RunMSB(self, li=0, stepi=0) -> None:            

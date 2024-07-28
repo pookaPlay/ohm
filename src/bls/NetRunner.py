@@ -24,7 +24,8 @@ class NetRunner:
         #self.dataMax = 2**self.K - 1.0        
         self.input = self.ScaleData(nx, param['scaleTo'], param['clipAt'])
         self.xxyy = self.ScaleData(nxxyy, param['scaleTo'], param['clipAt'])
-
+        
+        self.output = torch.zeros_like(self.input)
         self.first = self.input[0].tolist()        
         self.ohm = RunNetwork(self.first, param)   
 
@@ -38,7 +39,7 @@ class NetRunner:
         self.negStack = 0
         
         numSamples = len(self.input)
-        numSamples = 1
+        
         #self.ohm.SetAdaptWeights(adaptWeights)        
         self.plotResults['thresh'] = list()
 
@@ -52,18 +53,24 @@ class NetRunner:
         #             print(f"{i}        Thresh: {thresh}")
 
 
-        for ni in range(numSamples):                                                
-            if param['printSample'] == 1:
-                print(f"Sample {ni} ------------------")
-            
+        for ni in range(numSamples):                                                            
             #########################################################
             #########################################################
             # Run the OHM
             sample = self.input[ni].tolist()
-            atick = self.ohm.Run(sample, ni, param)
-            #########################################################            
+            if param['printSample'] == 1:
+                print(f"Sample {ni} ------------------")
+                print(f"Input: {sample}")
+
+
+            results = self.ohm.Run(sample, ni, param)
             
-            
+            self.output[ni] = torch.tensor(results)
+                                    
+            if param['printSample'] == 1:
+                print(f"Output: {results}")
+        
+        return self.output
             # if param['printSample'] == 1:
             #     for si in range(len(self.ohm.biasMem)):
             #         stackInputs = self.ohm.biasMem[si].GetLSBInts()
