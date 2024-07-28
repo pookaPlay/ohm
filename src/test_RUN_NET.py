@@ -89,10 +89,10 @@ def test_RUN():
     'applyToMap': 0,
     }    
 
-    #param['ptfWeights'] = numNodes * [1]    
-    #param['ptfThresh'] = [int(sum(param['ptfWeights'])/2)]
-    #param['ptfThresh'] = [numNodes]
-    #param['ptfThresh'] = [1]
+    for i in range(numStack):
+        param['ptfThresh'][i] = [i+1]
+        #param['ptfThresh'][i] = [halfD]
+        #param['ptfThresh'][i] = [numNodes]  # min
     
     #print(f"PTF Weights: {param['ptfWeights']}")
     #print(f"PTF  Thresh: {param['ptfThresh']}")     

@@ -117,7 +117,7 @@ class RunNetwork:
             
             self.biasMem[layerIndex][0].Print(f"BIAS@{layerIndex}-0")
             #self.biasMem[layerIndex][1].Print(f"BIAS@{layerIndex}-1")
-            self.paramBiasMem[layerIndex][0].Print(f"PARAM@{layerIndex}-0")
+            #self.paramBiasMem[layerIndex][0].Print(f"PARAM@{layerIndex}-0")
 
             print(f"   >> MSB PASS ")
             self.RunMSB(layerIndex, sampleIndex)                              
