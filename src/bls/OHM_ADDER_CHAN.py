@@ -28,14 +28,8 @@ class OHM_ADDER_CHAN:
 
         for ai in range(len(self.adders)):
             self.adders[ai].Calc(self.aInputs[ai], self.bInputs[ai], lsb)
-            #self.adders[ai].Print()
-        self.denseOut = list(self.memD * [0])                
-
-        if self.numOutputs == self.numInputs:
-            self.sparseOut = [ad.Output() for ad in self.adders]
-                
-            for ni in range(len(self.sparseOut)):
-                self.denseOut[self.outIndex[ni]] = self.sparseOut[ni]
+        
+        self.denseOut = [ad.Output() for ad in self.adders]        
 
     def Step(self) -> None:
         for ai in range(len(self.adders)):

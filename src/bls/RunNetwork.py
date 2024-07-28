@@ -20,22 +20,22 @@ class RunNetwork:
         self.input = input
 
         self.numStack = param['numStack']      # number of parallel nodes        
-        self.numNodes = param['numNodes']
+        self.numInputs = param['numInputs']
         self.numLayers = param['numLayers']
         
         self.memD = param['memD']        
         self.K = param['memK']        
                 
         self.dataMem = BSMEM(self.memD, self.K)                                
-        self.stackMem = [BSMEM(self.memD, self.K) for _ in range(self.numLayers)]        
-        self.biasMem = [[BSMEM(self.memD, self.K) for _ in range(self.numNodes)] for _ in range(self.numLayers)]
+        self.stackMem = [BSMEM(self.numStack, self.K) for _ in range(self.numLayers)]        
+        self.biasMem = [[BSMEM(self.numInputs, self.K) for _ in range(self.numStack)] for _ in range(self.numLayers)]
 
-        self.paramBiasMem = [[BSMEM(self.memD, self.K) for _ in range(self.numNodes)] for _ in range(self.numLayers)]
-        self.paramStackMem = [[BSMEM(self.memD, self.K) for _ in range(param['numStack'])] for _ in range(self.numLayers)]
-        self.paramThreshMem = [[BSMEM(1, self.K) for _ in range(param['numStack'])] for _ in range(self.numLayers)]
+        self.paramBiasMem = [[BSMEM(self.numInputs, self.K) for _ in range(self.numStack)] for _ in range(self.numLayers)]
+        self.paramStackMem = [[BSMEM(self.numInputs, self.K) for _ in range(self.numStack)] for _ in range(self.numLayers)]
+        self.paramThreshMem = [[BSMEM(1, self.K) for _ in range(self.numStack)] for _ in range(self.numLayers)]
 
-        self.bias = [[OHM_ADDER_CHAN(self.numNodes, self.memD) for _ in range(self.numNodes)] for _ in range(self.numLayers)]     
-        self.stack = [[STACK_BLS(self.memD, self.memD, self.K, param) for _ in range(param['numStack'])] for _ in range(self.numLayers)] 
+        self.bias = [[OHM_ADDER_CHAN(self.numInputs, self.memD) for _ in range(self.numStack)] for _ in range(self.numLayers)]     
+        self.stack = [[STACK_BLS(self.numInputs, self.memD, self.K, param) for _ in range(self.numStack)] for _ in range(self.numLayers)] 
         
         self.doneOut = [list(self.numStack * [-1]) for _ in range(self.numLayers)]
         self.doneIndexOut = [list(self.numStack * [-1]) for _ in range(self.numLayers)]
@@ -267,6 +267,8 @@ class RunNetwork:
 
             for bi in range(len(self.bias[li])):
                 self.bias[li][bi].Calc(inputMem, self.paramBiasMem[li][bi], lsb)            
+                #print(f"biasmem input: {self.bias[li][bi].Output()}")
+                #self.biasMem[li][bi].Print(f"BIAS@{li}-{bi}")
                 self.biasMem[li][bi].Step(self.bias[li][bi].Output())
                 self.bias[li][bi].Step()
                                     

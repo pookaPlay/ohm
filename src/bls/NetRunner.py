@@ -12,17 +12,15 @@ class NetRunner:
 
     def __init__(self, nx, nxxyy, param):
     
-        self.NN = param['numNodes']      # number of parallel nodes        
-        self.numNodes = param['numNodes']
-
+        self.numInputs = param['numInputs']
         self.depth = param['numLayers']     # number of layers in time              
-
         self.memD = param['memD']
         self.K = param['memK']
         self.param = param
         self.plotResults = dict()
         #self.dataMax = 2**self.K - 1.0        
-        self.input = self.ScaleData(nx, param['scaleTo'], param['clipAt'])
+        self.input = self.ScaleData(nx, param['scaleTo'], param['clipAt'])        
+
         self.xxyy = self.ScaleData(nxxyy, param['scaleTo'], param['clipAt'])
         
         self.output = torch.zeros_like(self.input)

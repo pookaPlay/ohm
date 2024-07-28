@@ -16,15 +16,18 @@ def ThreshExpand(x, thresh):
     
     N = x.shape[0]
     D = x.shape[1]
-    ND = 2 * D * len(thresh)
+   
+    #mirrored: ND = 2 * D * len(thresh)
+    ND = D * len(thresh)
     #print(x)
     #print(f"Expanding {N} samples to {ND} dimensions")
     nx = torch.zeros([N, ND])
     for t in range(len(thresh)):
         nx[:, t*D:(t+1)*D] = x - thresh[t]
     
-    for t in range(len(thresh)):        
-        nx[:, (t+len(thresh))*D:(t+len(thresh)+1)*D] = thresh[t] - x
+    #mirrored
+    #for t in range(len(thresh)):        
+    #    nx[:, (t+len(thresh))*D:(t+len(thresh)+1)*D] = thresh[t] - x
     
     return nx
 
@@ -54,24 +57,26 @@ def test_RUN():
     memK = 8
     dataN = nx.shape[0]
     memD = len(nx[0])
-    numNodes = memD
+    
     numLayers = 3
-    numStack = 4
+    numInputs = memD
+    numStack = 2
+
     halfD = int(memD/2)    
     
     print(f"Input  : {memD} wide (D) -> {memK} deep (K)")
-    print(f"Network: {numStack} wide (F) -> {numLayers} deep (L)")
+    print(f"Network: {numStack} wide (W) -> {numLayers} deep (L)")
+    print(f"Fanin (F): {numInputs}")
 
     param = {
     'memD': memD,
-    'memK': memK,
-    'numNodes': numNodes,
+    'memK': memK,    
     'numLayers': numLayers,
+    'numInputs': numInputs,
     'numStack': numStack,
-    'biasWeights': numNodes * [ numNodes * [0] ],
-    'ptfWeights': numStack * [numNodes * [1]],
-    'ptfThresh': numStack * [ [ halfD ] ],     
-    'ptfDeltas': np.zeros([numNodes, numNodes]),     
+    'biasWeights': numStack * [ (numInputs*2) * [0] ],
+    'ptfWeights': numStack * [(numInputs*2) * [1]],
+    'ptfThresh': numStack * [ [ numInputs ] ],         
     'adaptBias': 0,
     'adaptWeights': 0,
     'adaptThresh': 0,
