@@ -96,11 +96,15 @@ def test_RUN():
 
     for i in range(numStack):
         param['ptfThresh'][i] = [i+1]
+        for ni in range(numInputs):
+            param['biasWeights'][i][numInputs + ni] = 1        
         #param['ptfThresh'][i] = [halfD]
         #param['ptfThresh'][i] = [numNodes]  # min
     
+    #print(f"BIAS: {param['biasWeights']}")    
     #print(f"PTF Weights: {param['ptfWeights']}")
     #print(f"PTF  Thresh: {param['ptfThresh']}")     
+    
     if param['preAdaptInit'] == 1:
         #mam = BatchMAM(nx, nxxyy, param)    
         #param['biasWeights'] = mam.BatchTrainMAM()        
