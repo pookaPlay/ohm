@@ -3,20 +3,55 @@ from bls.ADD import ADD
 def NOT(x):
     return 1 - x
 
+def get_window_indices(base_index, window_width, list_length):
+    """
+    Returns a list of indices into a list, centered at the base_index with a specified window width.
+    Indices wrap around if they go out of bounds.
+    
+    Parameters:
+    - base_index (int): The central index of the window.
+    - window_width (int): The width of the window.
+    - list_length (int): The length of the list.
+    
+    Returns:
+    - List[int]: A list of indices within the specified window.
+    """
+    radius = window_width // 2
+    if window_width % 2 == 0:
+        start_index = base_index - radius
+        end_index = base_index + radius
+    else:
+        start_index = base_index - radius
+        end_index = base_index + radius + 1
+
+    indices = []
+    for i in range(start_index, end_index):
+        wrapped_index = i % list_length
+        indices.append(wrapped_index)
+    return indices
+
+
 class OHM_ADDER_CHANNEL:
 
-    def __init__(self,  numInputsMirrored, memD) -> None:        
+    def __init__(self,  numInputsMirrored, memD, adderInstance) -> None:        
         # numInputsMirrored is 2*actual (+ve/-ve)
-
+        # adderInstance is used to setup connections
         self.numInputsMirrored = numInputsMirrored
         self.numInputs = int(self.numInputsMirrored/2)        
         self.numOutputs = self.numInputsMirrored
         self.memD = memD
         
         self.adders = [ADD() for _ in range(self.numInputsMirrored)]        
-        # mirror inputs
-        self.inIndexA = list(range(self.numInputs))        
-        self.inIndexA.extend(range(self.numInputs))
+        
+        # connect and mirror inputs
+        
+        # Connect first so many 
+        #self.inIndexA = list(range(self.numInputs))        
+        
+        # 1D convolution with wrapping
+        self.inIndexA = get_window_indices(adderInstance, self.numInputs, self.memD)                
+        self.inIndexA.extend(self.inIndexA)
+        
         # parameter memory (B) should be 2*A 
         self.inIndexB = list(range(self.numInputsMirrored))
         self.outIndex = list(range(self.numOutputs))

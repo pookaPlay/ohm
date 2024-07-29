@@ -34,7 +34,7 @@ class RunNetwork:
         self.paramStackMem = [[BSMEM(self.numInputs*2, self.K) for _ in range(self.numStack)] for _ in range(self.numLayers)]
         self.paramThreshMem = [[BSMEM(1, self.K) for _ in range(self.numStack)] for _ in range(self.numLayers)]
 
-        self.bias = [[OHM_ADDER_CHANNEL(self.numInputs*2, self.memD) for _ in range(self.numStack)] for _ in range(self.numLayers)]     
+        self.bias = [[OHM_ADDER_CHANNEL(self.numInputs*2, self.memD, si) for si in range(self.numStack)] for _ in range(self.numLayers)]     
         self.stack = [[STACK_BLS(self.numInputs*2, self.memD, self.K, param) for _ in range(self.numStack)] for _ in range(self.numLayers)] 
         
         self.doneOut = [list(self.numStack * [-1]) for _ in range(self.numLayers)]

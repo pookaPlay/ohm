@@ -41,11 +41,12 @@ def test_RUN():
     #threshSpac = 2.0   # 8    
     #thresholds = np.arange(-2.0, 2.0, threshSpac).tolist()     
     thresholds = [0.0]
+    thresholds = [-0.5, 0.5]
     print(f"Thresholds @ dim: {thresholds}")
     
     numPoints = 5
     
-    x, y, xv, yv, xxyy = LoadXor(numPoints, 'uniform')
+    x, y, xv, yv, xxyy = LoadXor(numPoints, 'uniform', 1)
     #x, y, xv, yv, xxyy = LoadGaussian(numPoints)
     #x, y, xxyy = LoadLinear(numPoints)    
     
@@ -59,8 +60,8 @@ def test_RUN():
     memD = len(nx[0])
     
     numLayers = 3
-    numInputs = memD
-    numStack = 2
+    numInputs = 3
+    numStack = 4
 
     halfD = int(memD/2)    
     
