@@ -1,5 +1,5 @@
 from bls.BSMEM import BSMEM
-from bls.OHM_ADDER_CHAN import OHM_ADDER_CHAN
+from bls.OHM_ADDER_CHANNEL import OHM_ADDER_CHANNEL
 from bls.STACK_BLS import STACK_BLS
 from bls.BSMEM import BSMEM
 
@@ -28,14 +28,14 @@ class RunNetwork:
                 
         self.dataMem = BSMEM(self.memD, self.K)                                
         self.stackMem = [BSMEM(self.numStack, self.K) for _ in range(self.numLayers)]        
-        self.biasMem = [[BSMEM(self.numInputs, self.K) for _ in range(self.numStack)] for _ in range(self.numLayers)]
+        self.biasMem = [[BSMEM(self.numInputs*2, self.K) for _ in range(self.numStack)] for _ in range(self.numLayers)]
 
-        self.paramBiasMem = [[BSMEM(self.numInputs, self.K) for _ in range(self.numStack)] for _ in range(self.numLayers)]
-        self.paramStackMem = [[BSMEM(self.numInputs, self.K) for _ in range(self.numStack)] for _ in range(self.numLayers)]
+        self.paramBiasMem = [[BSMEM(self.numInputs*2, self.K) for _ in range(self.numStack)] for _ in range(self.numLayers)]
+        self.paramStackMem = [[BSMEM(self.numInputs*2, self.K) for _ in range(self.numStack)] for _ in range(self.numLayers)]
         self.paramThreshMem = [[BSMEM(1, self.K) for _ in range(self.numStack)] for _ in range(self.numLayers)]
 
-        self.bias = [[OHM_ADDER_CHAN(self.numInputs, self.memD) for _ in range(self.numStack)] for _ in range(self.numLayers)]     
-        self.stack = [[STACK_BLS(self.numInputs, self.memD, self.K, param) for _ in range(self.numStack)] for _ in range(self.numLayers)] 
+        self.bias = [[OHM_ADDER_CHANNEL(self.numInputs*2, self.memD) for _ in range(self.numStack)] for _ in range(self.numLayers)]     
+        self.stack = [[STACK_BLS(self.numInputs*2, self.memD, self.K, param) for _ in range(self.numStack)] for _ in range(self.numLayers)] 
         
         self.doneOut = [list(self.numStack * [-1]) for _ in range(self.numLayers)]
         self.doneIndexOut = [list(self.numStack * [-1]) for _ in range(self.numLayers)]
