@@ -15,7 +15,7 @@ class OHM_NETWORK:
     def __init__(self, input, param):
     
         self.param = param
-        self.input = input
+        self.input = input        
 
         self.numStack = param['numStack']      # number of parallel nodes        
         self.numInputs = param['numInputs']
@@ -118,13 +118,12 @@ class OHM_NETWORK:
 
             #print(f"   >> MSB PASS ")
             self.RunMSB(layerIndex, sampleIndex)                              
+            #self.results = self.stackMem[layerIndex].GetMSBInts()
             
             self.stackMem[layerIndex].ReverseContent()
-
-            #self.stackMem[layerIndex].Print(f"STACK@{layerIndex}")
-
-            #self.results = self.stackMem[layerIndex].GetMSBInts()
-            self.results = self.stackMem[layerIndex].GetLSBInts()            
+            self.results = self.stackMem[layerIndex].GetLSBInts()
+            print(f"L{layerIndex}: {self.results}")
+            
 
         
         if param['adaptThresh'] > 0:           

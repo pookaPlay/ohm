@@ -17,14 +17,14 @@ def test_RUN_SORT():
 
     numIterations = 1    
     numPoints = 5
-    numPermutations = 2
+    numPermutations = 1
 
     memK = 8
     scaleTo = 127
     clipAt = 127
 
     inputDim = 10
-    numLayers = 10
+    numLayers = 5
     numInputs = 3
     numStack = inputDim
 
@@ -66,7 +66,8 @@ def test_RUN_SORT():
     }    
 
     for i in range(numStack):
-        #param['ptfThresh'][i] = [i+1]        
+        param['ptfThresh'][i] = [(i%(numInputs*2))+1]        
+
         for ni in range(numInputs):
             param['biasWeights'][i][numInputs + ni] = 1        
     

@@ -1,4 +1,5 @@
 from bls.OHM_NETWORK import OHM_NETWORK
+from bls.OHM_PROBE import OHM_PROBE
 import matplotlib.pyplot as plt
 import math
 import pickle
@@ -24,7 +25,11 @@ class SortRunner:
         
         self.output = torch.zeros_like(self.input)
         self.first = self.input[0].tolist()        
-        self.ohm = OHM_NETWORK(self.first, param)   
+
+        self.ohm = OHM_NETWORK(self.first, param)
+        self.probe = OHM_PROBE(param, self.ohm)
+        
+
 
     def Run(self, param) -> None:        
         ticks = list()
@@ -39,25 +44,15 @@ class SortRunner:
         
         numPermutations = param['numPermutations']
 
-        # if param['printParameters'] == 1:            
-        #     for i in range(len(self.ohm.paramStackMem)):                    
-        #             weights = self.ohm.paramStackMem[i].GetLSBIntsHack()
-        #             thresh = self.ohm.paramThreshMem[i].GetLSBIntsHack()                    
-        #             biases = self.ohm.paramBiasMem[i].GetLSBInts()                                                        
-        #             print(f"{i}          Bias: {biases}")                                                                  
-        #             print(f"{i}       Weights: {weights}")                                       
-        #             print(f"{i}        Thresh: {thresh}")
-
         print(f"Running on {numSamples} samples with {numPermutations} permutations")
 
         for ni in range(numSamples):                                                            
-            #########################################################
-            #########################################################
-            # Run the OHM
+
             origSample = self.input[ni].tolist()
             sortedSample = origSample.copy()
             sortedSample.sort()
-
+            sortedSample.reverse()
+                             
             if param['printSample'] == 1:
                 print(f"Sample {ni} ------------------")
                 print(f"Input: {origSample}")
@@ -72,55 +67,22 @@ class SortRunner:
                 if param['printSample'] == 1:                
                     print(f"P{pii}: {sample}")
                 
+                self.probe.AnalyzeSample(sample)
+                ###############################
+                ## Run the OHM
                 results = self.ohm.Run(sample, ni, param)
                 tresults = torch.tensor(results)            
                 self.output[ni] = tresults
                                     
                 if param['printSample'] == 1:
                     print(f"Output: {results}")
+                ###############################
+                ## Analyze the results
+                self.probe.AnalyzeRun()
 
         
         return self.output
-            # if param['printSample'] == 1:
-            #     for si in range(len(self.ohm.biasMem)):
-            #         stackInputs = self.ohm.biasMem[si].GetLSBInts()
-            #         print(f"{stackInputs} -> {results[si]}[{outIndex[si]}] in {self.ohm.doneOut[si]}")
-
-            #     if param['printParameters'] == 1:            
-            #         for i in range(len(self.ohm.paramStackMem)):                    
-            #                 weights = self.ohm.paramStackMem[i].GetLSBIntsHack()
-            #                 thresh = self.ohm.paramThreshMem[i].GetLSBIntsHack()                    
-            #                 biases = self.ohm.paramBiasMem[i].GetLSBInts()                                                        
-            #                 print(f"               Bias{i}: {biases}")                                                                  
-            #                 print(f"            Weights{i}: {weights}")                                       
-            #                 print(f"             Thresh{i}: {thresh}")
-
-            
-            # if (param['adaptBias'] > 0):
-            #     biases = self.ohm.paramBiasMem[0].GetLSBInts()                                                        
-                
-            #     #sample = self.input[ni].tolist()                
-            #     for i in range(len(sample)):
-            #         if sample[i] > biases[i]:
-            #             biases[i] = biases[i] + 1
-            #         else:
-            #             biases[i] = biases[i] - 1                    
-                
-            #     self.ohm.paramBiasMem[0].LoadList(biases)
-        # if param['printIteration'] == 1:
-        #     #avg = sum(ticks) / len(ticks)
-        #     #print(f"Avg Ticks: {avg}")
-
-        #     if param['printParameters'] == 1:                                
-        #         for i in range(len(self.ohm.paramStackMem)):                    
-        #             biases = self.ohm.paramBiasMem[i].GetLSBInts()
-        #             print(f"{i}          Bias: {biases}")                                    
-        #             weights = self.ohm.paramStackMem[i].GetLSBIntsHack()
-        #             thresh = self.ohm.paramThreshMem[i].GetLSBIntsHack()                    
-        #             print(f"{i}       Weights: {weights}")                                       
-        #             print(f"{i}        Thresh: {thresh}")
-
-        
+       
     def WeightAdjust(self) -> None:
         weights = self.ohm.paramBiasMem[0].GetLSBIntsHack()        
         for i in range(len(self.weights)):                    
@@ -191,4 +153,42 @@ class SortRunner:
         with open(filename, 'rb') as f:
             self.min_value, self.max_value = pickle.load(f)
        
+            # if param['printSample'] == 1:
+            #     for si in range(len(self.ohm.biasMem)):
+            #         stackInputs = self.ohm.biasMem[si].GetLSBInts()
+            #         print(f"{stackInputs} -> {results[si]}[{outIndex[si]}] in {self.ohm.doneOut[si]}")
+
+            #     if param['printParameters'] == 1:            
+            #         for i in range(len(self.ohm.paramStackMem)):                    
+            #                 weights = self.ohm.paramStackMem[i].GetLSBIntsHack()
+            #                 thresh = self.ohm.paramThreshMem[i].GetLSBIntsHack()                    
+            #                 biases = self.ohm.paramBiasMem[i].GetLSBInts()                                                        
+            #                 print(f"               Bias{i}: {biases}")                                                                  
+            #                 print(f"            Weights{i}: {weights}")                                       
+            #                 print(f"             Thresh{i}: {thresh}")
+
+            
+            # if (param['adaptBias'] > 0):
+            #     biases = self.ohm.paramBiasMem[0].GetLSBInts()                                                        
+                
+            #     #sample = self.input[ni].tolist()                
+            #     for i in range(len(sample)):
+            #         if sample[i] > biases[i]:
+            #             biases[i] = biases[i] + 1
+            #         else:
+            #             biases[i] = biases[i] - 1                    
+                
+            #     self.ohm.paramBiasMem[0].LoadList(biases)
+        # if param['printIteration'] == 1:
+        #     #avg = sum(ticks) / len(ticks)
+        #     #print(f"Avg Ticks: {avg}")
+
+        #     if param['printParameters'] == 1:                                
+        #         for i in range(len(self.ohm.paramStackMem)):                    
+        #             biases = self.ohm.paramBiasMem[i].GetLSBInts()
+        #             print(f"{i}          Bias: {biases}")                                    
+        #             weights = self.ohm.paramStackMem[i].GetLSBIntsHack()
+        #             thresh = self.ohm.paramThreshMem[i].GetLSBIntsHack()                    
+        #             print(f"{i}       Weights: {weights}")                                       
+        #             print(f"{i}        Thresh: {thresh}")
        
