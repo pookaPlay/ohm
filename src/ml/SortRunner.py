@@ -4,6 +4,7 @@ import math
 import pickle
 import torch
 import sys
+import random
 
 smallest_int = -sys.maxsize - 1
 largest_int = sys.maxsize - 1
@@ -34,9 +35,9 @@ class SortRunner:
         self.negStack = 0
         
         numSamples = len(self.input)
+        numSamples = 1
         
-        #self.ohm.SetAdaptWeights(adaptWeights)        
-        self.plotResults['thresh'] = list()
+        numPermutations = param['numPermutations']
 
         # if param['printParameters'] == 1:            
         #     for i in range(len(self.ohm.paramStackMem)):                    
@@ -47,23 +48,37 @@ class SortRunner:
         #             print(f"{i}       Weights: {weights}")                                       
         #             print(f"{i}        Thresh: {thresh}")
 
-        print(f"Running on {numSamples} samples")
+        print(f"Running on {numSamples} samples with {numPermutations} permutations")
+
         for ni in range(numSamples):                                                            
             #########################################################
             #########################################################
             # Run the OHM
-            sample = self.input[ni].tolist()
+            origSample = self.input[ni].tolist()
+            sortedSample = origSample.copy()
+            sortedSample.sort()
+
             if param['printSample'] == 1:
                 print(f"Sample {ni} ------------------")
-                print(f"Input: {sample}")
+                print(f"Input: {origSample}")
+                print(f"Sort^: {sortedSample}")
+                print(f"----")        
+            
+            for pii in range(numPermutations):
 
+                sample = origSample.copy()
+                random.shuffle(sample)                
 
-            results = self.ohm.Run(sample, ni, param)
-            tresults = torch.tensor(results)            
-            self.output[ni] = tresults
+                if param['printSample'] == 1:                
+                    print(f"P{pii}: {sample}")
+                
+                results = self.ohm.Run(sample, ni, param)
+                tresults = torch.tensor(results)            
+                self.output[ni] = tresults
                                     
-            if param['printSample'] == 1:
-                print(f"Output: {results}")
+                if param['printSample'] == 1:
+                    print(f"Output: {results}")
+
         
         return self.output
             # if param['printSample'] == 1:

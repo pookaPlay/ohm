@@ -15,21 +15,23 @@ torch.backends.cudnn.benchmark = False
 
 def test_RUN_SORT():
 
-    numIterations = 1
+    numIterations = 1    
+    numPoints = 5
+    numPermutations = 2
 
     memK = 8
-    numPoints = 5
-    inputDim = 10
-    nx = torch.randn(numPoints, inputDim)
+    scaleTo = 127
+    clipAt = 127
 
-    
-    dataN = nx.shape[0]
-    memD = len(nx[0])
-    
-    numLayers = 1
+    inputDim = 10
+    numLayers = 10
     numInputs = 3
     numStack = inputDim
 
+    nx = torch.randn(numPoints, inputDim)    
+    dataN = nx.shape[0]
+    
+    memD = len(nx[0])        
     halfD = int(memD/2)    
     
     print(f"Input  : {memD} wide (D) -> {memK} deep (K)")
@@ -49,11 +51,12 @@ def test_RUN_SORT():
     'adaptWeights': 0,
     'adaptThresh': 0,
     'adaptThreshCrazy': 0,
-    'scaleTo': 127,
-    'clipAt': 127,
-    'printSample': 0,
+    'scaleTo': scaleTo,
+    'clipAt': clipAt,
+    'printSample': 1,
     'printParameters': 1,    
     'printIteration': 1, 
+    'numPermutations': numPermutations,
     'printMem': -1,  # set this to the sample 1index to print
     'postAdaptRun': 0,
     'preAdaptInit': 0,    
@@ -63,11 +66,9 @@ def test_RUN_SORT():
     }    
 
     for i in range(numStack):
-        param['ptfThresh'][i] = [i+1]
+        #param['ptfThresh'][i] = [i+1]        
         for ni in range(numInputs):
             param['biasWeights'][i][numInputs + ni] = 1        
-        #param['ptfThresh'][i] = [halfD]
-        #param['ptfThresh'][i] = [numNodes]  # min
     
     #print(f"BIAS: {param['biasWeights']}")    
     #print(f"PTF Weights: {param['ptfWeights']}")
@@ -79,9 +80,7 @@ def test_RUN_SORT():
         print(f"param: {param['biasWeights']}")    
     
 
-    runner = SortRunner(nx, param)            
-    
-    print(runner.input)
+    runner = SortRunner(nx, param)                    
     
     for iter in range(numIterations):
         print("##################################################")
@@ -89,9 +88,7 @@ def test_RUN_SORT():
         
         results = runner.Run(param)
         
-    
-    print(results)
-
+        
     if param['plotResults'] == 1:
         
         #min_value = torch.min(runner.input)
