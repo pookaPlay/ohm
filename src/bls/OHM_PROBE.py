@@ -37,45 +37,40 @@ class OHM_PROBE:
         for f in self.featuresByLayer:
             self.statsByLayer[f] = dict()
 
-
-    def AnalyzeLayer(self, layerIndex):
-        
-        results = self.ohm.stackMem[layerIndex].GetLSBInts()
+    
+    def AnalyzeList(self, key, results):
 
         mean = sum(results) / len(results)
         variance = sum((x - mean) ** 2 for x in results) / len(results)
-        self.statsByLayer['mean'][layerIndex] = mean
-        self.statsByLayer['variance'][layerIndex] = variance
+        self.statsByLayer['mean'][key] = mean
+        self.statsByLayer['variance'][key] = variance
 
         incPairs, decPairs = count_monotonic_pairs(results)
-        self.statsByLayer['incPairs'][layerIndex] = incPairs
-        self.statsByLayer['decPairs'][layerIndex] = decPairs
+        self.statsByLayer['incPairs'][key] = incPairs
+        self.statsByLayer['decPairs'][key] = decPairs
 
     def AnalyzeRun(self):
         numLayers = len(self.ohm.stackMem)
         print(f"Analyzing {numLayers} layers")
         # process each layer
-        for li in range(numLayers):            
-            self.AnalyzeLayer(li)
+        for li in range(numLayers): 
+            results = self.ohm.stackMem[li].GetLSBInts()
+            self.AnalyzeList(li, results)                       
 
-        self.PlotByLayer()            
-
-    def AnalyzeSample(self, sample):
-
-        pass
-
+        self.PlotByLayer()                
 
     def PlotByLayer(self):
-        
+        fig, axes = plt.subplots(2, 1)  # Create a grid of 2 subplots
+
         plt1 = ['mean', 'variance']
         plt2 = ['incPairs', 'decPairs']
 
         for f in plt1:
-            plt.plot(self.statsByLayer[f].keys(), self.statsByLayer[f].values(), label=f)
-        plt.legend()
-        plt.show()
+            axes[0].plot(self.statsByLayer[f].keys(), self.statsByLayer[f].values(), label=f)
+        axes[0].legend()
 
         for f in plt2:
-            plt.plot(self.statsByLayer[f].keys(), self.statsByLayer[f].values(), label=f)
-        plt.legend()
+            axes[1].plot(self.statsByLayer[f].keys(), self.statsByLayer[f].values(), label=f)
+        axes[1].legend()
+
         plt.show()

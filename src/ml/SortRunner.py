@@ -43,7 +43,10 @@ class SortRunner:
         numSamples = 1
         
         numPermutations = param['numPermutations']
-
+        
+        if param['printParameters'] == 1:
+            self.ohm.PrintParameters()
+        
         print(f"Running on {numSamples} samples with {numPermutations} permutations")
 
         for ni in range(numSamples):                                                            
@@ -52,7 +55,7 @@ class SortRunner:
             sortedSample = origSample.copy()
             sortedSample.sort()
             sortedSample.reverse()
-                             
+
             if param['printSample'] == 1:
                 print(f"Sample {ni} ------------------")
                 print(f"Input: {origSample}")
@@ -67,7 +70,9 @@ class SortRunner:
                 if param['printSample'] == 1:                
                     print(f"P{pii}: {sample}")
                 
-                self.probe.AnalyzeSample(sample)
+                self.probe.AnalyzeList('input', sample)
+                self.probe.AnalyzeList('sorted', sortedSample)
+
                 ###############################
                 ## Run the OHM
                 results = self.ohm.Run(sample, ni, param)
@@ -76,6 +81,9 @@ class SortRunner:
                                     
                 if param['printSample'] == 1:
                     print(f"Output: {results}")
+                
+                if param['printParameters'] == 1:
+                    self.ohm.PrintParameters()
                 ###############################
                 ## Analyze the results
                 self.probe.AnalyzeRun()
