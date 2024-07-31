@@ -1,4 +1,4 @@
-from bls.RunNetwork import RunNetwork
+from bls.OHM_NETWORK import OHM_NETWORK
 import matplotlib.pyplot as plt
 import math
 import pickle
@@ -8,9 +8,9 @@ import sys
 smallest_int = -sys.maxsize - 1
 largest_int = sys.maxsize - 1
 
-class NetRunner:
+class SortRunner:
 
-    def __init__(self, nx, nxxyy, param):
+    def __init__(self, nx, param):
     
         self.numInputs = param['numInputs']
         self.depth = param['numLayers']     # number of layers in time              
@@ -19,16 +19,13 @@ class NetRunner:
         self.param = param
         self.plotResults = dict()
         #self.dataMax = 2**self.K - 1.0        
-        self.input = self.ScaleData(nx, param['scaleTo'], param['clipAt'])        
-
-        self.xxyy = self.ScaleData(nxxyy, param['scaleTo'], param['clipAt'])
+        self.input = self.ScaleData(nx, param['scaleTo'], param['clipAt'])
         
         self.output = torch.zeros_like(self.input)
         self.first = self.input[0].tolist()        
-        self.ohm = RunNetwork(self.first, param)   
+        self.ohm = OHM_NETWORK(self.first, param)   
 
-    def Run(self, param) -> None:
-        print(f"Running on {len(self.input)} samples")
+    def Run(self, param) -> None:        
         ticks = list()
         self.posStackStats = 0
         self.negStackStats = 0
@@ -50,7 +47,7 @@ class NetRunner:
         #             print(f"{i}       Weights: {weights}")                                       
         #             print(f"{i}        Thresh: {thresh}")
 
-
+        print(f"Running on {numSamples} samples")
         for ni in range(numSamples):                                                            
             #########################################################
             #########################################################
@@ -62,8 +59,8 @@ class NetRunner:
 
 
             results = self.ohm.Run(sample, ni, param)
-            
-            self.output[ni] = torch.tensor(results)
+            tresults = torch.tensor(results)            
+            self.output[ni] = tresults
                                     
             if param['printSample'] == 1:
                 print(f"Output: {results}")
@@ -95,8 +92,6 @@ class NetRunner:
             #             biases[i] = biases[i] - 1                    
                 
             #     self.ohm.paramBiasMem[0].LoadList(biases)
-                
-
         # if param['printIteration'] == 1:
         #     #avg = sum(ticks) / len(ticks)
         #     #print(f"Avg Ticks: {avg}")

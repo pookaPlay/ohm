@@ -1,7 +1,7 @@
 from ml.TorchSynData import LoadXor, LoadGaussian
 from ml.TorchSynData import LoadLinear
 from ml.TorchSynData import PlotMap
-from ml.MLRunner import MLRunner
+from ml.SortRunner import SortRunner
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,56 +12,23 @@ np.random.seed(seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-def ThreshExpand(x, thresh):
-    
-    N = x.shape[0]
-    D = x.shape[1]
-   
-    #mirrored: ND = 2 * D * len(thresh)
-    ND = D * len(thresh)
-    #print(x)
-    #print(f"Expanding {N} samples to {ND} dimensions")
-    nx = torch.zeros([N, ND])
-    for t in range(len(thresh)):
-        nx[:, t*D:(t+1)*D] = x - thresh[t]
-    
-    #mirrored
-    #for t in range(len(thresh)):        
-    #    nx[:, (t+len(thresh))*D:(t+len(thresh)+1)*D] = thresh[t] - x
-    
-    return nx
 
-def test_RUN():
+def test_RUN_SORT():
 
     numIterations = 1
-        
-    #threshSpac = 0.1   # 240
-    threshSpac = 0.25   # 64
-    #threshSpac = 1.0   # 16
-    #threshSpac = 2.0   # 8    
-    #thresholds = np.arange(-2.0, 2.0, threshSpac).tolist()     
-    thresholds = [0.0]
-    thresholds = [-0.5, 0.5]
-    print(f"Thresholds @ dim: {thresholds}")
-    
-    numPoints = 5
-    
-    x, y, xv, yv, xxyy = LoadXor(numPoints, 'uniform', 1)
-    #x, y, xv, yv, xxyy = LoadGaussian(numPoints)
-    #x, y, xxyy = LoadLinear(numPoints)    
-    
-    nx = ThreshExpand(x, thresholds)        
-    nxxyy = ThreshExpand(xxyy, thresholds)        
-    
-    print(f"Thresh expand: {x.shape} -> {nx.shape}")
 
     memK = 8
+    numPoints = 5
+    inputDim = 10
+    nx = torch.randn(numPoints, inputDim)
+
+    
     dataN = nx.shape[0]
     memD = len(nx[0])
     
     numLayers = 1
     numInputs = 3
-    numStack = 4
+    numStack = inputDim
 
     halfD = int(memD/2)    
     
@@ -112,7 +79,8 @@ def test_RUN():
         print(f"param: {param['biasWeights']}")    
     
 
-    runner = MLRunner(nx, nxxyy, param)            
+    runner = SortRunner(nx, param)            
+    
     print(runner.input)
     
     for iter in range(numIterations):
@@ -121,20 +89,6 @@ def test_RUN():
         
         results = runner.Run(param)
         
-        if param['postAdaptRun'] == 1:
-            was1 = param['adaptWeights']
-            was2 = param['adaptThresh']
-            was3 = param['adaptBias']
-
-            param['adaptWeights'] = 0
-            param['adaptThresh'] = 0
-            param['adaptBias'] = 0
-            runner.Run(param)            
-
-            param['adaptWeights'] = was1
-            param['adaptThresh'] = was2
-            param['adaptBias'] = was3
-
     
     print(results)
 
@@ -161,4 +115,4 @@ def test_RUN():
         plt.show()
                 
 
-test_RUN()
+test_RUN_SORT()
