@@ -17,14 +17,14 @@ def test_RUN_SORT():
 
     numIterations = 1    
     numPoints = 5
-    numPermutations = 5
+    numPermutations = 1
 
     memK = 8
     scaleTo = 127
     clipAt = 127
 
     inputDim = 10
-    numLayers = 5
+    numLayers = 10
     numInputs = 3
     numStack = inputDim
 
@@ -37,7 +37,7 @@ def test_RUN_SORT():
     print(f"Input  : {memD} wide (D) -> {memK} deep (K)")
     print(f"Network: {numStack} wide (W) -> {numLayers} deep (L)")
     print(f"Fanin (F): {numInputs}")
-
+    # need to track precision and bounds! 
     param = {
     'memD': memD,
     'memK': memK,    
@@ -66,7 +66,7 @@ def test_RUN_SORT():
     }    
 
     for i in range(numStack):
-        #param['ptfThresh'][i] = [(i%(numInputs*2))+1]        
+        #param['ptfThresh'][i] = [((2*i)%(numInputs*2))+1]        
 
         for ni in range(numInputs):
             param['biasWeights'][i][numInputs + ni] = 1        
