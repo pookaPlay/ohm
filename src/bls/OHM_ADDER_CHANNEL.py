@@ -44,8 +44,12 @@ def get_reflected_indices(base_index, window_width, list_length):
     - List[int]: A list of indices within the specified window.
     """
     radius = window_width // 2
-    start_index = base_index - radius
-    end_index = base_index + radius + 1
+    if window_width % 2 == 0:
+        start_index = base_index - radius
+        end_index = base_index + radius
+    else:
+        start_index = base_index - radius
+        end_index = base_index + radius + 1
 
     indices = []
     for i in range(start_index, end_index):

@@ -103,8 +103,7 @@ class OHM_NETWORK:
             self.RunMSB(li, sampleIndex)                              
             
             self.stackMem[li].ReverseContent()
-            self.results = self.stackMem[li].GetLSBInts()
-            print(f"L{li}: {self.results}")            
+            self.results = self.stackMem[li].GetLSBInts()            
         
             if param['adaptThresh'] > 0:                       
                 for si in range(len(self.stack[li])):
@@ -126,7 +125,7 @@ class OHM_NETWORK:
                             assert(di >= 0)
                             #dii = GetNegativeIndex(di, len(weights))                
                             weights[di] = weights[di] + 1                
-                            print(f"{si}: MAX (lower) at index {di}")                                
+                            #print(f"{si}: MAX (lower) at index {di}")                                
                                         
 
                     if thresh[0] > sum(weights):
@@ -136,12 +135,17 @@ class OHM_NETWORK:
                             assert(di >= 0)
                             #dii = GetNegativeIndex(di, len(weights))
                             weights[di] = weights[di] + 1
-                            print(f"{si}: MIN (upper) at index {di}")
+                            #print(f"{si}: MIN (upper) at index {di}")
 
-                    self.paramThreshMem[li][si].SetLSBIntsHack(thresh)            
+                    if li < (self.numLayers - 1):
+                        nexti = li + 1
+                    else:
+                        nexti = 0
+                    
+                    self.paramThreshMem[nexti][si].SetLSBIntsHack(thresh)            
                     if param['adaptWeights'] > 0:
-                        self.paramStackMem[li][si].SetLSBIntsHack(weights)        
-
+                        self.paramStackMem[nexti][si].SetLSBIntsHack(weights)        
+                    
         return self.results
                 
     
@@ -228,8 +232,8 @@ class OHM_NETWORK:
             # fix dones for duplicates
             for si in range(len(self.stack[li])):                        
                 if self.doneOut[li][si] < 0:
-                    self.doneOut[li][si] = self.K
-                    dups = [i for i, flag in enumerate(self.stack[li][si].flags) if flag == 0]
+                    self.doneOut[li][si] = self.K                    
+                    dups = [i for i, flag in enumerate(self.stack[li][si].flags) if flag == 0]                    
                     self.doneIndexOut[li][si] = dups[0] if len(dups) > 0 else -1
                             
 

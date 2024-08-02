@@ -23,9 +23,9 @@ def test_RUN_SORT():
     scaleTo = 127
     clipAt = 127
 
-    inputDim = 10
-    numLayers = 10
-    numInputs = 3
+    inputDim = 1000
+    numLayers = 100
+    numInputs = 10
     numStack = inputDim
 
     nx = torch.randn(numPoints, inputDim)    
@@ -34,8 +34,8 @@ def test_RUN_SORT():
     memD = len(nx[0])        
     halfD = int(memD/2)    
     
-    print(f"Input  : {memD} wide (D) -> {memK} deep (K)")
-    print(f"Network: {numStack} wide (W) -> {numLayers} deep (L)")
+    print(f"Input  : {memD} dimension (D) -> {memK} precision (K)")
+    print(f"Network: {numStack} wide (W) -> {numLayers} long (L)")
     print(f"Fanin (F): {numInputs}")
     # need to track precision and bounds! 
     param = {
@@ -48,12 +48,12 @@ def test_RUN_SORT():
     'ptfWeights': numStack * [(numInputs*2) * [1]],
     'ptfThresh': numStack * [ [ numInputs ] ],         
     'adaptBias': 0,
-    'adaptWeights': 0,
-    'adaptThresh': 0,
+    'adaptWeights': 1,
+    'adaptThresh': 1,
     'adaptThreshCrazy': 0,
     'scaleTo': scaleTo,
-    'clipAt': clipAt,
-    'printSample': 1,
+    'clipAt': clipAt,    
+    'printSample': 0,
     'printParameters': 0,    
     'printIteration': 1, 
     'numPermutations': numPermutations,
@@ -66,7 +66,7 @@ def test_RUN_SORT():
     }    
 
     for i in range(numStack):
-        #param['ptfThresh'][i] = [((2*i)%(numInputs*2))+1]        
+        #param['ptfThresh'][i] = [((i)%(numInputs*2))+1]        
 
         for ni in range(numInputs):
             param['biasWeights'][i][numInputs + ni] = 1        
