@@ -17,5 +17,5 @@ jobs:
     - name: Run tests
       run: |
         python src/test_OHM.py
-        python src/test_RUN_SORT_NETWORK.py
+        python src/test_RUN_SORT.py
         
