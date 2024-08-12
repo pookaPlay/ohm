@@ -64,26 +64,25 @@ class OHM_PROBE:
             self.localResults[li] = self.ohm.stackMem[li].GetLSBInts()
             self.AnalyzeList(li, self.localResults[li])
 
-        print(f"Plot Results")
-        self.PlotByLayer()                
-
     def PlotByLayer(self):
    
         #######################################################################
         #######################################################################
         ## Value plots
-        fig, axes = plt.subplots(2, 1)  # Create a grid of 2 subplots
+        statPlot = False
+        if statPlot:
+            fig, axes = plt.subplots(2, 1)  # Create a grid of 2 subplots
 
-        plt1 = ['mean', 'variance']
-        plt2 = ['incPairs', 'decPairs', 'eqPairs']
+            plt1 = ['mean', 'variance']
+            plt2 = ['incPairs', 'decPairs', 'eqPairs']
 
-        for f in plt1:
-            axes[0].plot(self.statsByLayer[f].keys(), self.statsByLayer[f].values(), label=f)
-        axes[0].legend()
+            for f in plt1:
+                axes[0].plot(self.statsByLayer[f].keys(), self.statsByLayer[f].values(), label=f)
+            axes[0].legend()
 
-        for f in plt2:
-            axes[1].plot(self.statsByLayer[f].keys(), self.statsByLayer[f].values(), label=f)
-        axes[1].legend()
+            for f in plt2:
+                axes[1].plot(self.statsByLayer[f].keys(), self.statsByLayer[f].values(), label=f)
+            axes[1].legend()
         
         
         #######################################################################        
@@ -96,30 +95,73 @@ class OHM_PROBE:
         # Convert ticksTaken to a numpy array for easier manipulation
         ticksTaken = np.array(ticksTaken)
         valNetwork = np.zeros_like(ticksTaken)
+        sumFlag = np.zeros_like(ticksTaken)
+        weightNetwork = np.zeros(())
+
         for li in range(len(ticksTaken)):
             for ni in range(len(ticksTaken[li])):
                 valNetwork[li][ni] = self.localResults[li][ni]
-                ticksTaken[li][ni] = ticksTaken[li][ni] / K
+                ticksTaken[li][ni] = ticksTaken[li][ni] #/ K                
 
-        fig = plt.figure()
-        fig2 = plt.figure()
-        # Create a meshgrid for X and Y coordinates
-        X, Y = np.meshgrid(range(ticksTaken.shape[1]), range(ticksTaken.shape[0]))                
-        ax = fig.add_subplot(111, projection='3d')
-        ax2 = fig2.add_subplot(111, projection='3d')
-        ax.plot_surface(X, Y, ticksTaken, cmap='viridis')
-        ax2.plot_surface(X, Y, valNetwork, cmap='viridis')
-        ax.view_init(elev=90, azim=0)
-        ax2.view_init(elev=90, azim=0)
-        ax.set_xlabel('Input')
-        ax.set_ylabel('Layer')
-        ax.set_zlabel('Ticks Taken')
-        ax2.set_xlabel('Input')
+        # Transpose the arrays to swap x and y axes
+        ticksTaken = ticksTaken.T
+        valNetwork = valNetwork.T
+
+        fig = plt.figure(1)        
+        ax3 = fig.add_subplot(231)
+        ax4 = fig.add_subplot(232)
+        ax1 = fig.add_subplot(233)
+        ax2 = fig.add_subplot(236)
+        ax5 = fig.add_subplot(234)
+        ax6 = fig.add_subplot(235)
+        
+        # 2D Heatmaps
+        cax3 = ax3.imshow(ticksTaken, cmap='viridis', aspect='auto')
+        cax4 = ax4.imshow(valNetwork, cmap='viridis', aspect='auto')
+        fig.colorbar(cax3, ax=ax3, orientation='vertical')
+        fig.colorbar(cax4, ax=ax4, orientation='vertical')
+        ax3.set_ylabel('Input')
+        ax3.set_xlabel('Layer')
+        ax3.set_title('Ticks')
+        ax4.set_ylabel('Input')
+        ax4.set_xlabel('Layer')
+        ax4.set_title('Values')
+        
+        allweights, allthresh = self.ohm.GetPrettyParameters()
+
+        cax1 = ax1.imshow(allweights, cmap='viridis', aspect='auto')
+        cax2 = ax2.imshow(allthresh, cmap='viridis', aspect='auto')
+        fig.colorbar(cax1, ax=ax1, orientation='vertical')
+        fig.colorbar(cax2, ax=ax2, orientation='vertical')
+        ax1.set_xlabel('Weights')
+        ax1.set_ylabel('Layer')
+        ax1.set_title('Weights')
+        ax2.set_xlabel('Thresh')
         ax2.set_ylabel('Layer')
-        ax2.set_zlabel('Values')
+        ax2.set_title('Thresh')
+        
+        sumFlag = np.array(self.ohm.sumOut)
+        sumFlag = sumFlag.T
+        sumFlag2 = (sumFlag == 0)
 
+        cax5 = ax5.imshow(sumFlag, cmap='viridis', aspect='auto')
+        cax6 = ax6.imshow(sumFlag2, cmap='viridis', aspect='auto')
+        fig.colorbar(cax5, ax=ax5, orientation='vertical')
+        fig.colorbar(cax6, ax=ax6, orientation='vertical')
+        ax5.set_ylabel('Input')
+        ax5.set_xlabel('Layer')
+        ax5.set_title('SumFlag')
+        ax6.set_ylabel('Input')
+        ax6.set_xlabel('Layer')
+        ax6.set_title('SumFlag')
 
+        plt.tight_layout()
         plt.show()
+        
     
+        #ax1 = fig.add_subplot(221, projection='3d')
+        #X, Y = np.meshgrid(range(ticksTaken.shape[1]), range(ticksTaken.shape[0]))
+        #ax.plot_surface(X, Y, ticksTaken, cmap='viridis')
+        #ax.view_init(elev=90, azim=0)
 
     

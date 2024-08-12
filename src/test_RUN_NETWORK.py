@@ -16,7 +16,7 @@ torch.backends.cudnn.benchmark = False
 def test_RUN_SORT():
 
     numIterations = 1    
-    numPoints = 5
+    numPoints = 1
     numPermutations = 1
 
     memK = 8
@@ -27,9 +27,13 @@ def test_RUN_SORT():
     numLayers = 10
     numInputs = 10
     numStack = inputDim
+    #numStack = 1
 
     nx = torch.randn(numPoints, inputDim)    
+    #nx = torch.zeros(numPoints, inputDim)    
+    #nx = torch.ones(numPoints, inputDim)*127    
     dataN = nx.shape[0]
+    #print(f"DataN: {dataN}: {nx}")
     
     memD = len(nx[0])        
     halfD = int(memD/2)    
@@ -48,8 +52,8 @@ def test_RUN_SORT():
     'ptfWeights': numStack * [(numInputs*2) * [1]],
     'ptfThresh': numStack * [ [ numInputs ] ],         
     'adaptBias': 0,
-    'adaptWeights': 1,
-    'adaptThresh': 1,
+    'adaptWeights': 0,
+    'adaptThresh': 0,
     'adaptThreshCrazy': 0,
     'scaleTo': scaleTo,
     'clipAt': clipAt,    
@@ -80,7 +84,8 @@ def test_RUN_SORT():
         #param['biasWeights'] = mam.BatchTrainMAM()        
         print(f"param: {param['biasWeights']}")    
     
-
+    print("##################################################")
+    print("##################################################")
     runner = SortRunner(nx, param)                    
     
     for iter in range(numIterations):
@@ -89,6 +94,7 @@ def test_RUN_SORT():
         
         results = runner.Run(param)
         
+        #runner.ohm.PrintParameters()
         
     if param['plotResults'] == 1:
         

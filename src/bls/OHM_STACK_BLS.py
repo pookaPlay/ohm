@@ -2,7 +2,7 @@ from bls.ADD import ADD
 import math
 
 
-class STACK_BLS:
+class OHM_STACK_BLS:
 
     def __init__(self,  numInputs, memD, memK, param) -> None:        
         self.numInputs = numInputs

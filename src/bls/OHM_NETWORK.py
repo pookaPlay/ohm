@@ -1,7 +1,8 @@
 from bls.OHM_ADDER_CHANNEL import OHM_ADDER_CHANNEL
-from bls.STACK_BLS import STACK_BLS
+from bls.OHM_STACK_BLS import OHM_STACK_BLS
 from bls.BSMEM import BSMEM
 import networkx as nx
+import numpy as np
 
 def GetNegativeIndex(din, N):
     if din < N/2:
@@ -33,11 +34,12 @@ class OHM_NETWORK:
         self.paramThreshMem = [[BSMEM(1, self.K) for _ in range(self.numStack)] for _ in range(self.numLayers)]
 
         self.bias = [[OHM_ADDER_CHANNEL(self.numInputs*2, self.memD, si) for si in range(self.numStack)] for _ in range(self.numLayers)]     
-        self.stack = [[STACK_BLS(self.numInputs*2, self.memD, self.K, param) for _ in range(self.numStack)] for _ in range(self.numLayers)] 
+        self.stack = [[OHM_STACK_BLS(self.numInputs*2, self.memD, self.K, param) for _ in range(self.numStack)] for _ in range(self.numLayers)] 
         
         self.doneOut = [list(self.numStack * [-1]) for _ in range(self.numLayers)]
         self.doneIndexOut = [list(self.numStack * [-1]) for _ in range(self.numLayers)]
         self.denseOut = [list(self.numStack * [0]) for _ in range(self.numLayers)]
+        self.sumOut = [list(self.numStack * [0]) for _ in range(self.numLayers)]
         
         #self.paramStackGraph = [nx.Graph() for _ in range(param['numStack'])]
         
@@ -74,6 +76,7 @@ class OHM_NETWORK:
 
         self.doneOut = [list(self.numStack * [-1]) for _ in range(self.numLayers)]
         self.doneIndexOut = [list(self.numStack * [-1]) for _ in range(self.numLayers)]
+        self.sumOut = [list(self.numStack * [0]) for _ in range(self.numLayers)]
         self.denseOut = [list(self.numStack * [0]) for _ in range(self.numLayers)]
 
 
@@ -99,7 +102,8 @@ class OHM_NETWORK:
             else:
                 inputMem = self.stackMem[li-1]
             
-            self.RunLSB(inputMem, li, sampleIndex)                            
+            self.RunLSB(inputMem, li, sampleIndex)
+            self.lsbResult = self.stackMem[li].GetLSBInts()            
             self.RunMSB(li, sampleIndex)                              
             
             self.stackMem[li].ReverseContent()
@@ -113,7 +117,7 @@ class OHM_NETWORK:
                     #print(f"Result: {self.results}")
                     #print(f"Pos: {self.stack[0].posCount} Neg: {self.stack[0].negCount} Thresh: {thresh[0]}")
                     #if self.stack[li][si].posCount > self.stack[li][si].negCount:
-                    if self.results[0] > 0:
+                    if self.results[si] > 0:
                         thresh[0] = thresh[0] + 1
                     else:
                         thresh[0] = thresh[0] - 1
@@ -125,7 +129,7 @@ class OHM_NETWORK:
                             assert(di >= 0)
                             #dii = GetNegativeIndex(di, len(weights))                
                             weights[di] = weights[di] + 1                
-                            #print(f"{si}: MAX (lower) at index {di}")                                
+                            print(f"{li}:{si}: MAX (lower) at index {di}")                                
                                         
 
                     if thresh[0] > sum(weights):
@@ -135,13 +139,13 @@ class OHM_NETWORK:
                             assert(di >= 0)
                             #dii = GetNegativeIndex(di, len(weights))
                             weights[di] = weights[di] + 1
-                            #print(f"{si}: MIN (upper) at index {di}")
+                            print(f"{li}:{si}: MIN (upper) at index {di}")
 
                     if li < (self.numLayers - 1):
                         nexti = li + 1
                     else:
                         nexti = 0
-                    
+                    #print(f"{li}:{si} Setting Thresh {thresh}")                                
                     self.paramThreshMem[nexti][si].SetLSBIntsHack(thresh)            
                     if param['adaptWeights'] > 0:
                         self.paramStackMem[nexti][si].SetLSBIntsHack(weights)        
@@ -156,7 +160,8 @@ class OHM_NETWORK:
             self.denseOut[li] = self.numStack * [0]            
             self.doneOut[li] = self.numStack * [-1]
             self.doneIndexOut[li] = self.numStack * [-1]
-            
+            self.sumOut[li] = self.numStack * [0]
+
             [biasMem.ResetIndex() for biasMem in self.biasMem[li]]
             [paramStackMem.ResetIndex() for paramStackMem in self.paramStackMem[li]]
             [paramThreshMem.ResetIndex() for paramThreshMem in self.paramThreshMem[li]]
@@ -172,12 +177,15 @@ class OHM_NETWORK:
 
             for si in range(len(self.stack[li])):     
                 
+                #self.biasMem[li][si].Print(f"BIAS@{li}-{si}")
+
                 self.stack[li][si].Calc(self.biasMem[li][si], self.paramStackMem[li][si], self.paramThreshMem[li][si], msb, stepi)
                                                         
                 if self.doneOut[li][si] < 0:
                     if self.stack[li][si].done == 1:
                         self.doneOut[li][si] = ti
-                        self.doneIndexOut[li][si] = self.stack[li][si].doneIndex[0]
+                        self.doneIndexOut[li][si] = self.stack[li][si].doneIndex
+                        self.sumOut[li][si] = self.stack[li][si].sumFlags
 
                 self.denseOut[li][si] = self.stack[li][si].Output()            
                         
@@ -212,10 +220,17 @@ class OHM_NETWORK:
                     if self.doneOut[li][si] < 0:
                         if self.stack[li][si].done == 1:
                             self.doneOut[li][si] = ti                                                        
-                            self.doneIndexOut[li][si] = self.stack[li][si].doneIndex[0]
+                            self.doneIndexOut[li][si] = self.stack[li][si].doneIndex                            
 
                     self.denseOut[li][si] = self.stack[li][si].Output()            
 
+                if ti == (self.K - 1):
+                    for si in range(len(self.stack[li])):
+                        self.sumOut[li][si] = self.stack[li][si].sumFlags
+                        if self.sumOut[li][si] == 0:
+                            print(f"SUMOUT: {li}:{si}: {self.sumOut[li][si]}")
+                            self.biasMem[li][si].Print(f"BIAS@{li}-{si}")
+                
                 #print(f"     == {stepi}:{ti} {self.denseOut}")
                 self.stackMem[li].Step(self.denseOut[li])
 
@@ -288,13 +303,27 @@ class OHM_NETWORK:
         self.bias.Print(prefix + "  ", showInput)        
  
     def PrintParameters(self) -> None:
-                                        
-        for i in range(len(self.paramStackMem)):                    
-            #biases = self.ohm.paramBiasMem[i].GetLSBInts()
-            #print(f"{i}          Bias: {biases}")                                    
-            for li in range(len(self.paramStackMem)):
-                for i in range(len(self.paramStackMem[li])):
-                    weights = self.paramStackMem[li][i].GetLSBIntsHack()
-                    thresh = self.paramThreshMem[li][i].GetLSBIntsHack()                    
-                    print(f"{li}:{i}       Weights: {weights}")                                       
-                    print(f"{li}:{i}        Thresh: {thresh}")
+        for li in range(len(self.paramStackMem)):
+            for i in range(len(self.paramStackMem[li])):
+                #biases = self.paramBiasMem[li][i].GetLSBInts()
+                weights = self.paramStackMem[li][i].GetLSBIntsHack()
+                thresh = self.paramThreshMem[li][i].GetLSBIntsHack()                    
+                #print(f"{li}:{i}          Bias: {biases}")                                                        
+                print(f"{li}:{i}       Weights: {weights}")                                       
+                print(f"{li}:{i}        Thresh: {thresh}")
+
+    def GetPrettyParameters(self):
+        allweights = np.zeros((self.numLayers, self.numStack*self.numInputs*2))
+        allthresh = np.zeros((self.numLayers, self.numStack))
+
+        for li in range(len(self.paramStackMem)):
+            for i in range(len(self.paramStackMem[li])):
+                weights = self.paramStackMem[li][i].GetLSBIntsHack()
+                allweights[li][i*len(weights):(i+1)*len(weights)] = weights
+                                            
+        for li in range(len(self.paramStackMem)):
+            for i in range(len(self.paramStackMem[li])):
+                thresh = self.paramThreshMem[li][i].GetLSBIntsHack()
+                allthresh[li][i] = thresh[0]
+
+        return allweights, allthresh

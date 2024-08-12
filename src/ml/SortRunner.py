@@ -40,7 +40,7 @@ class SortRunner:
         self.negStack = 0
         
         numSamples = len(self.input)
-        numSamples = 1
+        #numSamples = 1
         
         numPermutations = param['numPermutations']
         
@@ -62,13 +62,22 @@ class SortRunner:
                 print(f"Sort^: {sortedSample}")
                 print(f"----")        
             
+            import matplotlib.pyplot as plt
+            import random
+            import torch
+
+            print(f"Sort^: {sortedSample}")
+            print(f"----")        
+
+            #plt.ion()  # Enable interactive mode
+            
             for pii in range(numPermutations):
 
                 sample = origSample.copy()
                 random.shuffle(sample)                
 
-                if param['printSample'] == 1:                
-                    print(f"P{pii}: {sample}")
+                #if param['printSample'] == 1:                
+                print(f"IN-{pii}: {sample}")
                 
                 self.probe.AnalyzeList('input', sample)
                 self.probe.AnalyzeList('sorted', sortedSample)
@@ -79,14 +88,24 @@ class SortRunner:
                 tresults = torch.tensor(results)            
                 self.output[ni] = tresults
                                     
-                if param['printSample'] == 1:
-                    print(f"Output: {results}")
+                #if param['printSample'] == 1:
+                print(f"Output: {results}")
                 
                 if param['printParameters'] == 1:
                     self.ohm.PrintParameters()
                 ###############################
                 ## Analyze the results
                 self.probe.AnalyzeRun()
+                
+                print(f"Plot Results")
+                #plt.clf()  # Clear the current figure
+                self.probe.PlotByLayer()                
+                #plt.pause(0.1)  # Pause to update the plot
+
+            #plt.ioff()  # Disable interactive mode
+
+            return self.output
+
 
         
         return self.output
@@ -137,6 +156,8 @@ class SortRunner:
                 
         data = torch.round(data)
         data = data.int()        
+        # take out zeros!
+        data = torch.where(data == 0, torch.tensor(1, dtype=data.dtype), data)
 
         return data
 
