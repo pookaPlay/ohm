@@ -24,7 +24,7 @@ def test_RUN_SORT():
     clipAt = 127
 
     inputDim = 100
-    numLayers = 10
+    numLayers = 20
     numInputs = 10
     numStack = inputDim
     #numStack = 1

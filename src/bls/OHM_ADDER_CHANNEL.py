@@ -80,8 +80,11 @@ class OHM_ADDER_CHANNEL:
         #self.inIndexA = list(range(self.numInputs))        
         
         # 1D convolution with wrapping
-        # self.inIndexA = get_window_indices(adderInstance, self.numInputs, self.memD)                
-        self.inIndexA = get_reflected_indices(adderInstance, self.numInputs, self.memD)                
+        self.inIndexA = get_window_indices(adderInstance, self.numInputs, self.memD)                
+        
+        # 1D convolution with reflection
+        #self.inIndexA = get_reflected_indices(adderInstance, self.numInputs, self.memD)                
+        
         self.inIndexA.extend(self.inIndexA)
         
         # parameter memory (B) should be 2*A 

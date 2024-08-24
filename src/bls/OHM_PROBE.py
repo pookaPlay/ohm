@@ -142,18 +142,22 @@ class OHM_PROBE:
         
         sumFlag = np.array(self.ohm.sumOut)
         sumFlag = sumFlag.T
-        sumFlag2 = (sumFlag == 0)
 
-        cax5 = ax5.imshow(sumFlag, cmap='viridis', aspect='auto')
-        cax6 = ax6.imshow(sumFlag2, cmap='viridis', aspect='auto')
-        fig.colorbar(cax5, ax=ax5, orientation='vertical')
-        fig.colorbar(cax6, ax=ax6, orientation='vertical')
         ax5.set_ylabel('Input')
         ax5.set_xlabel('Layer')
         ax5.set_title('SumFlag')
+        cax5 = ax5.imshow(sumFlag, cmap='viridis', aspect='auto')        
+        fig.colorbar(cax5, ax=ax5, orientation='vertical')
+
+        thresh = int(self.param['numInputs'])    
+        print(f"Half D: {thresh}")
+        sumFlag2 = (sumFlag == thresh)
+
+        cax6 = ax6.imshow(sumFlag2, cmap='viridis', aspect='auto')
+        fig.colorbar(cax6, ax=ax6, orientation='vertical')
         ax6.set_ylabel('Input')
         ax6.set_xlabel('Layer')
-        ax6.set_title('SumFlag')
+        ax6.set_title('SumFlag == halfD')
 
         plt.tight_layout()
         plt.show()
