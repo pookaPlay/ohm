@@ -1,5 +1,5 @@
 from bls.OHM_ADDER_CHANNEL import OHM_ADDER_CHANNEL
-from bls.OHM_STACK_BLS import OHM_STACK_BLS
+from bls.OHM_STACK_TWOS import OHM_STACK_TWOS
 from bls.BSMEM import BSMEM
 import networkx as nx
 import numpy as np
@@ -34,7 +34,7 @@ class OHM_NETWORK:
         self.paramThreshMem = [[BSMEM(1, self.K) for _ in range(self.numStack)] for _ in range(self.numLayers)]
 
         self.bias = [[OHM_ADDER_CHANNEL(self.numInputs*2, self.memD, si) for si in range(self.numStack)] for _ in range(self.numLayers)]     
-        self.stack = [[OHM_STACK_BLS(self.numInputs*2, self.memD, self.K, param) for _ in range(self.numStack)] for _ in range(self.numLayers)] 
+        self.stack = [[OHM_STACK_TWOS(self.numInputs*2, self.memD, self.K, param) for _ in range(self.numStack)] for _ in range(self.numLayers)] 
         
         self.doneOut = [list(self.numStack * [-1]) for _ in range(self.numLayers)]
         self.doneIndexOut = [list(self.numStack * [-1]) for _ in range(self.numLayers)]

@@ -13,9 +13,9 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
 
-def test_RUN_SORT():
+def test_RUN_NETWORK():
 
-    numIterations = 1
+    numIterations = 5
     numPoints = 1
     numPermutations = 1
 
@@ -121,4 +121,4 @@ def test_RUN_SORT():
         plt.show()
                 
 
-test_RUN_SORT()
+test_RUN_NETWORK()
