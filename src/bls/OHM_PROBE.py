@@ -42,6 +42,10 @@ class OHM_PROBE:
         self.statsByLayer = dict()
         for f in self.featuresByLayer:
             self.statsByLayer[f] = dict()
+        
+        self.networkStats = dict()
+        self.networkStats['minWeightIncrease'] = list()
+        self.networkStats['maxWeightIncrease'] = list()
 
     
     def AnalyzeList(self, key, results):
@@ -59,10 +63,16 @@ class OHM_PROBE:
     def AnalyzeRun(self):
         numLayers = len(self.ohm.stackMem)
         self.localResults = dict()
-        print(f"Analyzing {numLayers} layers")        
+        #print(f"Analyzing {numLayers} layers")        
         for li in range(numLayers): 
             self.localResults[li] = self.ohm.stackMem[li].GetLSBInts()
             self.AnalyzeList(li, self.localResults[li])
+        
+        self.networkStats['minWeightIncrease'].append(self.ohm.minWeightIncrease)                
+        self.networkStats['maxWeightIncrease'].append(self.ohm.maxWeightIncrease)
+
+    def PrintSomeStats(self):        
+        print(f"Weight updates MIN: {self.networkStats['minWeightIncrease']} MAX: {self.networkStats['maxWeightIncrease']}")
 
     def PlotByLayer(self):
    
@@ -150,7 +160,7 @@ class OHM_PROBE:
         fig.colorbar(cax5, ax=ax5, orientation='vertical')
 
         thresh = int(self.param['numInputs'])    
-        print(f"Half D: {thresh}")
+        #print(f"Half D: {thresh}")
         sumFlag2 = (sumFlag == thresh)
 
         cax6 = ax6.imshow(sumFlag2, cmap='viridis', aspect='auto')

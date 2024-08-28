@@ -43,11 +43,19 @@ class SortRunner:
         #numSamples = 1
         
         numPermutations = param['numPermutations']
-        
+        keepPermutationConstant = 0
+
+        if numPermutations == 0:
+            numPermutations = 1
+            keepPermutationConstant = 1
+
         if param['printParameters'] == 1:
             self.ohm.PrintParameters()
         
         print(f"Running on {numSamples} samples with {numPermutations} permutations")
+        
+        if param['runMovie'] == 1:
+            plt.ion()  # Enable interactive mode                        
 
         for ni in range(numSamples):                                                            
 
@@ -62,22 +70,15 @@ class SortRunner:
                 print(f"Sort^: {sortedSample}")
                 print(f"----")        
             
-            import matplotlib.pyplot as plt
-            import random
-            import torch
-
-            print(f"Sort^: {sortedSample}")
-            print(f"----")        
-
-            #plt.ion()  # Enable interactive mode
-            
             for pii in range(numPermutations):
 
                 sample = origSample.copy()
-                random.shuffle(sample)                
+                
+                if keepPermutationConstant == 0:
+                    random.shuffle(sample)                
 
-                #if param['printSample'] == 1:                
-                print(f"IN-{pii}: {sample}")
+                if param['printSample'] == 1:                
+                    print(f"IN-{pii}: {sample}")
                 
                 self.probe.AnalyzeList('input', sample)
                 self.probe.AnalyzeList('sorted', sortedSample)
@@ -88,26 +89,26 @@ class SortRunner:
                 tresults = torch.tensor(results)            
                 self.output[ni] = tresults
                                     
-                #if param['printSample'] == 1:
-                print(f"Output: {results}")
+                if param['printSample'] == 1:
+                    print(f"OUT : {results}")
                 
                 if param['printParameters'] == 1:
                     self.ohm.PrintParameters()
                 ###############################
                 ## Analyze the results
-                self.probe.AnalyzeRun()
-                
-                print(f"Plot Results")
-                #plt.clf()  # Clear the current figure
-                self.probe.PlotByLayer()                
-                #plt.pause(0.1)  # Pause to update the plot
+                self.probe.AnalyzeRun()                                
+                ## Print some stuff
+                self.probe.PrintSomeStats()    
+                ## Plot the results
+                plt.clf()  
+                self.probe.PlotByLayer()    
+                                         
+                if param['runMovie'] == 1:
+                    plt.pause(0.1)                   
+                    
+        if param['runMovie'] == 1:
+            plt.ioff()
 
-            #plt.ioff()  # Disable interactive mode
-
-            return self.output
-
-
-        
         return self.output
        
     def WeightAdjust(self) -> None:

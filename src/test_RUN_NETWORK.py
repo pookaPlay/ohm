@@ -15,7 +15,7 @@ torch.backends.cudnn.benchmark = False
 
 def test_RUN_SORT():
 
-    numIterations = 1    
+    numIterations = 1
     numPoints = 1
     numPermutations = 1
 
@@ -24,7 +24,7 @@ def test_RUN_SORT():
     clipAt = 127
 
     inputDim = 100
-    numLayers = 20
+    numLayers = 10
     numInputs = 10
     numStack = inputDim
     #numStack = 1
@@ -41,6 +41,7 @@ def test_RUN_SORT():
     print(f"Input  : {memD} dimension (D) -> {memK} precision (K)")
     print(f"Network: {numStack} wide (W) -> {numLayers} long (L)")
     print(f"Fanin (F): {numInputs}")
+    
     # need to track precision and bounds! 
     param = {
     'memD': memD,
@@ -52,21 +53,22 @@ def test_RUN_SORT():
     'ptfWeights': numStack * [(numInputs*2) * [1]],
     'ptfThresh': numStack * [ [ numInputs ] ],         
     'adaptBias': 0,
-    'adaptWeights': 0,
-    'adaptThresh': 0,
+    'adaptWeights': 1,
+    'adaptThresh': 1,
     'adaptThreshCrazy': 0,
     'scaleTo': scaleTo,
     'clipAt': clipAt,    
-    'printSample': 0,
+    'printSample': 1,
     'printParameters': 0,    
     'printIteration': 1, 
-    'numPermutations': numPermutations,
+    'numPermutations': numPermutations, # set to 0 to keep permutation constant
     'printMem': -1,  # set this to the sample 1index to print
     'postAdaptRun': 0,
     'preAdaptInit': 0,    
     'plotResults': 0,    
     'printTicks' : 0,
     'applyToMap': 0,
+    'runMovie': 1,
     }    
 
     for i in range(numStack):
