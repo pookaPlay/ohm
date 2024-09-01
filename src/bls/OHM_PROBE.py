@@ -37,7 +37,8 @@ class OHM_PROBE:
         self.param = param              
         self.ohm = ohm
 
-        self.featuresByLayer = ['mean', 'variance', 'incPairs', 'decPairs', 'eqPairs']
+        self.featuresByLayer = ['mean', 'variance', 'incPairs', 'decPairs', 'eqPairs', 
+                                'mean_ticks', 'min_ticks', 'max_ticks']
 
         self.statsByLayer = dict()
         for f in self.featuresByLayer:
@@ -47,7 +48,7 @@ class OHM_PROBE:
         self.networkStats['minWeightIncrease'] = list()
         self.networkStats['maxWeightIncrease'] = list()
 
-    
+
     def AnalyzeList(self, key, results):
 
         mean = sum(results) / len(results)
@@ -58,7 +59,12 @@ class OHM_PROBE:
         incPairs, decPairs, eqPairs = count_monotonic_pairs(results)
         self.statsByLayer['incPairs'][key] = incPairs
         self.statsByLayer['decPairs'][key] = decPairs
-        self.statsByLayer['eqPairs'][key] = eqPairs
+        self.statsByLayer['eqPairs'][key] = eqPairs    
+
+    def PrintSomeStats(self):        
+        print(f"WEIGHT UPDATES")
+        print(f" MIN: {self.networkStats['minWeightIncrease']}")
+        print(f" MAX: {self.networkStats['maxWeightIncrease']}")
 
     def AnalyzeRun(self):
         numLayers = len(self.ohm.stackMem)
@@ -68,32 +74,44 @@ class OHM_PROBE:
             self.localResults[li] = self.ohm.stackMem[li].GetLSBInts()
             self.AnalyzeList(li, self.localResults[li])
         
-        self.networkStats['minWeightIncrease'].append(self.ohm.minWeightIncrease)                
-        self.networkStats['maxWeightIncrease'].append(self.ohm.maxWeightIncrease)
-
-    def PrintSomeStats(self):        
-        print(f"Weight updates MIN: {self.networkStats['minWeightIncrease']} MAX: {self.networkStats['maxWeightIncrease']}")
+        statKeys = ['minWeightIncrease', 'maxWeightIncrease']
+        for stat in statKeys:            
+            self.networkStats[stat].append(self.ohm.stats[stat])                        
+        
+        ####################
+        ticksTaken = np.array(self.ohm.doneOut)
+        #sumFlag = np.zeros_like(ticksTaken)        
+        for li in range(numLayers):             
+            self.statsByLayer['mean_ticks'][li] = np.mean(ticksTaken[li])
+            self.statsByLayer['min_ticks'][li] = np.min(ticksTaken[li])
+            self.statsByLayer['max_ticks'][li] = np.max(ticksTaken[li])
 
     def PlotByLayer(self):
-   
-        #######################################################################
-        #######################################################################
-        ## Value plots
-        statPlot = False
-        if statPlot:
-            fig, axes = plt.subplots(2, 1)  # Create a grid of 2 subplots
 
-            plt1 = ['mean', 'variance']
-            plt2 = ['incPairs', 'decPairs', 'eqPairs']
+        #######################################        
+        fig = plt.figure(1)           
+        ax1 = fig.add_subplot(311)
+        ax2 = fig.add_subplot(312)
+        ax3 = fig.add_subplot(313)        
 
-            for f in plt1:
-                axes[0].plot(self.statsByLayer[f].keys(), self.statsByLayer[f].values(), label=f)
-            axes[0].legend()
+        plt1 = ['mean', 'variance']
+        for f in plt1:
+            ax1.plot(self.statsByLayer[f].keys(), self.statsByLayer[f].values(), label=f)
+        ax1.legend()
 
-            for f in plt2:
-                axes[1].plot(self.statsByLayer[f].keys(), self.statsByLayer[f].values(), label=f)
-            axes[1].legend()
+        plt2 = ['incPairs', 'decPairs', 'eqPairs']
+        for f in plt2:
+            ax2.plot(self.statsByLayer[f].keys(), self.statsByLayer[f].values(), label=f)
+        ax2.legend()
         
+        #######################################        
+        plt3 = ['mean_ticks', 'min_ticks', 'max_ticks']
+        for f in plt3:
+            ax3.plot(self.statsByLayer[f].keys(), self.statsByLayer[f].values(), label=f)
+        ax3.legend()        
+
+
+    def SurfacePlots(self):
         
         #######################################################################        
         #######################################################################
@@ -117,7 +135,10 @@ class OHM_PROBE:
         ticksTaken = ticksTaken.T
         valNetwork = valNetwork.T
 
-        fig = plt.figure(1)        
+        fig = plt.figure(2)        
+        fig.set_size_inches(10, 8)        
+        fig.canvas.manager.window.move(0, 0)
+
         ax3 = fig.add_subplot(231)
         ax4 = fig.add_subplot(232)
         ax1 = fig.add_subplot(233)
@@ -168,14 +189,4 @@ class OHM_PROBE:
         ax6.set_ylabel('Input')
         ax6.set_xlabel('Layer')
         ax6.set_title('SumFlag == halfD')
-
-        plt.tight_layout()
-        plt.show()
-        
-    
-        #ax1 = fig.add_subplot(221, projection='3d')
-        #X, Y = np.meshgrid(range(ticksTaken.shape[1]), range(ticksTaken.shape[0]))
-        #ax.plot_surface(X, Y, ticksTaken, cmap='viridis')
-        #ax.view_init(elev=90, azim=0)
-
     

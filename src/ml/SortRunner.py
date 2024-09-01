@@ -99,10 +99,16 @@ class SortRunner:
                 self.probe.AnalyzeRun()                                
                 ## Print some stuff
                 self.probe.PrintSomeStats()    
+                
                 ## Plot the results
                 plt.clf()  
-                self.probe.PlotByLayer()    
-                                         
+                plt.tight_layout()
+                
+                self.probe.PlotByLayer()  
+                self.probe.SurfacePlots()
+
+                plt.show()
+                
                 if param['runMovie'] == 1:
                     plt.pause(0.1)                   
                     

@@ -1,8 +1,7 @@
 from bls.ADD import ADD
-import math
 
 
-class OHM_STACK_TWOS:
+class OHM_STACK_ONES:
 
     def __init__(self,  numInputs, memD, memK, param) -> None:        
         self.numInputs = numInputs
@@ -41,10 +40,9 @@ class OHM_STACK_TWOS:
     def Calc(self, memInputs, memParam, memThresh, msb=0, sampleIndex=0) -> None:    
 
         self.inputs = [memInputs.OutputMSB(aIndex) for aIndex in self.inIndexA]        
+        self.origInputs = self.inputs.copy()
 
-        if msb == 1:              
-            self.inputs = [1-x for x in self.inputs]
-            self.origInputs = [1-x for x in self.inputs]
+        if msb == 1:                              
             self.flags = list(len(self.inputs) * [0])
             self.latchInput = list(len(self.inputs) * [0])
             self.done = 0
@@ -56,8 +54,7 @@ class OHM_STACK_TWOS:
             self.negCount = 0
             self.stepCount = 0
             self.lastOut = 0
-        else:
-            self.origInputs  = self.inputs.copy()
+        else:            
             for i in range(len(self.inputs)):    
                 if self.flags[i] == 1:
                     self.inputs[i] = self.latchInput[i]
@@ -95,10 +92,7 @@ class OHM_STACK_TWOS:
         
         if (self.sumFlags == (len(self.inputs)-1)):          
             self.done = 1
-            self.doneIndex = [i for i, flag in enumerate(self.flags) if flag == 0][0]
-                
-        if msb == 1:
-            self.pbfOut = 1 - self.pbfOut
+            self.doneIndex = [i for i, flag in enumerate(self.flags) if flag == 0][0]                        
 
         return self.pbfOut
 
@@ -106,7 +100,7 @@ class OHM_STACK_TWOS:
         return self.pbfOut               
 
     def Print(self, prefix="", verbose=1) -> None:        
-        print(f"{prefix}STACK_TWOS")
+        print(f"{prefix}STACK_ONES")
 
 
 def GetNegativeIndex(din, N):

@@ -42,7 +42,7 @@ class OHM_NETWORK:
         self.sumOut = [list(self.numStack * [0]) for _ in range(self.numLayers)]
         
         #self.paramStackGraph = [nx.Graph() for _ in range(param['numStack'])]
-        
+        self.stats = dict()
         self.Reset()
 
     def SetAdaptWeights(self, adaptWeights) -> None:
@@ -78,6 +78,8 @@ class OHM_NETWORK:
         self.doneIndexOut = [list(self.numStack * [-1]) for _ in range(self.numLayers)]
         self.sumOut = [list(self.numStack * [0]) for _ in range(self.numLayers)]
         self.denseOut = [list(self.numStack * [0]) for _ in range(self.numLayers)]
+        
+        self.stats = dict()
 
     def ResetIndex(self) -> None:
         [stackMemLayer.ResetIndex() for stackMemLayer in self.stackMem]
@@ -90,8 +92,8 @@ class OHM_NETWORK:
     def Run(self, input, sampleIndex, param) -> None:      
                 
         assert(len(input) > 0)
-        self.minWeightIncrease = 0
-        self.maxWeightIncrease = 0
+        self.stats['minWeightIncrease'] = 0
+        self.stats['maxWeightIncrease'] = 0
         
         self.input = input
         self.dataMem.LoadList(self.input)
@@ -111,15 +113,21 @@ class OHM_NETWORK:
             self.results = self.stackMem[li].GetLSBInts()            
         
             if param['adaptThresh'] > 0:
-
+                
                 for si in range(len(self.stack[li])):
                     
                     weights = self.paramStackMem[li][si].GetLSBIntsHack()
                     thresh = self.paramThreshMem[li][si].GetLSBIntsHack()                                        
-                    #print(f"Result: {self.results}")
-                    #print(f"Pos: {self.stack[0].posCount} Neg: {self.stack[0].negCount} Thresh: {thresh[0]}")
-                    if self.stack[li][si].posCount > self.stack[li][si].negCount:
-                    #if self.results[si] > 0:
+
+                    posUpdate = 0
+                    if param['adaptThreshType'] == 'ss':
+                        if self.results[si] > 0:
+                            posUpdate = 1
+                    elif param['adaptThreshType'] == 'pc':
+                        if self.stack[li][si].posCount > self.stack[li][si].negCount:
+                            posUpdate = 1
+
+                    if posUpdate == 1:
                         thresh[0] = thresh[0] + 1
                     else:
                         thresh[0] = thresh[0] - 1
@@ -132,7 +140,7 @@ class OHM_NETWORK:
                             #dii = GetNegativeIndex(di, len(weights))                
                             weights[di] = weights[di] + 1                
                             #print(f"{li}:{si}: MAX (lower) at index {di}")                                
-                            self.maxWeightIncrease = self.maxWeightIncrease + 1
+                            self.stats['maxWeightIncrease'] = self.stats['maxWeightIncrease'] + 1
                                         
 
                     if thresh[0] > sum(weights):
@@ -143,7 +151,7 @@ class OHM_NETWORK:
                             #dii = GetNegativeIndex(di, len(weights))
                             weights[di] = weights[di] + 1
                             #print(f"{li}:{si}: MIN (upper) at index {di}")
-                            self.minWeightIncrease = self.minWeightIncrease + 1
+                            self.stats['minWeightIncrease'] = self.stats['minWeightIncrease'] + 1
 
                     if li < (self.numLayers - 1):
                         nexti = li + 1

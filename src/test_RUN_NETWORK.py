@@ -5,8 +5,10 @@ from ml.SortRunner import SortRunner
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
-seed = 0
+seed = 1
+random.seed(seed)
 torch.manual_seed(seed)
 np.random.seed(seed)
 torch.backends.cudnn.deterministic = True
@@ -15,7 +17,7 @@ torch.backends.cudnn.benchmark = False
 
 def test_RUN_NETWORK():
 
-    numIterations = 5
+    numIterations = 1
     numPoints = 1
     numPermutations = 1
 
@@ -24,7 +26,7 @@ def test_RUN_NETWORK():
     clipAt = 127
 
     inputDim = 100
-    numLayers = 10
+    numLayers = 20
     numInputs = 10
     numStack = inputDim
     #numStack = 1
@@ -55,6 +57,7 @@ def test_RUN_NETWORK():
     'adaptBias': 0,
     'adaptWeights': 1,
     'adaptThresh': 1,
+    'adaptThreshType': 'pc',        # 'pc' or 'ss'
     'adaptThreshCrazy': 0,
     'scaleTo': scaleTo,
     'clipAt': clipAt,    
@@ -68,12 +71,11 @@ def test_RUN_NETWORK():
     'plotResults': 0,    
     'printTicks' : 0,
     'applyToMap': 0,
-    'runMovie': 1,
+    'runMovie': 0,
     }    
 
     for i in range(numStack):
         #param['ptfThresh'][i] = [((i)%(numInputs*2))+1]        
-
         for ni in range(numInputs):
             param['biasWeights'][i][numInputs + ni] = 1        
     
