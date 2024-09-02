@@ -71,7 +71,7 @@ def test_RUN_NETWORK():
     'plotResults': 0,    
     'printTicks' : 0,
     'applyToMap': 0,
-    'runMovie': 0,
+    'runMovie': 1,
     }    
 
     for i in range(numStack):
