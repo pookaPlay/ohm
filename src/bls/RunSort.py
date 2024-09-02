@@ -1,5 +1,5 @@
 from bls.BSMEM import BSMEM
-from bls.OHM_ADDER_CHAN import OHM_ADDER_CHAN
+from bls.OHM_ADDER_CHANNEL import OHM_ADDER_CHANNEL
 from bls.OS_ADDER_TREE import OS_ADDER_TREE
 
 class RunSort:
@@ -21,7 +21,7 @@ class RunSort:
         self.dataMem = BSMEM(self.memD, self.K)
         self.paramMem = BSMEM(self.memD, self.K)                
         
-        self.biases = OHM_ADDER_CHAN(self.NN, self.memD)        
+        self.biases = OHM_ADDER_CHANNEL(self.NN, self.memD, 0)        
         
         self.paramStackMem = [BSMEM(self.NN, self.K) for _ in range(self.NN)]                        
         self.stack = [OS_ADDER_TREE(self.NN, self.memD, self.K) for _ in range(self.NN)]

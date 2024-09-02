@@ -46,8 +46,8 @@ def test_RUN_NETWORK():
     
     # need to track precision and bounds! 
     param = {
-    'memD': memD,
-    'memK': memK,    
+    'memK': memK,
+    'memD': memD,        
     'numLayers': numLayers,
     'numInputs': numInputs,
     'numStack': numStack,
@@ -59,8 +59,8 @@ def test_RUN_NETWORK():
     'adaptThresh': 1,
     'adaptThreshType': 'pc',        # 'pc' or 'ss'
     'adaptThreshCrazy': 0,
-    'scaleTo': scaleTo,
-    'clipAt': clipAt,    
+    'scaleTo': 127,
+    'clipAt': 127,    
     'printSample': 1,
     'printParameters': 0,    
     'printIteration': 1, 
@@ -78,6 +78,7 @@ def test_RUN_NETWORK():
         #param['ptfThresh'][i] = [((i)%(numInputs*2))+1]        
         for ni in range(numInputs):
             param['biasWeights'][i][numInputs + ni] = 1        
+            #pass
     
     #print(f"BIAS: {param['biasWeights']}")    
     #print(f"PTF Weights: {param['ptfWeights']}")
