@@ -22,8 +22,7 @@ class SortRunner:
         self.plotResults = dict()
         #self.dataMax = 2**self.K - 1.0        
         self.input = self.ScaleData(nx, param['scaleTo'], param['clipAt'])
-        
-        self.output = torch.zeros_like(self.input)
+                
         self.first = self.input[0].tolist()        
 
         self.ohm = OHM_NETWORK(self.first, param)
@@ -48,7 +47,7 @@ class SortRunner:
         if numPermutations == 0:
             numPermutations = 1
             keepPermutationConstant = 1
-
+        
         if param['printParameters'] == 1:
             self.ohm.PrintParameters()
         
@@ -87,8 +86,7 @@ class SortRunner:
                 ## Run the OHM
                 results = self.ohm.Run(sample, ni, param)
                 tresults = torch.tensor(results)            
-                self.output[ni] = tresults
-                                    
+                                                                                    
                 if param['printSample'] == 1:
                     print(f"OUT : {results}")
                 
@@ -96,26 +94,24 @@ class SortRunner:
                     self.ohm.PrintParameters()
                 ###############################
                 ## Analyze the results
-                self.probe.AnalyzeRun()                                
+                self.probe.AnalyzeRun(ni, pii, tresults)
                 ## Print some stuff
                 self.probe.PrintSomeStats()    
                 
                 ## Plot the results
-                plt.clf()  
-                plt.tight_layout()
+                #plt.clf()  
+                #plt.tight_layout()
                 
-                self.probe.PlotByLayer()  
-                self.probe.SurfacePlots()
-
+                self.probe.TwoConfigPlot(param['expId'])
                 plt.show()
                 
                 if param['runMovie'] == 1:
-                    plt.pause(0.1)                   
+                    plt.pause(0.1)   
+
                     
         if param['runMovie'] == 1:
             plt.ioff()
-
-        return self.output
+        
        
     def WeightAdjust(self) -> None:
         weights = self.ohm.paramBiasMem[0].GetLSBIntsHack()        

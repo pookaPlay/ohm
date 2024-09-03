@@ -92,6 +92,7 @@ class OHM_NETWORK:
     def Run(self, input, sampleIndex, param) -> None:      
                 
         assert(len(input) > 0)
+        
         self.stats['minWeightIncrease'] = 0
         self.stats['maxWeightIncrease'] = 0
         

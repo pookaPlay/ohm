@@ -61,13 +61,15 @@ class OHM_PROBE:
         print(f" MIN: {self.networkStats['minWeightIncrease']}")
         print(f" MAX: {self.networkStats['maxWeightIncrease']}")
 
-    def AnalyzeRun(self):
+    def AnalyzeRun(self, ni, pii, results):
+        # results should be last layer
         numLayers = len(self.ohm.stackMem)
-        self.localResults = dict()
+        self.localResults = dict()        
+
         #print(f"Analyzing {numLayers} layers")        
         for li in range(numLayers): 
             self.localResults[li] = self.ohm.stackMem[li].GetLSBInts()
-            self.AnalyzeList(li, self.localResults[li])
+            self.AnalyzeList(li, self.localResults[li])            
         
         statKeys = ['minWeightIncrease', 'maxWeightIncrease']
         for stat in statKeys:            
@@ -81,10 +83,22 @@ class OHM_PROBE:
             self.statsByLayer['min_ticks'][li] = np.min(ticksTaken[li])
             self.statsByLayer['max_ticks'][li] = np.max(ticksTaken[li])
 
-    def PlotByLayer(self):
+    def TwoConfigPlot(self, fignum):
+        self.PlotByLayer(fignum)
+        self.SurfacePlots(fignum)
+
+    def PlotByLayer(self, fignum=0):
 
         #######################################        
-        fig = plt.figure(1)           
+        if fignum == 0:
+            fig = plt.figure(1)
+            fig.set_size_inches(4, 4)        
+            fig.canvas.manager.window.move(0, 600)
+        else:
+            fig = plt.figure(10)    
+            fig.set_size_inches(4, 4)        
+            fig.canvas.manager.window.move(800, 600)        
+
         ax1 = fig.add_subplot(311)
         ax2 = fig.add_subplot(312)
         ax3 = fig.add_subplot(313)        
@@ -106,11 +120,18 @@ class OHM_PROBE:
         ax3.legend()        
 
 
-    def SurfacePlots(self):
-        
+    def SurfacePlots(self, fignum=0):
         #######################################################################        
-        #######################################################################
-        ## Surface plots
+        if fignum == 0:
+            fig = plt.figure(2)
+            fig.set_size_inches(8, 6)                                
+            fig.canvas.manager.window.move(0, 0)
+        else:
+            fig = plt.figure(12)    
+            fig.set_size_inches(8, 6)        
+            fig.canvas.manager.window.move(800, 0)        
+
+                
         K = self.param['memK']
         ticksTaken = self.ohm.doneOut
         assert(len(ticksTaken) == len(self.localResults))
@@ -129,10 +150,6 @@ class OHM_PROBE:
         # Transpose the arrays to swap x and y axes
         ticksTaken = ticksTaken.T
         valNetwork = valNetwork.T
-
-        fig = plt.figure(2)        
-        fig.set_size_inches(10, 8)        
-        fig.canvas.manager.window.move(0, 0)
 
         ax3 = fig.add_subplot(231)
         ax4 = fig.add_subplot(232)

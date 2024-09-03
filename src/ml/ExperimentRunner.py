@@ -5,7 +5,6 @@ from ml.SortRunner import SortRunner
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
-import random
 
 
 def SetupExperiment(param):
@@ -42,7 +41,7 @@ def SetupExperiment(param):
     param['plotResults'] = 0
     param['printTicks'] = 0
     param['applyToMap'] = 0
-    param['runMovie'] = 0
+    param['runMovie'] = 1
 
     for i in range(param['numStack']):
         #param['ptfThresh'][i] = [((i)%(numInputs*2))+1]        
@@ -50,6 +49,12 @@ def SetupExperiment(param):
             param['biasWeights'][i][param['numInputs'] + ni] = 1        
     
     return nx, param
+
+def UpdateParam(param, config):
+    for key, value in config.items():
+        param[key] = value
+    return param
+
 
 def RunNetwork(nx, param):
 
@@ -75,7 +80,7 @@ def RunNetwork(nx, param):
         print("##################################################")
         print(f"ITERATION {iter}")
         
-        results = runner.Run(param)
+        runner.Run(param)
         
         #runner.ohm.PrintParameters()
         
