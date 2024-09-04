@@ -171,16 +171,17 @@ class OHM_PROBE:
         ax4.set_title('Values')
         
         allweights, allthresh = self.ohm.GetPrettyParameters()
-
+        allweights = allweights.T
+        allthresh = allthresh.T
         cax1 = ax1.imshow(allweights, cmap='viridis', aspect='auto')
         cax2 = ax2.imshow(allthresh, cmap='viridis', aspect='auto')
         fig.colorbar(cax1, ax=ax1, orientation='vertical')
         fig.colorbar(cax2, ax=ax2, orientation='vertical')
-        ax1.set_xlabel('Weights')
-        ax1.set_ylabel('Layer')
+        ax1.set_ylabel('Weights')
+        ax1.set_xlabel('Layer')
         ax1.set_title('Weights')
-        ax2.set_xlabel('Thresh')
-        ax2.set_ylabel('Layer')
+        ax2.set_ylabel('Thresh')
+        ax2.set_xlabel('Layer')
         ax2.set_title('Thresh')
         
         sumFlag = np.array(self.ohm.sumOut)

@@ -14,26 +14,27 @@ torch.backends.cudnn.benchmark = False
 
 def RUN_EXPERIMENT_test():
 
-    param = {}
-    param['inputDim'] = 100
-    param['numPoints'] = 1
+    param = {
+        'numPoints': 1,
+        'inputDim': 100,
+        'numIterations' : 1,
+        'runMovie': 1,
+        'adaptWeights': 1, 
+        'adaptThresh' : 1,
+    }
 
     nx, param = SetupExperiment(param)
     
     config1 = {
-        'expId': 0,        
-        'runMovie': 1,
-        'adaptWeights': 0, 
-        'adaptThresh' : 0,                 
+        'expId': 0,                
+        'numInputs': 5,
     }
     param = UpdateParam(param, config1)    
     RunNetwork(nx, param)
     
     config2 = {        
         'expId': 1,                
-        'runMovie': 1,
-        'adaptWeights': 1, 
-        'adaptThresh' : 1,         
+        'numInputs': 5,
     }
     param = UpdateParam(param, config2)    
     RunNetwork(nx, param)
