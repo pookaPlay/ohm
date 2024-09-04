@@ -1,7 +1,6 @@
 from bls.OHM_ADDER_CHANNEL import OHM_ADDER_CHANNEL
 from bls.OHM_STACK_TWOS import OHM_STACK_TWOS
 from bls.BSMEM import BSMEM
-import networkx as nx
 import numpy as np
 
 def GetNegativeIndex(din, N):

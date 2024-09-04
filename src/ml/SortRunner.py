@@ -94,7 +94,7 @@ class SortRunner:
                     self.ohm.PrintParameters()
                 ###############################
                 ## Analyze the results
-                self.probe.AnalyzeRun(ni, pii, tresults)
+                self.probe.AnalyzeRun(ni, pii)
                 ## Print some stuff
                 self.probe.PrintSomeStats()    
                 

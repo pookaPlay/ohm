@@ -1,29 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
-def count_monotonic_pairs(lst):
-    increasing_pairs = 0
-    decreasing_pairs = 0
-    equal_pairs = 0
-
-    for x, y in zip(lst, lst[1:]):
-        if x < y:
-            increasing_pairs += 1
-        elif x > y:
-            decreasing_pairs += 1
-        elif x == y:
-            equal_pairs += 1
-    
-    total_pairs = len(lst) - 1
-    if total_pairs == 0:
-        return 0, 0  # Avoid division by zero for lists with fewer than 2 elements
-    
-    normalized_increasing = increasing_pairs / total_pairs
-    normalized_decreasing = decreasing_pairs / total_pairs
-    normalized_equal = equal_pairs / total_pairs
-
-    return normalized_increasing, normalized_decreasing, normalized_equal
-
+from bls.OHM_PROBE_ANALYSIS import WeightAnalysis, count_monotonic_pairs
 
 class OHM_PROBE:
 
@@ -61,8 +38,8 @@ class OHM_PROBE:
         print(f" MIN: {self.networkStats['minWeightIncrease']}")
         print(f" MAX: {self.networkStats['maxWeightIncrease']}")
 
-    def AnalyzeRun(self, ni, pii, results):
-        # results should be last layer
+    def AnalyzeRun(self, ni, pii):
+        
         numLayers = len(self.ohm.stackMem)
         self.localResults = dict()        
 
@@ -83,10 +60,14 @@ class OHM_PROBE:
             self.statsByLayer['min_ticks'][li] = np.min(ticksTaken[li])
             self.statsByLayer['max_ticks'][li] = np.max(ticksTaken[li])
 
-    def TwoConfigPlot(self, fignum):
-        self.PlotByLayer(fignum)
-        self.SurfacePlots(fignum)
-
+        ######################
+        ### AnalyzeWeights
+        w, t = WeightAnalysis(self.ohm)        
+        print("##################################################")
+        print("##################################################")
+        print("##################################################")
+        print(f"WEIGHTS: {w}")
+    
     def PlotByLayer(self, fignum=0):
 
         #######################################        
@@ -203,3 +184,6 @@ class OHM_PROBE:
         ax6.set_xlabel('Layer')
         ax6.set_title('SumFlag == halfD')
     
+    def TwoConfigPlot(self, fignum):
+        self.PlotByLayer(fignum)
+        self.SurfacePlots(fignum)
