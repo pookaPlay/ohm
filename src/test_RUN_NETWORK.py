@@ -1,7 +1,9 @@
 from ml.TorchSynData import LoadXor, LoadGaussian
 from ml.TorchSynData import LoadLinear
 from ml.TorchSynData import PlotMap
-from ml.SortRunner import SortRunner
+from ml.ScaleData import ScaleData
+from bls.OHM_NETWORK import OHM_NETWORK
+from bls.OHM_PROBE import OHM_PROBE
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -20,25 +22,21 @@ def test_RUN_NETWORK():
     numIterations = 1
     numPoints = 1
     numPermutations = 1
+    
+    #first = [0, 0, 0, 0, 0, 0, 0]
+    #first = [1, 2, 3, 0, -1, -2, -3]    
+    first = [1, 2, 3, 4, -1, -2, -3]    
+    memD = len(first)        
+    halfD = int(memD/2)    
 
     memK = 8
     scaleTo = 127
     clipAt = 127
 
-    inputDim = 100
-    numLayers = 20
-    numInputs = 10
-    numStack = inputDim
-    #numStack = 1
-
-    nx = torch.randn(numPoints, inputDim)    
-    #nx = torch.zeros(numPoints, inputDim)    
-    #nx = torch.ones(numPoints, inputDim)*127    
-    dataN = nx.shape[0]
-    #print(f"DataN: {dataN}: {nx}")
-    
-    memD = len(nx[0])        
-    halfD = int(memD/2)    
+    inputDim = memD
+    numLayers = 1
+    numInputs = 3
+    numStack = inputDim    
     
     print(f"Input  : {memD} dimension (D) -> {memK} precision (K)")
     print(f"Network: {numStack} wide (W) -> {numLayers} long (L)")
@@ -61,7 +59,7 @@ def test_RUN_NETWORK():
     'adaptThreshCrazy': 0,
     'scaleTo': 127,
     'clipAt': 127,    
-    'printSample': 1,
+    'printSample': 0,
     'printParameters': 0,    
     'printIteration': 1, 
     'numPermutations': numPermutations, # set to 0 to keep permutation constant
@@ -79,49 +77,15 @@ def test_RUN_NETWORK():
         for ni in range(numInputs):
             param['biasWeights'][i][numInputs + ni] = 1        
             #pass
-    
-    #print(f"BIAS: {param['biasWeights']}")    
-    #print(f"PTF Weights: {param['ptfWeights']}")
-    #print(f"PTF  Thresh: {param['ptfThresh']}")     
-    
-    if param['preAdaptInit'] == 1:
-        #mam = BatchMAM(nx, nxxyy, param)    
-        #param['biasWeights'] = mam.BatchTrainMAM()        
-        print(f"param: {param['biasWeights']}")    
-    
-    print("##################################################")
-    print("##################################################")
-    runner = SortRunner(nx, param)                    
-    
-    for iter in range(numIterations):
-        print("##################################################")
-        print(f"ITERATION {iter}")
-        
-        results = runner.Run(param)
-        
-        #runner.ohm.PrintParameters()
-        
-    if param['plotResults'] == 1:
-        
-        #min_value = torch.min(runner.input)
-        #max_value = torch.max(runner.input)        
-        minScale = -150
-        maxScale = 150
 
-        offsets = runner.ohm.paramBiasMem[0].GetLSBInts()        
-        off = torch.tensor(offsets)        
+    ohm = OHM_NETWORK(first, param)
+    probe = OHM_PROBE(param, ohm)
 
-        plt.scatter(runner.input[ y[:,0] > 0 , 0], runner.input[ y[:,0] > 0 , 1], color='g', marker='o')
-        plt.scatter(runner.input[ y[:,0] < 0 , 0], runner.input[ y[:,0] < 0 , 1], color='r', marker='x')
-
-        plt.axvline(x=off[0], color='b', linestyle='--')
-        plt.axhline(y=off[1], color='b', linestyle='--')        
-        plt.axvline(x=-off[2], color='g', linestyle='--')
-        plt.axhline(y=-off[3], color='g', linestyle='--')
-
-        plt.xlim(minScale, maxScale)
-        plt.ylim(minScale, maxScale)
-        plt.show()
+    print(f"IN : {first}")
+    results = ohm.Run(first, ni, param)
+    print(f"OUT: {results}")
+    
+    #probe.AnalyzeRun(0, 0)    
                 
 
 test_RUN_NETWORK()

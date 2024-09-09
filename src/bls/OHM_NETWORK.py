@@ -222,7 +222,6 @@ class OHM_NETWORK:
                 if self.param['printTicks'] == 1:
                     print(f"     == {stepi}:{li}:{ti} ")                
 
-
                 [biasMem.Step() for biasMem in self.biasMem[li]]
                 
                 for si in range(len(self.stack[li])):                    

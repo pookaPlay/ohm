@@ -16,18 +16,19 @@ def RUN_EXPERIMENT_test():
 
     param = {
         'numPoints': 1,
-        'inputDim': 10,
+        'inputDim': 100,
         'numIterations' : 1,
         'runMovie': 1,
         'adaptWeights': 1, 
         'adaptThresh' : 1,
+        'numLayers': 10,
     }
 
     nx, param = SetupExperiment(param)
     
     config1 = {
         'expId': 0,                
-        'numInputs': 100,
+        'numInputs': 10,
     }
     param = UpdateParam(param, config1)    
     RunNetwork(nx, param)

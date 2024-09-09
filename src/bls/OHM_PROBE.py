@@ -62,11 +62,8 @@ class OHM_PROBE:
 
         ######################
         ### AnalyzeWeights
-        w, t = WeightAnalysis(self.ohm)        
-        print("##################################################")
-        print("##################################################")
-        print("##################################################")
-        print(f"WEIGHTS: {w}")
+        self.effectiveInputs = WeightAnalysis(self.ohm)     
+        print(f"Effective Inputs: {self.effectiveInputs}")           
     
     def PlotByLayer(self, fignum=0):
 
@@ -154,13 +151,15 @@ class OHM_PROBE:
         allweights, allthresh = self.ohm.GetPrettyParameters()
         allweights = allweights.T
         allthresh = allthresh.T
-        cax1 = ax1.imshow(allweights, cmap='viridis', aspect='auto')
+
+        #cax1 = ax1.imshow(allweights, cmap='viridis', aspect='auto')
+        cax1 = ax1.imshow(self.effectiveInputs, cmap='viridis', aspect='auto')
         cax2 = ax2.imshow(allthresh, cmap='viridis', aspect='auto')
         fig.colorbar(cax1, ax=ax1, orientation='vertical')
         fig.colorbar(cax2, ax=ax2, orientation='vertical')
-        ax1.set_ylabel('Weights')
+        ax1.set_ylabel('Number of Inputs')
         ax1.set_xlabel('Layer')
-        ax1.set_title('Weights')
+        ax1.set_title('Effective Inputs')
         ax2.set_ylabel('Thresh')
         ax2.set_xlabel('Layer')
         ax2.set_title('Thresh')

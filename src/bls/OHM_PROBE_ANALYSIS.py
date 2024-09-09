@@ -27,18 +27,23 @@ def count_monotonic_pairs(lst):
 
 
 def WeightAnalysis(ohm):
-    allweights = np.zeros((ohm.numLayers, ohm.numStack*ohm.numInputs*2))
-    allthresh = np.zeros((ohm.numLayers, ohm.numStack))
-
+    
+    effectiveInputs = np.zeros((ohm.numLayers, ohm.numStack))
+    
     for li in range(len(ohm.paramStackMem)):
         for i in range(len(ohm.paramStackMem[li])):
             weights = ohm.paramStackMem[li][i].GetLSBIntsHack()
-            allweights[li][i*len(weights):(i+1)*len(weights)] = weights
-                                        
-    for li in range(len(ohm.paramStackMem)):
-        for i in range(len(ohm.paramStackMem[li])):
             thresh = ohm.paramThreshMem[li][i].GetLSBIntsHack()
-            allthresh[li][i] = thresh[0]
+            thresh = thresh[0]
+            weights = np.array(weights)
+            sumw = np.sum(weights)
+            numw = weights.shape[0]
+            if sumw == numw:
+                numInputs = numw
+            else:
+                numInputs = 0
+            
+            effectiveInputs[li][i] = numInputs
 
-    return allweights, allthresh
+    return effectiveInputs
 
