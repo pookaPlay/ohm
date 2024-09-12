@@ -72,6 +72,11 @@ class OHM_STACK_TWOS:
             self.treeInputs[i] = self.inputs[i] * intParam[i]
         
         self.pbfOut = 1 if (sum(self.treeInputs) >= halfSum) else 0                
+
+        if self.param['doneClip'] == 1:
+            if self.done == 1:
+                self.pbfOut = self.param['doneClipValue'] 
+            
         signOut = self.pbfOut*2-1
         
         self.stepCount = self.stepCount + 1
@@ -86,10 +91,10 @@ class OHM_STACK_TWOS:
                     self.flags[i] = 1
                     self.latchInput[i] = self.inputs[i]
 
-        for i in range(len(self.flags)):
-            if self.done == 0:
-                if self.flags[i] == 0:                        
-                    self.weightCount[i] = self.weightCount[i] + 1
+        #for i in range(len(self.flags)):
+        #    if self.done == 0:
+        #        if self.flags[i] == 0:                        
+        #            self.weightCount[i] = self.weightCount[i] + 1
         
         self.sumFlags = sum(self.flags)
         

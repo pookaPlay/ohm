@@ -70,6 +70,8 @@ def test_RUN_NETWORK():
     'printTicks' : 0,
     'applyToMap': 0,
     'runMovie': 1,
+    'doneClip' : 0,
+    'doneClipValue' : 0,
     }    
 
     for i in range(numStack):

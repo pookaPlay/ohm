@@ -17,6 +17,7 @@ def RUN_EXPERIMENT_test():
     param = {
         'numPoints': 1,
         'inputDim': 100,
+        'numInputs': 10,
         'numIterations' : 1,
         'runMovie': 1,
         'adaptWeights': 1, 
@@ -28,16 +29,18 @@ def RUN_EXPERIMENT_test():
     
     config1 = {
         'expId': 0,                
-        'numInputs': 10,
+        'doneClip': 1,
+        'doneClipValue' : 0,       
     }
     param = UpdateParam(param, config1)    
     RunNetwork(nx, param)
     
-    #config2 = {        
-    #    'expId': 1,                
-    #    'numInputs': 5,
-    #}
-    ##param = UpdateParam(param, config2)    
+    config2 = {        
+        'expId': 1,                
+        'doneClip': 1,
+        'doneClipValue' : 1,
+    }
+    param = UpdateParam(param, config2)    
     RunNetwork(nx, param)
 
     print("Press any key to continue...")    

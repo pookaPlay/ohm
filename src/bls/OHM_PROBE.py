@@ -63,7 +63,7 @@ class OHM_PROBE:
         ######################
         ### AnalyzeWeights
         self.effectiveInputs = WeightAnalysis(self.ohm)     
-        print(f"Effective Inputs: {self.effectiveInputs}")           
+        #print(f"Effective Inputs: {self.effectiveInputs}")           
     
     def PlotByLayer(self, fignum=0):
 
@@ -75,7 +75,7 @@ class OHM_PROBE:
         else:
             fig = plt.figure(10)    
             fig.set_size_inches(4, 4)        
-            fig.canvas.manager.window.move(800, 600)        
+            fig.canvas.manager.window.move(950, 600)        
 
         ax1 = fig.add_subplot(311)
         ax2 = fig.add_subplot(312)
@@ -102,12 +102,12 @@ class OHM_PROBE:
         #######################################################################        
         if fignum == 0:
             fig = plt.figure(2)
-            fig.set_size_inches(8, 6)                                
+            fig.set_size_inches(10, 6)                                
             fig.canvas.manager.window.move(0, 0)
         else:
             fig = plt.figure(12)    
-            fig.set_size_inches(8, 6)        
-            fig.canvas.manager.window.move(800, 0)        
+            fig.set_size_inches(10, 6)        
+            fig.canvas.manager.window.move(950, 0)        
 
                 
         K = self.param['memK']

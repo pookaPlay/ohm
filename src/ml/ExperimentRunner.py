@@ -69,7 +69,11 @@ def SetupExperiment(param):
         param['applyToMap'] = 0
     if 'runMovie' not in param:
         param['runMovie'] = 1
-
+    if 'doneClip' not in param:
+        param['doneClip'] = 0        
+    if 'doneClipValue' not in param:
+        param['doneClipValue'] = 0        
+        
     for i in range(param['numStack']):
         #param['ptfThresh'][i] = [((i)%(numInputs*2))+1]        
         for ni in range(param['numInputs']):
