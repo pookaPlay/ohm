@@ -111,7 +111,7 @@ class OHM_NETWORK:
             
             self.stackMem[li].ReverseContent()
             self.results = self.stackMem[li].GetLSBInts()            
-        
+            #print(f"    RESULTS: {li}: {self.results}")
             if param['adaptThresh'] > 0:
                 
                 for si in range(len(self.stack[li])):

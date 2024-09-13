@@ -63,6 +63,7 @@ class OHM_PROBE:
         ######################
         ### AnalyzeWeights
         self.effectiveInputs = WeightAnalysis(self.ohm)     
+        
         #print(f"Effective Inputs: {self.effectiveInputs}")           
     
     def PlotByLayer(self, fignum=0):
@@ -118,8 +119,7 @@ class OHM_PROBE:
         ticksTaken = np.array(ticksTaken)
         valNetwork = np.zeros_like(ticksTaken)
         sumFlag = np.zeros_like(ticksTaken)
-        weightNetwork = np.zeros(())
-
+        
         for li in range(len(ticksTaken)):
             for ni in range(len(ticksTaken[li])):
                 valNetwork[li][ni] = self.localResults[li][ni]
@@ -151,6 +151,9 @@ class OHM_PROBE:
         allweights, allthresh = self.ohm.GetPrettyParameters()
         allweights = allweights.T
         allthresh = allthresh.T
+
+        print(f"allweights: {allweights.shape}")
+        print(f"Effective Inputs: {self.effectiveInputs.shape}")
 
         #cax1 = ax1.imshow(allweights, cmap='viridis', aspect='auto')
         cax1 = ax1.imshow(self.effectiveInputs, cmap='viridis', aspect='auto')

@@ -25,7 +25,8 @@ def test_RUN_NETWORK():
     
     #first = [0, 0, 0, 0, 0, 0, 0]
     #first = [1, 2, 3, 0, -1, -2, -3]    
-    first = [1, 2, 3, 4, -1, -2, -3]    
+    #first = [1, 2, 3, 4, -1, -2, -3]    
+    first = [-65, -32, -28, -68, -4, -26, -41, -68, -30, 13, -33, -11, -9, 71, 10, 20, -30, -49, 30, 8, 37, 10, -28, 34, 47, -7, -95, -61, 3, -26, -34, -6, 80, -3, 7, -33, 8, 2, 6, -20, -5, 12, -7, -1, 100, -44, 67, -27, -39, 23, 3, -19, 32, 19, 49, 85, 6, 40, -8, -27, 65, -37, -127, -32, -1, -43, -25, -43, -9, 1, 71, 1, -30, -8, -42, -35, -20, -24, 17, -42, -21, 4, -28, 31, 59, -34, -39, 47, 26, 8, -109, 36, -89, -26, -63, -48, -4, 15, -45, -37]    
     memD = len(first)        
     halfD = int(memD/2)    
 
@@ -35,7 +36,7 @@ def test_RUN_NETWORK():
 
     inputDim = memD
     numLayers = 1
-    numInputs = 3
+    numInputs = 10
     numStack = inputDim    
     
     print(f"Input  : {memD} dimension (D) -> {memK} precision (K)")
@@ -53,16 +54,16 @@ def test_RUN_NETWORK():
     'ptfWeights': numStack * [(numInputs*2) * [1]],
     'ptfThresh': numStack * [ [ numInputs ] ],         
     'adaptBias': 0,
-    'adaptWeights': 1,
-    'adaptThresh': 1,
+    'adaptWeights': 0,
+    'adaptThresh': 0,
     'adaptThreshType': 'pc',        # 'pc' or 'ss'
     'adaptThreshCrazy': 0,
     'scaleTo': 127,
     'clipAt': 127,    
     'printSample': 0,
     'printParameters': 0,    
-    'printIteration': 1, 
-    'numPermutations': numPermutations, # set to 0 to keep permutation constant
+    'printIteration': 1,     
+    'numPermutations' : 0,
     'printMem': -1,  # set this to the sample 1index to print
     'postAdaptRun': 0,
     'preAdaptInit': 0,    
@@ -86,7 +87,7 @@ def test_RUN_NETWORK():
     print(f"IN : {first}")
     results = ohm.Run(first, ni, param)
     print(f"OUT: {results}")
-    
+    print(param)
     #probe.AnalyzeRun(0, 0)    
                 
 

@@ -18,30 +18,46 @@ def RUN_EXPERIMENT_test():
         'numPoints': 1,
         'inputDim': 100,
         'numInputs': 10,
-        'numIterations' : 1,
+        'numLayers': 20,
+        'numIterations' : 1,        
+        'numPermutations' : 0,
+        'adaptWeights': 0, 
+        'adaptThresh' : 0,     
+        'adaptBias': 0,
+        'adaptThreshType': 'pc',        # 'pc' or 'ss'
+        'scaleTo': 127,
+        'clipAt': 127,    
+        'printSample': 1,
+        'printIteration': 1,                
+        'printParameters': 0,            
+        'printTicks' : 0,
+        'applyToMap': 0,
         'runMovie': 1,
-        'adaptWeights': 1, 
-        'adaptThresh' : 1,
-        'numLayers': 10,
-    }
+        'doneClip' : 0,
+        'doneClipValue' : 0,               
+        }
 
     nx, param = SetupExperiment(param)
     
     config1 = {
         'expId': 0,                
-        'doneClip': 1,
-        'doneClipValue' : 0,       
+        'doneClip': 0,
+        'doneClipValue' : 0,   
+        'adaptWeights': 0, 
+        'adaptThresh' : 0,     
     }
-    param = UpdateParam(param, config1)    
-    RunNetwork(nx, param)
+    param1 = UpdateParam(param, config1)    
+    RunNetwork(nx, param1)
     
     config2 = {        
         'expId': 1,                
-        'doneClip': 1,
-        'doneClipValue' : 1,
+        'doneClip': 0,
+        'doneClipValue' : 0,
+        'adaptWeights': 1, 
+        'adaptThresh' : 1,     
     }
-    param = UpdateParam(param, config2)    
-    RunNetwork(nx, param)
+    param2 = UpdateParam(param, config2)    
+    RunNetwork(nx, param2)
 
     print("Press any key to continue...")    
     keyboard.read_event()

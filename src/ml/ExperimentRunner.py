@@ -22,7 +22,7 @@ def SetupExperiment(param):
     if 'numIterations' not in param:
         param['numIterations'] = 1
     if 'numPermutations' not in param:
-        param['numPermutations'] = 0  # set to 0 to keep permutation constant
+        param['numPermutations'] = 1  # set to 0 to keep permutation constant
     if 'memK' not in param:
         param['memK'] = 8
     if 'memD' not in param:
@@ -88,6 +88,11 @@ def UpdateParam(param, config):
     param['biasWeights'] = param['numStack'] * [(param['numInputs'] * 2) * [0]]
     param['ptfWeights'] = param['numStack'] * [(param['numInputs'] * 2) * [1]]
     param['ptfThresh'] = param['numStack'] * [[param['numInputs']]]
+
+    for i in range(param['numStack']):
+        #param['ptfThresh'][i] = [((i)%(numInputs*2))+1]        
+        for ni in range(param['numInputs']):
+            param['biasWeights'][i][param['numInputs'] + ni] = 1        
 
     return param
 

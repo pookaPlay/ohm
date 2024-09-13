@@ -27,7 +27,7 @@ def count_monotonic_pairs(lst):
 
 
 def WeightAnalysis(ohm):
-    
+        
     effectiveInputs = np.zeros((ohm.numLayers, ohm.numStack))
     
     for li in range(len(ohm.paramStackMem)):
@@ -45,5 +45,7 @@ def WeightAnalysis(ohm):
             
             effectiveInputs[li][i] = numInputs
 
+    effectiveInputs = effectiveInputs.T
+    
     return effectiveInputs
 
