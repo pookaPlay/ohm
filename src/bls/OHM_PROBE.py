@@ -103,11 +103,11 @@ class OHM_PROBE:
         #######################################################################        
         if fignum == 0:
             fig = plt.figure(2)
-            fig.set_size_inches(10, 6)                                
+            fig.set_size_inches(10, 10)
             fig.canvas.manager.window.move(0, 0)
         else:
             fig = plt.figure(12)    
-            fig.set_size_inches(10, 6)        
+            fig.set_size_inches(10, 10)        
             fig.canvas.manager.window.move(950, 0)        
 
                 
@@ -129,21 +129,26 @@ class OHM_PROBE:
         ticksTaken = ticksTaken.T
         valNetwork = valNetwork.T
 
-        ax3 = fig.add_subplot(231)
-        ax4 = fig.add_subplot(232)
-        ax1 = fig.add_subplot(233)
-        ax2 = fig.add_subplot(236)
-        ax5 = fig.add_subplot(234)
-        ax6 = fig.add_subplot(235)
-        
-        # 2D Heatmaps
-        cax3 = ax3.imshow(ticksTaken, cmap='viridis', aspect='auto')
-        cax4 = ax4.imshow(valNetwork, cmap='viridis', aspect='auto')
-        fig.colorbar(cax3, ax=ax3, orientation='vertical')
-        fig.colorbar(cax4, ax=ax4, orientation='vertical')
+        ax3 = fig.add_subplot(331)
+        ax4 = fig.add_subplot(332)
+        ax1 = fig.add_subplot(333)
+        ax5 = fig.add_subplot(334)
+        ax6 = fig.add_subplot(335)
+        ax2 = fig.add_subplot(336)
+        ex1 = fig.add_subplot(337)
+        ex2 = fig.add_subplot(338)
+        ex3 = fig.add_subplot(339)
+                        
+        # ticks
+        cax3 = ax3.imshow(ticksTaken, cmap='viridis', aspect='auto')        
+        fig.colorbar(cax3, ax=ax3, orientation='vertical')        
         ax3.set_ylabel('Input')
         ax3.set_xlabel('Layer')
         ax3.set_title('Ticks')
+
+        # values
+        cax4 = ax4.imshow(valNetwork, cmap='viridis', aspect='auto')
+        fig.colorbar(cax4, ax=ax4, orientation='vertical')
         ax4.set_ylabel('Input')
         ax4.set_xlabel('Layer')
         ax4.set_title('Values')
@@ -152,17 +157,20 @@ class OHM_PROBE:
         allweights = allweights.T
         allthresh = allthresh.T
 
-        print(f"allweights: {allweights.shape}")
-        print(f"Effective Inputs: {self.effectiveInputs.shape}")
+        cex1 = ex1.imshow(allweights, cmap='viridis', aspect='auto')
+        fig.colorbar(cex1, ax=ex1, orientation='vertical')
+        ex1.set_ylabel('Inputs')
+        ex1.set_xlabel('Layer')
+        ex1.set_title('Weights')
 
-        #cax1 = ax1.imshow(allweights, cmap='viridis', aspect='auto')
-        cax1 = ax1.imshow(self.effectiveInputs, cmap='viridis', aspect='auto')
-        cax2 = ax2.imshow(allthresh, cmap='viridis', aspect='auto')
+        cax1 = ax1.imshow(self.effectiveInputs, cmap='viridis', aspect='auto')        
         fig.colorbar(cax1, ax=ax1, orientation='vertical')
-        fig.colorbar(cax2, ax=ax2, orientation='vertical')
-        ax1.set_ylabel('Number of Inputs')
+        ax1.set_ylabel('#Inputs')
         ax1.set_xlabel('Layer')
         ax1.set_title('Effective Inputs')
+        
+        cax2 = ax2.imshow(allthresh, cmap='viridis', aspect='auto')
+        fig.colorbar(cax2, ax=ax2, orientation='vertical')
         ax2.set_ylabel('Thresh')
         ax2.set_xlabel('Layer')
         ax2.set_title('Thresh')
@@ -186,6 +194,6 @@ class OHM_PROBE:
         ax6.set_xlabel('Layer')
         ax6.set_title('SumFlag == halfD')
     
-    def TwoConfigPlot(self, fignum):
-        self.PlotByLayer(fignum)
+    def TwoConfigPlot(self, fignum):        
         self.SurfacePlots(fignum)
+        #self.PlotByLayer(fignum)

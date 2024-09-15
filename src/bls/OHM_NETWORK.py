@@ -155,12 +155,16 @@ class OHM_NETWORK:
 
                     if li < (self.numLayers - 1):
                         nexti = li + 1
+                        #print(f"{li}:{si} Setting Thresh {thresh}")                                
+                        self.paramThreshMem[nexti][si].SetLSBIntsHack(thresh)            
+                        if param['adaptWeights'] > 0:
+                            self.paramStackMem[nexti][si].SetLSBIntsHack(weights)        
                     else:
                         nexti = 0
-                    #print(f"{li}:{si} Setting Thresh {thresh}")                                
-                    self.paramThreshMem[nexti][si].SetLSBIntsHack(thresh)            
-                    if param['adaptWeights'] > 0:
-                        self.paramStackMem[nexti][si].SetLSBIntsHack(weights)        
+                        #self.paramThreshMem[nexti][si].SetLSBIntsHack(thresh)            
+                        #if param['adaptWeights'] > 0:
+                        #    self.paramStackMem[nexti][si].SetLSBIntsHack(weights)        
+
                     
         return self.results
                 

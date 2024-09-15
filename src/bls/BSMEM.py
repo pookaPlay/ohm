@@ -43,7 +43,7 @@ class BSMEM():
         return self.memhack
 
     def SetLSBIntsHack(self, vals):        
-        self.memhack = vals
+        self.memhack = vals.copy()
 
     def LoadList(self, data):                
         self.Reset()       

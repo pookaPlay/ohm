@@ -18,7 +18,7 @@ def RUN_EXPERIMENT_test():
         'numPoints': 1,
         'inputDim': 100,
         'numInputs': 10,
-        'numLayers': 20,
+        'numLayers': 21,
         'numIterations' : 1,        
         'numPermutations' : 0,
         'adaptWeights': 0, 
