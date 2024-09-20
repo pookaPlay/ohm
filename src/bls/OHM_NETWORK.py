@@ -135,23 +135,23 @@ class OHM_NETWORK:
                     if thresh[0] < 1:
                         thresh[0] = 1
                         if param['adaptWeights'] > 0:
-                            di = self.doneIndexOut[li][si]
-                            assert(di >= 0)
-                            #dii = GetNegativeIndex(di, len(weights))                
-                            weights[di] = weights[di] + 1                
-                            #print(f"{li}:{si}: MAX (lower) at index {di}")                                
-                            self.stats['maxWeightIncrease'] = self.stats['maxWeightIncrease'] + 1
+                            for di in self.doneIndexOut[li][si]:
+                                assert(di >= 0)
+                                #dii = GetNegativeIndex(di, len(weights))                
+                                weights[di] = weights[di] + 1                
+                                #print(f"{li}:{si}: MAX (lower) at index {di}")                                
+                                self.stats['maxWeightIncrease'] = self.stats['maxWeightIncrease'] + 1
                                         
 
                     if thresh[0] > sum(weights):
                         thresh[0] = sum(weights)
                         if param['adaptWeights'] > 0:
-                            di = self.doneIndexOut[li][si]
-                            assert(di >= 0)
-                            #dii = GetNegativeIndex(di, len(weights))
-                            weights[di] = weights[di] + 1
-                            #print(f"{li}:{si}: MIN (upper) at index {di}")
-                            self.stats['minWeightIncrease'] = self.stats['minWeightIncrease'] + 1
+                            for di in self.doneIndexOut[li][si]:
+                                assert(di >= 0)
+                                #dii = GetNegativeIndex(di, len(weights))
+                                weights[di] = weights[di] + 1
+                                #print(f"{li}:{si}: MIN (upper) at index {di}")
+                                self.stats['minWeightIncrease'] = self.stats['minWeightIncrease'] + 1
 
                     if li < (self.numLayers - 1):
                         nexti = li + 1
@@ -165,6 +165,16 @@ class OHM_NETWORK:
                         #if param['adaptWeights'] > 0:
                         #    self.paramStackMem[nexti][si].SetLSBIntsHack(weights)        
 
+            if (param['adaptBias'] > 0):
+                pass
+                #biases = self.paramBiasMem[0].GetLSBInts()                                                                        
+                #sample = self.input[ni].tolist()                
+                #for i in range(len(sample)):
+                #    if sample[i] > biases[i]:
+                #        biases[i] = biases[i] + 1
+                #    else:
+                #        biases[i] = biases[i] - 1                                    
+                #self.ohm.paramBiasMem[0].LoadList(biases)
                     
         return self.results
                 
@@ -259,12 +269,12 @@ class OHM_NETWORK:
 
                 #[stack.Step() for stack in self.stack]
             
-            # fix dones for duplicates
+            # case for duplicates and done did not fire
             for si in range(len(self.stack[li])):                        
                 if self.doneOut[li][si] < 0:
                     self.doneOut[li][si] = self.K                    
                     dups = [i for i, flag in enumerate(self.stack[li][si].flags) if flag == 0]                    
-                    self.doneIndexOut[li][si] = dups[0] if len(dups) > 0 else -1
+                    self.doneIndexOut[li][si] = dups
                             
 
     def RunLSB(self, inputMem, li=0, stepi=0) -> None:            
@@ -342,3 +352,12 @@ class OHM_NETWORK:
                 allthresh[li][i] = thresh[0]
 
         return allweights, allthresh
+    
+    # def WeightAdjust(self) -> None:
+    #     weights = self.ohm.paramBiasMem[0].GetLSBIntsHack()        
+    #     for i in range(len(self.weights)):                    
+    #         if (self.weights[i] > 1):
+    #             self.weights[i] = int(math.floor(self.weights[i] / 2))
+            
+    #     self.ohm.paramStackMem[0].SetLSBIntsHack(self.weights)
+

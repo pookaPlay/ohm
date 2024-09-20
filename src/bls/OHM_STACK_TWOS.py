@@ -100,7 +100,7 @@ class OHM_STACK_TWOS:
         
         if (self.sumFlags == (len(self.inputs)-1)):          
             self.done = 1
-            self.doneIndex = [i for i, flag in enumerate(self.flags) if flag == 0][0]
+            self.doneIndex = [i for i, flag in enumerate(self.flags) if flag == 0]
                 
         if msb == 1:
             self.pbfOut = 1 - self.pbfOut

@@ -101,19 +101,6 @@ class MLRunner:
                             print(f"               Bias{i}: {biases}")                                                                  
                             print(f"            Weights{i}: {weights}")                                       
                             print(f"             Thresh{i}: {thresh}")
-
-            
-            if (param['adaptBias'] > 0):
-                biases = self.ohm.paramBiasMem[0].GetLSBInts()                                                        
-                
-                #sample = self.input[ni].tolist()                
-                for i in range(len(sample)):
-                    if sample[i] > biases[i]:
-                        biases[i] = biases[i] + 1
-                    else:
-                        biases[i] = biases[i] - 1                    
-                
-                self.ohm.paramBiasMem[0].LoadList(biases)
                 
 
         if param['printIteration'] == 1:
@@ -129,15 +116,7 @@ class MLRunner:
                     print(f"{i}       Weights: {weights}")                                       
                     print(f"{i}        Thresh: {thresh}")
 
-        
-    def WeightAdjust(self) -> None:
-        weights = self.ohm.paramBiasMem[0].GetLSBIntsHack()        
-        for i in range(len(self.weights)):                    
-            if (self.weights[i] > 1):
-                self.weights[i] = int(math.floor(self.weights[i] / 2))
-            
-        self.ohm.paramStackMem[0].SetLSBIntsHack(self.weights)
-
+           
     def ApplyToMap(self, param) -> None:
         print(f"Running on {len(self.xxyy)} samples")
                 
