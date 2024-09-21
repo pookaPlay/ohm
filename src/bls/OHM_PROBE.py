@@ -153,9 +153,16 @@ class OHM_PROBE:
         ax4.set_xlabel('Layer')
         ax4.set_title('Values')
         
-        allweights, allthresh = self.ohm.GetPrettyParameters()
+        allweights, allthresh, allbiases = self.ohm.GetPrettyParameters()
         allweights = allweights.T
         allthresh = allthresh.T
+        allbiases = allbiases.T
+
+        cex2 = ex2.imshow(allbiases, cmap='viridis', aspect='auto')
+        fig.colorbar(cex2, ax=ex2, orientation='vertical')
+        ex2.set_ylabel('Inputs')
+        ex2.set_xlabel('Layer')
+        ex2.set_title('Biases')
 
         cex1 = ex1.imshow(allweights, cmap='viridis', aspect='auto')
         fig.colorbar(cex1, ax=ex1, orientation='vertical')

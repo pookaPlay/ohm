@@ -81,6 +81,9 @@ class OHM_ADDER_CHANNEL:
         
         # 1D convolution with wrapping
         self.inIndexA = get_window_indices(adderInstance, self.numInputs, self.memD)                
+        if self.numInputs == self.memD:
+            # shift left 
+            self.inIndexA = self.inIndexA[int(self.memD/2):] + self.inIndexA[:int(self.memD/2)]
         
         # 1D convolution with reflection
         #self.inIndexA = get_reflected_indices(adderInstance, self.numInputs, self.memD)                
