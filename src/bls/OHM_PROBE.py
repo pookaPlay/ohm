@@ -8,6 +8,8 @@ class OHM_PROBE:
     
         self.param = param              
         self.ohm = ohm
+        
+        self.statKeys = ['minWeightIncrease', 'maxWeightIncrease', 'biasIncrease']
 
         self.featuresByLayer = ['mean', 'variance', 'incPairs', 'decPairs', 'eqPairs', 
                                 'mean_ticks', 'min_ticks', 'max_ticks']
@@ -19,6 +21,7 @@ class OHM_PROBE:
         self.networkStats = dict()
         self.networkStats['minWeightIncrease'] = list()
         self.networkStats['maxWeightIncrease'] = list()
+        self.networkStats['biasIncrease'] = list()
 
 
     def AnalyzeList(self, key, results):
@@ -34,9 +37,11 @@ class OHM_PROBE:
         self.statsByLayer['eqPairs'][key] = eqPairs    
 
     def PrintSomeStats(self):        
-        print(f"WEIGHT UPDATES")
+        print(f"---------------------------------")
         print(f" MIN: {self.networkStats['minWeightIncrease']}")
         print(f" MAX: {self.networkStats['maxWeightIncrease']}")
+        print(f"BIAS: {self.networkStats['biasIncrease']}")
+        print(f"---------------------------------")
 
     def AnalyzeRun(self, ni, pii):
         
@@ -47,9 +52,8 @@ class OHM_PROBE:
         for li in range(numLayers): 
             self.localResults[li] = self.ohm.stackMem[li].GetLSBInts()
             self.AnalyzeList(li, self.localResults[li])            
-        
-        statKeys = ['minWeightIncrease', 'maxWeightIncrease']
-        for stat in statKeys:            
+                
+        for stat in self.statKeys:            
             self.networkStats[stat].append(self.ohm.stats[stat])                        
         
         ####################
@@ -125,32 +129,34 @@ class OHM_PROBE:
                 valNetwork[li][ni] = self.localResults[li][ni]
                 ticksTaken[li][ni] = ticksTaken[li][ni] #/ K                
 
-        # Transpose the arrays to swap x and y axes
+        sumFlag = np.array(self.ohm.sumOut)
+        sumFlag = sumFlag.T        
         ticksTaken = ticksTaken.T
         valNetwork = valNetwork.T
 
         ax3 = fig.add_subplot(331)
         ax4 = fig.add_subplot(332)
         ax1 = fig.add_subplot(333)
-        ax5 = fig.add_subplot(334)
-        ax6 = fig.add_subplot(335)
+        ex2 = fig.add_subplot(334)
+        ex1 = fig.add_subplot(335)
         ax2 = fig.add_subplot(336)
-        ex1 = fig.add_subplot(337)
-        ex2 = fig.add_subplot(338)
-        ex3 = fig.add_subplot(339)
+        
+        sb1 = fig.add_subplot(337)
+        sb2 = fig.add_subplot(338)
+        sb3 = fig.add_subplot(339)
                         
         # ticks
         cax3 = ax3.imshow(ticksTaken, cmap='viridis', aspect='auto')        
         fig.colorbar(cax3, ax=ax3, orientation='vertical')        
         ax3.set_ylabel('Input')
-        ax3.set_xlabel('Layer')
+        #ax3.set_xlabel('Layer')
         ax3.set_title('Ticks')
 
         # values
         cax4 = ax4.imshow(valNetwork, cmap='viridis', aspect='auto')
         fig.colorbar(cax4, ax=ax4, orientation='vertical')
-        ax4.set_ylabel('Input')
-        ax4.set_xlabel('Layer')
+        #ax4.set_ylabel('Input')
+        #ax4.set_xlabel('Layer')
         ax4.set_title('Values')
         
         allweights, allthresh, allbiases = self.ohm.GetPrettyParameters()
@@ -161,45 +167,60 @@ class OHM_PROBE:
         cex2 = ex2.imshow(allbiases, cmap='viridis', aspect='auto')
         fig.colorbar(cex2, ax=ex2, orientation='vertical')
         ex2.set_ylabel('Inputs')
-        ex2.set_xlabel('Layer')
+        #ex2.set_xlabel('Layer')
         ex2.set_title('Biases')
 
-        cex1 = ex1.imshow(allweights, cmap='viridis', aspect='auto')
+        #cex1 = ex1.imshow(allweights, cmap='viridis', aspect='auto')
+        cex1 = ex1.imshow(sumFlag, cmap='viridis', aspect='auto')
         fig.colorbar(cex1, ax=ex1, orientation='vertical')
-        ex1.set_ylabel('Inputs')
-        ex1.set_xlabel('Layer')
-        ex1.set_title('Weights')
+        #ex1.set_ylabel('Inputs')
+        ex1.set_title('SumFlag')
+        #ex1.set_title('Weights')
 
         cax1 = ax1.imshow(self.effectiveInputs, cmap='viridis', aspect='auto')        
         fig.colorbar(cax1, ax=ax1, orientation='vertical')
-        ax1.set_ylabel('#Inputs')
-        ax1.set_xlabel('Layer')
+        #ax1.set_ylabel('#Inputs')
+        #ax1.set_xlabel('Layer')
         ax1.set_title('Effective Inputs')
         
         cax2 = ax2.imshow(allthresh, cmap='viridis', aspect='auto')
         fig.colorbar(cax2, ax=ax2, orientation='vertical')
-        ax2.set_ylabel('Thresh')
-        ax2.set_xlabel('Layer')
+        #ax2.set_ylabel('Thresh')
+        #ax2.set_xlabel('Layer')
         ax2.set_title('Thresh')
-        
-        sumFlag = np.array(self.ohm.sumOut)
-        sumFlag = sumFlag.T
+                
+        plt1 = ['mean', 'variance']
+        for f in plt1:
+            sb1.plot(self.statsByLayer[f].keys(), self.statsByLayer[f].values(), label=f)
+        sb1.legend()
 
-        ax5.set_ylabel('Input')
-        ax5.set_xlabel('Layer')
-        ax5.set_title('SumFlag')
-        cax5 = ax5.imshow(sumFlag, cmap='viridis', aspect='auto')        
-        fig.colorbar(cax5, ax=ax5, orientation='vertical')
+        plt2 = ['incPairs', 'decPairs', 'eqPairs']
+        for f in plt2:
+            sb2.plot(self.statsByLayer[f].keys(), self.statsByLayer[f].values(), label=f)
+        sb2.legend()
 
-        thresh = int(self.param['numInputs'])    
-        #print(f"Half D: {thresh}")
-        sumFlag2 = (sumFlag == thresh)
+        #######################################        
+        plt3 = ['mean_ticks', 'min_ticks', 'max_ticks']
+        for f in plt3:
+            sb3.plot(self.statsByLayer[f].keys(), self.statsByLayer[f].values(), label=f)
+        sb3.legend()        
 
-        cax6 = ax6.imshow(sumFlag2, cmap='viridis', aspect='auto')
-        fig.colorbar(cax6, ax=ax6, orientation='vertical')
-        ax6.set_ylabel('Input')
-        ax6.set_xlabel('Layer')
-        ax6.set_title('SumFlag == halfD')
+
+        # ax5.set_ylabel('Input')
+        # ax5.set_xlabel('Layer')
+        # ax5.set_title('SumFlag')
+        # cax5 = ax5.imshow(sumFlag, cmap='viridis', aspect='auto')        
+        # fig.colorbar(cax5, ax=ax5, orientation='vertical')
+
+        # thresh = int(self.param['numInputs'])    
+        # #print(f"Half D: {thresh}")
+        # sumFlag2 = (sumFlag == thresh)
+
+        # cax6 = ax6.imshow(sumFlag2, cmap='viridis', aspect='auto')
+        # fig.colorbar(cax6, ax=ax6, orientation='vertical')
+        # ax6.set_ylabel('Input')
+        # ax6.set_xlabel('Layer')
+        # ax6.set_title('SumFlag == halfD')
     
     def TwoConfigPlot(self, fignum):        
         self.SurfacePlots(fignum)

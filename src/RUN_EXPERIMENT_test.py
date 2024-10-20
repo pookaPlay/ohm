@@ -16,23 +16,24 @@ def RUN_EXPERIMENT_test():
 
     param = {
         'numPoints': 1,
-        'inputDim': 100,
-        'numInputs': 10,
-        'numLayers': 20,
-        'numIterations' : 10,        
+        'inputDim': 10,
+        'numInputs': 3,
+        'numLayers': 1,
+        'numIterations' : 2,        
         'numPermutations' : 0,
         'adaptWeights': 0, 
         'adaptThresh' : 0,     
         'adaptBias': 0,
-        'adaptThreshType': 'pc',        # 'pc' or 'ss'
+        'adaptThreshType': 'ss',        # 'pc' or 'ss'
         'scaleTo': 127,
         'clipAt': 127,    
         'printSample': 1,
-        'printIteration': 1,                
+        'printSampleLayer': 1,
+        'printIteration': 0,                
         'printParameters': 0,            
         'printTicks' : 0,
         'applyToMap': 0,
-        'runMovie': 1,
+        'runMovie': 0,
         'doneClip' : 0,
         'doneClipValue' : 0,               
         }
@@ -41,28 +42,26 @@ def RUN_EXPERIMENT_test():
     
     config1 = {
         'expId': 0,                
-        'doneClip': 0,
-        'doneClipValue' : 0,   
-        'adaptWeights': 1, 
-        'adaptThresh' : 1,     
-        'adaptBias': 1,
+        'adaptWeights': 0, 
+        'adaptThresh' : 0,     
+        'adaptBias': 0,
     }
     param1 = UpdateParam(param, config1)    
     RunNetwork(nx, param1)
     
     config2 = {        
         'expId': 1,                
-        'doneClip': 0,
-        'doneClipValue' : 0,
-        'adaptWeights': 1, 
-        'adaptThresh' : 1,     
+        'adaptWeights': 0, 
+        'adaptThresh' : 0,     
         'adaptBias': 1,
     }
-    #param2 = UpdateParam(param, config2)    
-    #RunNetwork(nx, param2)
-
-    print("Press any key to continue...")    
-    keyboard.read_event()
+    param2 = UpdateParam(param, config2)    
+    RunNetwork(nx, param2)
+    
+    print("Press 'q' to quit...")
+    while True:
+        if keyboard.is_pressed('q'):
+            break
 
                 
 
