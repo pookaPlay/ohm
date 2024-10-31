@@ -1,4 +1,4 @@
-from bls.OHM_NETWORK_V1 import OHM_NETWORK_V1
+from bls.OHM_NETWORK import OHM_NETWORK
 from bls.OHM_PROBE import OHM_PROBE
 import matplotlib.pyplot as plt
 import math
@@ -25,7 +25,7 @@ class SortRunner:
                 
         self.first = self.input[0].tolist()        
 
-        self.ohm = OHM_NETWORK_V1(self.first, param)
+        self.ohm = OHM_NETWORK(self.first, param)
         self.probe = OHM_PROBE(param, self.ohm)
         
 

@@ -10,7 +10,7 @@ import random
 smallest_int = -sys.maxsize - 1
 largest_int = sys.maxsize - 1
 
-class SortRunner:
+class SortRunner_V1:
 
     def __init__(self, nx, param):
     

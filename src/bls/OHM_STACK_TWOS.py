@@ -105,7 +105,7 @@ class OHM_STACK_TWOS:
         if msb == 1:
             self.pbfOut = 1 - self.pbfOut
 
-        return self.pbfOut
+        return self.pbfOut, self.done, self.doneIndex
 
     def Output(self):        
         return self.pbfOut               

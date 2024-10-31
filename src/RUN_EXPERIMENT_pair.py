@@ -49,6 +49,15 @@ def RUN_EXPERIMENT_test():
     param1 = UpdateParam(param, config1)    
     RunNetwork(nx, param1)
     
+    config2 = {        
+        'expId': 1,                
+        'adaptWeights': 0, 
+        'adaptThresh' : 0,     
+        'adaptBias': 1,
+    }
+    param2 = UpdateParam(param, config2)    
+    RunNetwork(nx, param2)
+    
     print("Press 'q' to quit...")
     while True:
         if keyboard.is_pressed('q'):
