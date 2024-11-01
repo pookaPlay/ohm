@@ -12,7 +12,7 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
 
-def RUN_EXPERIMENT_test():
+def test_V0_V1():
 
     param = {
         'numPoints': 1,
@@ -56,4 +56,4 @@ def RUN_EXPERIMENT_test():
 
                 
 
-RUN_EXPERIMENT_test()
+test_V0_V1()

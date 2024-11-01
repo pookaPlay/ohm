@@ -10,7 +10,7 @@ def GetNegativeIndex(din, N):
         dout = int(din - N/2)
     return dout
 
-class OHM_NETWORK:
+class OHM_NETWORK_V0:
 
     def __init__(self, input, param):
     

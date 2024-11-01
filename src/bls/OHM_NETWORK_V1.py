@@ -98,18 +98,13 @@ class OHM_NETWORK_V1:
         
         self.input = input
         self.dataMem.LoadList(self.input)
-        # For each layer
-        for li in range(self.numLayers):
-
-            if li == 0:
-                inputMem = self.dataMem
-            else:
-                inputMem = self.stackMem[li-1]
+        
+        inputMem = self.dataMem
+                
+        self.RunLSB(inputMem, sampleIndex)        
+        self.RunMSB(sampleIndex)                              
             
-            self.RunLSB(inputMem, li, sampleIndex)
-            self.lsbResult = self.stackMem[li].GetLSBInts()            
-            self.RunMSB(li, sampleIndex)                              
-            
+        for li in range(self.numLayers):            
             self.stackMem[li].ReverseContent()
             self.results = self.stackMem[li].GetLSBInts()            
             
@@ -129,7 +124,6 @@ class OHM_NETWORK_V1:
     #############################################################################
     #############################################################################
     ## ADAPT FUNCTIONS 
-
     def AdaptBiases(self, li, param) -> None:
         
         # Iterate through stacks and update the parameters        
@@ -156,8 +150,7 @@ class OHM_NETWORK_V1:
                     nexti = li
                     self.paramBiasMem[nexti][si].LoadList(biases)
 
-    def AdaptThresholds(self, li, param) -> None:               
-        
+    def AdaptThresholds(self, li, param) -> None:                       
         # Iterate through stacks and update the parameters
         for si in range(len(self.stack[li])):
             
@@ -218,21 +211,28 @@ class OHM_NETWORK_V1:
     #############################################################################
     ## RUN FUNCTIONS 
 
-    def RunLSB(self, inputMem, li=0, stepi=0) -> None:            
+    def RunLSB(self, inputMem, stepi=0) -> None:            
 
             ti = 0                        
             #print(f"     == {stepi}:{ti} ")
             lsb = 1            
-            [paramBiasMem.ResetIndex() for paramBiasMem in self.paramBiasMem[li]]
-            [biasMem.ResetIndex() for biasMem in self.biasMem[li]]
-            [bias.Reset() for bias in self.bias[li]]
 
-            for bi in range(len(self.bias[li])):
-                self.bias[li][bi].Calc(inputMem, self.paramBiasMem[li][bi], lsb)            
-                #print(f"biasmem input: {self.bias[li][bi].Output()}")
-                #self.biasMem[li][bi].Print(f"BIAS@{li}-{bi}")
-                self.biasMem[li][bi].Step(self.bias[li][bi].Output())
-                self.bias[li][bi].Step()
+            for li in range(self.numLayers):
+                [paramBiasMem.ResetIndex() for paramBiasMem in self.paramBiasMem[li]]
+                [biasMem.ResetIndex() for biasMem in self.biasMem[li]]
+                [bias.Reset() for bias in self.bias[li]]
+
+                if li == 0:
+                    inputMem = self.dataMem
+                else:
+                    inputMem = self.stackMem[li-1]
+
+                for bi in range(len(self.bias[li])):
+                    self.bias[li][bi].Calc(inputMem, self.paramBiasMem[li][bi], lsb)            
+                    #print(f"biasmem input: {self.bias[li][bi].Output()}")
+                    #self.biasMem[li][bi].Print(f"BIAS@{li}-{bi}")
+                    self.biasMem[li][bi].Step(self.bias[li][bi].Output())
+                    self.bias[li][bi].Step()
                                     
             lsb = 0
             for ti in range(1, self.K):
@@ -240,88 +240,101 @@ class OHM_NETWORK_V1:
                 inputMem.Step()         
                 [paramBiasMem.Step() for paramBiasMem in self.paramBiasMem[li]]                
         
-                for bi in range(len(self.bias[li])):
-                    self.bias[li][bi].Calc(inputMem, self.paramBiasMem[li][bi], lsb)
-                    self.biasMem[li][bi].Step(self.bias[li][bi].Output())
-                    self.bias[li][bi].Step()      
+                for li in range(self.numLayers):
+                    if li == 0:
+                        inputMem = self.dataMem
+                    else:
+                        inputMem = self.stackMem[li-1]
 
+                    for bi in range(len(self.bias[li])):
+                        self.bias[li][bi].Calc(inputMem, self.paramBiasMem[li][bi], lsb)
+                        self.biasMem[li][bi].Step(self.bias[li][bi].Output())
+                        self.bias[li][bi].Step()      
 
-    def RunMSB(self, li=0, stepi=0) -> None:            
+            for li in range(self.numLayers):
+                self.lsbResult = self.stackMem[li].GetLSBInts()            
+
+    def RunMSB(self, stepi=0) -> None:            
             
             ti = 0                        
             msb = 1            
-            self.denseOut[li] = self.numStack * [0]            
-            self.doneOut[li] = self.numStack * [-1]
-            self.doneIndexOut[li] = self.numStack * [-1]
-            self.sumOut[li] = self.numStack * [0]
 
-            [biasMem.ResetIndex() for biasMem in self.biasMem[li]]
-            [paramStackMem.ResetIndex() for paramStackMem in self.paramStackMem[li]]
-            [paramThreshMem.ResetIndex() for paramThreshMem in self.paramThreshMem[li]]
-            self.stackMem[li].ResetIndex()            
-            [stack.Reset() for stack in self.stack[li]]
+            for li in range(self.numLayers):
 
-            for si in range(len(self.stack[li])):     
-                
-                #self.biasMem[li][si].Print(f"BIAS@{li}-{si}")
+                self.denseOut[li] = self.numStack * [0]            
+                self.doneOut[li] = self.numStack * [-1]
+                self.doneIndexOut[li] = self.numStack * [-1]
+                self.sumOut[li] = self.numStack * [0]
 
-                self.stack[li][si].Calc(self.biasMem[li][si], self.paramStackMem[li][si], self.paramThreshMem[li][si], msb, stepi)
-                                                        
-                if self.doneOut[li][si] < 0:
-                    if self.stack[li][si].done == 1:
-                        self.doneOut[li][si] = ti
-                        self.doneIndexOut[li][si] = self.stack[li][si].doneIndex
-                        self.sumOut[li][si] = self.stack[li][si].sumFlags
+                [biasMem.ResetIndex() for biasMem in self.biasMem[li]]
+                [paramStackMem.ResetIndex() for paramStackMem in self.paramStackMem[li]]
+                [paramThreshMem.ResetIndex() for paramThreshMem in self.paramThreshMem[li]]
+                self.stackMem[li].ResetIndex()            
+                [stack.Reset() for stack in self.stack[li]]
 
-                self.denseOut[li][si] = self.stack[li][si].Output()            
+            for li in range(self.numLayers):
+                for si in range(len(self.stack[li])):     
+                    
+                    #self.biasMem[li][si].Print(f"BIAS@{li}-{si}")
+                    self.stack[li][si].Calc(self.biasMem[li][si], self.paramStackMem[li][si], self.paramThreshMem[li][si], msb, stepi)
+                                                            
+                    if self.doneOut[li][si] < 0:
+                        if self.stack[li][si].done == 1:
+                            self.doneOut[li][si] = ti
+                            self.doneIndexOut[li][si] = self.stack[li][si].doneIndex
+                            self.sumOut[li][si] = self.stack[li][si].sumFlags
 
-                if self.param['printTicks'] == 1:
-                    print(f"     == {si}:{stepi}:{li}:{ti}:INPUT {self.stack[li][si].inputs} -> {self.denseOut[li][si]}")
-                    print(f"     == {si}:{stepi}:{li}:{ti}:FLAGS {self.stack[li][si].flags} ")            
+                    self.denseOut[li][si] = self.stack[li][si].Output()            
+
+                    if self.param['printTicks'] == 1:
+                        print(f"     == {si}:{stepi}:{li}:{ti}:INPUT {self.stack[li][si].inputs} -> {self.denseOut[li][si]}")
+                        print(f"     == {si}:{stepi}:{li}:{ti}:FLAGS {self.stack[li][si].flags} ")            
                     
                         
             # Save output
             #print(f"     == {stepi}:{ti} {self.denseOut}")
-            self.stackMem[li].Step(self.denseOut[li])
-
+            for li in range(self.numLayers):
+                self.stackMem[li].Step(self.denseOut[li])
 
             msb = 0                
             for ti in range(1, self.K):
                 
                 [biasMem.Step() for biasMem in self.biasMem[li]]
                 
-                for si in range(len(self.stack[li])):                    
-                    self.stack[li][si].Calc(self.biasMem[li][si], self.paramStackMem[li][si], self.paramThreshMem[li][si], msb, stepi)
+                for li in range(self.numLayers):
+                    for si in range(len(self.stack[li])):                    
+                        self.stack[li][si].Calc(self.biasMem[li][si], self.paramStackMem[li][si], self.paramThreshMem[li][si], msb, stepi)
 
-                    # Update the sticky latches                            
-                    if self.doneOut[li][si] < 0:
-                        if self.stack[li][si].done == 1:
-                            self.doneOut[li][si] = ti                                                        
-                            self.doneIndexOut[li][si] = self.stack[li][si].doneIndex                            
+                        # Update the sticky latches                            
+                        if self.doneOut[li][si] < 0:
+                            if self.stack[li][si].done == 1:
+                                self.doneOut[li][si] = ti                                                        
+                                self.doneIndexOut[li][si] = self.stack[li][si].doneIndex                            
 
-                    self.denseOut[li][si] = self.stack[li][si].Output()            
+                        self.denseOut[li][si] = self.stack[li][si].Output()            
 
-                if self.param['printTicks'] == 1:
-                    print(f"     == {si}:{stepi}:{li}:{ti}:INPUT {self.stack[li][si].inputs} -> {self.denseOut[li][si]}")
-                    print(f"     == {si}:{stepi}:{li}:{ti}:FLAGS {self.stack[li][si].flags} ")                                
-                
-                #if ti == (self.K - 1):
-                #    for si in range(len(self.stack[li])):
-                #        self.sumOut[li][si] = self.stack[li][si].sumFlags
-                #        #if self.sumOut[li][si] == 0:
-                #        #    print(f"SUMOUT: {li}:{si}: {self.sumOut[li][si]}")
-                #        #    self.biasMem[li][si].Print(f"BIAS@{li}-{si}")
-                
-                self.stackMem[li].Step(self.denseOut[li])
+                    self.stackMem[li].Step(self.denseOut[li])
+
+                    if self.param['printTicks'] == 1:
+                        print(f"     == {si}:{stepi}:{li}:{ti}:INPUT {self.stack[li][si].inputs} -> {self.denseOut[li][si]}")
+                        print(f"     == {si}:{stepi}:{li}:{ti}:FLAGS {self.stack[li][si].flags} ")                                
+                    
+                    #if ti == (self.K - 1):
+                    #    for si in range(len(self.stack[li])):
+                    #        self.sumOut[li][si] = self.stack[li][si].sumFlags
+                    #        #if self.sumOut[li][si] == 0:
+                    #        #    print(f"SUMOUT: {li}:{si}: {self.sumOut[li][si]}")
+                    #        #    self.biasMem[li][si].Print(f"BIAS@{li}-{si}")                
             
-            # case for duplicates 
-            for si in range(len(self.stack[li])):                        
-                if self.doneOut[li][si] < 0:
-                    self.doneOut[li][si] = self.K                    
-                    dups = [i for i, flag in enumerate(self.stack[li][si].flags) if flag == 0]
-                    self.doneIndexOut[li][si] = dups
-                    #print(f"DUPLICATE: {li}:{si} {dups}")
-                    #print(self.stack[li][si].flags)
+            # # case for duplicates 
+            # for li in range(self.numLayers):
+            #     for si in range(len(self.stack[li])):                        
+            #         if self.doneOut[li][si] < 0:
+            #             self.doneOut[li][si] = self.K                    
+            #             dups = [i for i, flag in enumerate(self.stack[li][si].flags) if flag == 0]
+            #             self.doneIndexOut[li][si] = dups
+            #             #print(f"DUPLICATE: {li}:{si} {dups}")
+            #             #print(self.stack[li][si].flags)
                                          
                 
 
