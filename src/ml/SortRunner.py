@@ -26,7 +26,11 @@ class SortRunner:
                 
         self.first = self.input[0].tolist()        
 
-        self.ohm = OHM_NETWORK_V0(self.first, param)
+        if param['networkVersion'] == 0:
+            self.ohm = OHM_NETWORK_V0(self.first, param)
+        else:
+            self.ohm = OHM_NETWORK_V1(self.first, param)
+            
         self.probe = OHM_PROBE(param, self.ohm)
         
 
@@ -85,11 +89,7 @@ class SortRunner:
 
                 ###############################
                 ## Run the OHM
-                results = self.ohm.Run(sample, ni, param)
-                tresults = torch.tensor(results)            
-                                                                                    
-                if param['printSample'] == 1:
-                    print(f"OUT : {results}")
+                self.ohm.Run(sample, ni, param)
                 
                 if param['printParameters'] == 1:
                     self.ohm.PrintParameters()

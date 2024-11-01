@@ -35,7 +35,8 @@ def RUN_EXPERIMENT_test():
         'applyToMap': 0,
         'runMovie': 0,
         'doneClip' : 0,
-        'doneClipValue' : 0,               
+        'doneClipValue' : 0,   
+        'networkVersion': 1,            
         }
 
     nx, param = SetupExperiment(param)
@@ -49,10 +50,11 @@ def RUN_EXPERIMENT_test():
     param1 = UpdateParam(param, config1)    
     RunNetwork(nx, param1)
     
-    print("Press 'q' to quit...")
-    while True:
-        if keyboard.is_pressed('q'):
-            break
+    if param['runMovie'] == 1:
+        print("Press 'q' to quit...")
+        while True:
+            if keyboard.is_pressed('q'):
+                break
 
                 
 

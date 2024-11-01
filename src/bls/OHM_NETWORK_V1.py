@@ -13,7 +13,8 @@ def GetNegativeIndex(din, N):
 class OHM_NETWORK_V1:
 
     def __init__(self, input, param):
-    
+        
+        print(f"OHM_NETWORK_V1 INIT")
         self.param = param
         self.input = input        
 
@@ -43,6 +44,7 @@ class OHM_NETWORK_V1:
         #self.paramStackGraph = [nx.Graph() for _ in range(param['numStack'])]
         self.stats = dict()
         self.Reset()
+        print(f"OHM_NETWORK_V1 INIT DONE")
 
     def SetAdaptWeights(self, adaptWeights) -> None:
         for stackLayer in self.stack:
@@ -96,6 +98,7 @@ class OHM_NETWORK_V1:
         self.stats['maxWeightIncrease'] = 0
         self.stats['biasIncrease'] = 0
         
+        self.results = dict()
         self.input = input
         self.dataMem.LoadList(self.input)
         
@@ -103,109 +106,103 @@ class OHM_NETWORK_V1:
                 
         self.RunLSB(inputMem, sampleIndex)        
         self.RunMSB(sampleIndex)                              
-            
-        for li in range(self.numLayers):            
-            self.stackMem[li].ReverseContent()
-            self.results = self.stackMem[li].GetLSBInts()            
-            
-            if param['printSampleLayer'] == 1:
-                print(f"    {li}: {self.results}")
-            
-            if param['adaptThresh'] > 0:
-                self.AdaptThresholds(li, param)
+
+        if param['adaptThresh'] > 0:
+            self.AdaptThresholds(param)
                 
-            if param['adaptBias'] > 0:
-                self.AdaptBiases(li, param)
+        if param['adaptBias'] > 0:
+            self.AdaptBiases(param)
 
-        print(f"Thanks!")
-
-        return self.results                            
+        print(f"Thanks!")        
 
     #############################################################################
     #############################################################################
     ## ADAPT FUNCTIONS 
-    def AdaptBiases(self, li, param) -> None:
+    def AdaptBiases(self, param) -> None:
         
-        # Iterate through stacks and update the parameters        
-        for si in range(len(self.stack[li])):
+        for li in range(self.numLayers):                        
+            # Iterate through stacks and update the parameters        
+            for si in range(len(self.stack[li])):
 
-            if len(self.doneIndexOut[li][si]) > 1:
-                #print(f"GOT ONE: {li}:{si} {self.doneIndexOut[li][si]}")
+                if len(self.doneIndexOut[li][si]) > 1:
+                    #print(f"GOT ONE: {li}:{si} {self.doneIndexOut[li][si]}")
 
-                biases = self.paramBiasMem[li][si].GetLSBInts()
-                
-                for di in range(len(self.doneIndexOut[li][si])):
-                    bi = self.doneIndexOut[li][si][di]
-                    #bin = GetNegativeIndex(bi, len(biases))
-                    biases[bi] = biases[bi] + di
-                    #biases[bin] = biases[bin] + di
-                    self.stats['biasIncrease'] = self.stats['biasIncrease'] + 1
-
-                if li < (self.numLayers - 1):
-                    #nexti = li + 1
-                    nexti = li
-                    self.paramBiasMem[nexti][si].LoadList(biases)
-                else:
-                    #nexti = 0
-                    nexti = li
-                    self.paramBiasMem[nexti][si].LoadList(biases)
-
-    def AdaptThresholds(self, li, param) -> None:                       
-        # Iterate through stacks and update the parameters
-        for si in range(len(self.stack[li])):
-            
-            if param['adaptThresh'] > 0:
-
-                weights = self.paramStackMem[li][si].GetLSBIntsHack()
-                thresh = self.paramThreshMem[li][si].GetLSBIntsHack()                                        
-
-                posUpdate = 0
-                if param['adaptThreshType'] == 'ss':
-                    if self.results[si] > 0:
-                        posUpdate = 1
-                elif param['adaptThreshType'] == 'pc':
-                    if self.stack[li][si].posCount > self.stack[li][si].negCount:
-                        posUpdate = 1
-
-                if posUpdate == 1:
-                    thresh[0] = thresh[0] + 1
-                else:
-                    thresh[0] = thresh[0] - 1
-
-                if thresh[0] < 1:
-                    thresh[0] = 1
-                    if param['adaptWeights'] > 0:
-                        for di in self.doneIndexOut[li][si]:
-                            assert(di >= 0)
-                            #dii = GetNegativeIndex(di, len(weights))                
-                            weights[di] = weights[di] + 1                
-                            #print(f"{li}:{si}: MAX (lower) at index {di}")                                
-                            self.stats['maxWeightIncrease'] = self.stats['maxWeightIncrease'] + 1
-                                    
-
-                if thresh[0] > sum(weights):
-                    thresh[0] = sum(weights)
-                    if param['adaptWeights'] > 0:
-                        for di in self.doneIndexOut[li][si]:
-                            assert(di >= 0)
-                            #dii = GetNegativeIndex(di, len(weights))
-                            weights[di] = weights[di] + 1
-                            #print(f"{li}:{si}: MIN (upper) at index {di}")
-                            self.stats['minWeightIncrease'] = self.stats['minWeightIncrease'] + 1
-
-                if li < (self.numLayers - 1):
-                    #nexti = li + 1
-                    nexti = li
+                    biases = self.paramBiasMem[li][si].GetLSBInts()
                     
-                    self.paramThreshMem[nexti][si].SetLSBIntsHack(thresh)            
-                    if param['adaptWeights'] > 0:
-                        self.paramStackMem[nexti][si].SetLSBIntsHack(weights)        
-                else:
-                    #nexti = 0
-                    nexti = li
-                    self.paramThreshMem[nexti][si].SetLSBIntsHack(thresh)            
-                    if param['adaptWeights'] > 0:
-                        self.paramStackMem[nexti][si].SetLSBIntsHack(weights)        
+                    for di in range(len(self.doneIndexOut[li][si])):
+                        bi = self.doneIndexOut[li][si][di]
+                        #bin = GetNegativeIndex(bi, len(biases))
+                        biases[bi] = biases[bi] + di
+                        #biases[bin] = biases[bin] + di
+                        self.stats['biasIncrease'] = self.stats['biasIncrease'] + 1
+
+                    if li < (self.numLayers - 1):
+                        #nexti = li + 1
+                        nexti = li
+                        self.paramBiasMem[nexti][si].LoadList(biases)
+                    else:
+                        #nexti = 0
+                        nexti = li
+                        self.paramBiasMem[nexti][si].LoadList(biases)
+
+    def AdaptThresholds(self, param) -> None:                       
+        
+        for li in range(self.numLayers):                        
+            # Iterate through stacks and update the parameters
+            for si in range(len(self.stack[li])):
+                
+                if param['adaptThresh'] > 0:
+
+                    weights = self.paramStackMem[li][si].GetLSBIntsHack()
+                    thresh = self.paramThreshMem[li][si].GetLSBIntsHack()                                        
+
+                    posUpdate = 0
+                    if param['adaptThreshType'] == 'ss':
+                        if self.results[si] > 0:
+                            posUpdate = 1
+                    elif param['adaptThreshType'] == 'pc':
+                        if self.stack[li][si].posCount > self.stack[li][si].negCount:
+                            posUpdate = 1
+
+                    if posUpdate == 1:
+                        thresh[0] = thresh[0] + 1
+                    else:
+                        thresh[0] = thresh[0] - 1
+
+                    if thresh[0] < 1:
+                        thresh[0] = 1
+                        if param['adaptWeights'] > 0:
+                            for di in self.doneIndexOut[li][si]:
+                                assert(di >= 0)
+                                #dii = GetNegativeIndex(di, len(weights))                
+                                weights[di] = weights[di] + 1                
+                                #print(f"{li}:{si}: MAX (lower) at index {di}")                                
+                                self.stats['maxWeightIncrease'] = self.stats['maxWeightIncrease'] + 1
+                                        
+
+                    if thresh[0] > sum(weights):
+                        thresh[0] = sum(weights)
+                        if param['adaptWeights'] > 0:
+                            for di in self.doneIndexOut[li][si]:
+                                assert(di >= 0)
+                                #dii = GetNegativeIndex(di, len(weights))
+                                weights[di] = weights[di] + 1
+                                #print(f"{li}:{si}: MIN (upper) at index {di}")
+                                self.stats['minWeightIncrease'] = self.stats['minWeightIncrease'] + 1
+
+                    if li < (self.numLayers - 1):
+                        #nexti = li + 1
+                        nexti = li
+                        
+                        self.paramThreshMem[nexti][si].SetLSBIntsHack(thresh)            
+                        if param['adaptWeights'] > 0:
+                            self.paramStackMem[nexti][si].SetLSBIntsHack(weights)        
+                    else:
+                        #nexti = 0
+                        nexti = li
+                        self.paramThreshMem[nexti][si].SetLSBIntsHack(thresh)            
+                        if param['adaptWeights'] > 0:
+                            self.paramStackMem[nexti][si].SetLSBIntsHack(weights)        
 
     #############################################################################
     #############################################################################
@@ -319,6 +316,14 @@ class OHM_NETWORK_V1:
                         print(f"     == {si}:{stepi}:{li}:{ti}:INPUT {self.stack[li][si].inputs} -> {self.denseOut[li][si]}")
                         print(f"     == {si}:{stepi}:{li}:{ti}:FLAGS {self.stack[li][si].flags} ")                                
                     
+            
+            for li in range(self.numLayers):
+                self.stackMem[li].ReverseContent()
+                self.results = self.stackMem[li].GetLSBInts()            
+                        
+                if self.param['printSampleLayer'] == 1:
+                    print(f"    {li}: {self.results}")
+
                     #if ti == (self.K - 1):
                     #    for si in range(len(self.stack[li])):
                     #        self.sumOut[li][si] = self.stack[li][si].sumFlags
