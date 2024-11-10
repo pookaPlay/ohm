@@ -14,6 +14,7 @@ class OHM_NETWORK_V0:
 
     def __init__(self, input, param):
     
+        print(f"OHM_NETWORK_V0 INIT")
         self.param = param
         self.input = input        
 
