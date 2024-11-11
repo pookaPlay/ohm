@@ -144,8 +144,8 @@ class OHM:
         self.msbAtOut.Step(self.msbAtPBF.Output())        
 
         for i in range(self.d):
-            self.lsb2msb[i].Step(self.addp[i].Output(), self.flags[i])
-            self.lsb2msb[i+self.d].Step(self.addn[i].Output(), self.flags[i+self.d])
+            self.lsb2msb[i].Step(self.addp[i].Output()) # , self.flags[i])
+            self.lsb2msb[i+self.d].Step(self.addn[i].Output()) #, self.flags[i+self.d])
             
             self.addp[i].Step()  
             self.addn[i].Step()

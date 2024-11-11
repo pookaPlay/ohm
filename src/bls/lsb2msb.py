@@ -52,13 +52,12 @@ class lsb2msb:
         readMode = 1 - self.mode        
         return self.state[readMode][self.ri]        
     
-    def Step(self, input, holdFlag=0) -> None:
+    def Step(self, input) -> None:
         #print(f"L2M write at {self.wi} : {input}")
         self.state[self.mode][self.wi] = input                      
         
         #print(f"L2M step {self.wi} : {input} with hold {holdFlag}")
-        if holdFlag == 0:
-            self.ri += 1
+        self.ri += 1
         
         self.wi -= 1
         if self.wi < 0:

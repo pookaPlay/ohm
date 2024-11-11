@@ -1,45 +1,36 @@
-from bls.DataReader import DataReader
-from bls.DataWriter import DataWriter
+##################################################
+## Bit Serial OHM Node with both LSB and MSB paths
+
 from bls.OHM import OHM
 
-
-def RunNet(input, ptf):
+class OHM_NET:
     
-    NBitsIn = 8
-    NBitsOut = 9
+    def __init__(self, D=2, Nin = 4, Nout = 5, ptf="") -> None:
+
+        self.ohm = OHM(D, Nin, Nout, ptf)
+        
+    def Reset(self) -> None:
+        self.ohm.Reset()        
                 
-    D = len(input[0])
-    NSteps = 85
+    def msbOut(self) -> int:
+        return self.ohm.msbOut()
 
-    data = DataReader(input, NBitsIn, NBitsOut)    
-    ohm = OHM(D, NBitsIn, NBitsOut, ptf=ptf)        
-    output = DataWriter()    
-    
-    data.Reset()        
-    ohm.Reset()        
-    output.Reset()
+    def lsbOut(self) -> int:
+        return self.ohm.lsbOut()        
 
-    print(f"== {0} ============================")
-    data.Print()
-
-    ohm.Calc(data.Output(), data.lsbIn(), data.msbIn())
-    output.Step(ohm.Output(), ohm.lsbOut(), ohm.msbOut())    
-    ohm.Step(data.lsbIn(), data.msbIn())                    
-
-    for bi in range(NSteps):
-        print(f"== {bi+1} ============================")
-        data.Step()
-        data.Print()
+    def Output(self) -> int:
+        return self.ohm.Output()
         
-        ohm.Calc(data.Output(), data.lsbIn(), data.msbIn())
-        print(f"OHM: {ohm.Output()}      lsb: {ohm.lsbOut()} msb: {ohm.msbOut()}")
-        #ohm.Print("", 1)
-        output.Step(ohm.Output(), ohm.lsbOut(), ohm.msbOut())            
-        output.Print()
-
-        ohm.Step(data.lsbIn(), data.msbIn())
+    # Combinatorial stuff goes here
+    def Calc(self, x, lsb, msb) -> None:        
+        self.ohm.Calc(x, lsb, msb)          
         
-    output.PrintAll()
-    
-    return output.Output()
+    # State stuff goes here
+    def Step(self, isLsb, isMsb) -> None:        
 
+        self.ohm.Step(isLsb, isMsb)                
+        
+
+    def Print(self, prefix="", showInput=1) -> None:
+
+        self.ohm.Print(prefix, showInput)
