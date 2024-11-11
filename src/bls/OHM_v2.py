@@ -6,10 +6,9 @@ from bls.ADD import ADD
 from bls.PTF import PTF
 from bls.SRL import SRL
 from bls.msb2lsb import msb2lsb
-from bls.lsb2msb import lsb2msb
 from bls.lsb2msb_v2 import lsb2msb_v2
 
-class OHM:
+class OHM_v2:
     
     def __init__(self, D=2, Nin = 4, Nout = 5, ptf="") -> None:
         ## Nin is the stored precision of weights
