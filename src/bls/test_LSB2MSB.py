@@ -20,6 +20,7 @@ def test_lsb2msb():
     print(f"Switching")
     
     test.Switch()
+    test.Print()
     result2 = list()
     for i in range(len(a)):
         val = test.Output()
@@ -32,6 +33,7 @@ def test_lsb2msb():
     print(f"Switching")
 
     test.Switch()
+    test.Print()
     result3 = list()
     for i in range(len(a)):
         val = test.Output()

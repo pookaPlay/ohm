@@ -1,5 +1,5 @@
 
-class lsb2msb_v2:    
+class msb2lsb_v2:    
     
     def __init__(self) -> None:             
         self.Reset()
@@ -7,6 +7,8 @@ class lsb2msb_v2:
     def Reset(self) -> None:
         self.state = [list(), list()]        
         self.mode = 0
+        self.switchStep = 1
+        
 
     def Output(self) -> int:
         readMode = 1 - self.mode    
@@ -20,18 +22,22 @@ class lsb2msb_v2:
         return firstVal
     
     def Step(self, input) -> None:
+        self.switchStep = 0
         #print(f"L2M write at {self.wi} : {input}")
         self.state[self.mode].append(input)        
         
         if len(self.state[1 - self.mode]) > 0:
             self.state[1 - self.mode].pop()
-        
-        
+                
     def Switch(self):
         self.mode = 1 - self.mode
-
+        self.switchStep = 1
+        
+    def SwitchStep(self):
+        return self.switchStep
+    
     def Print(self, prefix="") -> None:        
-        temps = prefix + "L2M: "
+        temps = prefix + "M2L: "
 
         mem0 = [str(el) for el in self.state[0]]            
         mem1 = [str(el) for el in self.state[1]]

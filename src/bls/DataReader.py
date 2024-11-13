@@ -16,7 +16,7 @@ class DataReader():
             self.data[d].reverse()
 
         self.slice = [self.data[d][self.bi] for d in range(self.D)]        
-        self.lsb = 1
+        self.lsb = [1] * self.D
         self.msb = 0
 
 
@@ -24,7 +24,7 @@ class DataReader():
         self.bi = 0
         self.ni = 0
         self.slice = [self.data[d][self.bi] for d in range(self.D)]        
-        self.lsb = 1
+        self.lsb = [1] * self.D
         self.msb = 0
  
     def Print(self, prefix="", verbose=1):                
@@ -64,9 +64,9 @@ class DataReader():
             self.slice = self.D * [0]
 
         self.msb = 0
-        self.lsb = 0
+        self.lsb = [0] * self.D
 
         if self.bi == self.NOut-1:
             self.msb = 1
         if self.bi == 0:
-            self.lsb = 1
+            self.lsb = [1] * self.D
