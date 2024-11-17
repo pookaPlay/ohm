@@ -1,5 +1,5 @@
 from bls.DataReader import DataReader
-from bls.DataWriter import DataWriter
+from bls.DataWriter_v2 import DataWriter_v2
 from bls.OHM_v2 import OHM_v2
 
 

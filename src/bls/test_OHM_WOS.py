@@ -34,8 +34,8 @@ def runTest(input, ptf):
         ohm.Calc(data.Output(), data.lsbIn(), data.msbIn())
         print(f"OHM: {ohm.Output()}      lsb: {ohm.lsbOut()} msb: {ohm.msbOut()}")
         ohm.Print("", 1)
-        
-        output.Step(ohm.Output(), ohm.lsbOut(), ohm.msbOut())            
+                
+        output.Step(ohm.Output(), ohm.lsbOut(), ohm.msbOut())               
         output.Print()
 
         ohm.Step(data.lsbIn(), data.msbIn())
