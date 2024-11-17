@@ -34,7 +34,7 @@ class OHM_v2:
         #self.lsb2msb = [lsb2msb(self.Nout) for _ in range(self.d2)]
         self.lsb2msb = [lsb2msb_v2() for _ in range(self.d2)]
 
-        self.lsbDelayed = SRL(1)               
+        #self.lsbDelayed = SRL(1)
 
         self.flags = list(self.d2 * [0])                               
         self.latchInput = list(self.d2 * [0])
@@ -50,7 +50,8 @@ class OHM_v2:
             self.pbf.SetMedian()
 
         self.msb2lsb = msb2lsb_v2()
-        self.done = 0        
+        self.done = 0  
+        self.doneOut = 0      
         
     def Reset(self) -> None:
         
@@ -64,6 +65,8 @@ class OHM_v2:
 
             self.lsb2msb[i].Reset()
             self.lsb2msb[i+self.d].Reset()
+            #self.lsb2msb[i].Reset(i)
+            #self.lsb2msb[i+self.d].Reset(i+self.d)
             
         self.flags = list(self.d2 * [0])                        
         self.latchInput = list(self.d2 * [0])
@@ -78,8 +81,12 @@ class OHM_v2:
         #return self.lsbAtPBF.Output()
 
     def Output(self) -> int:
-        return self.msb2lsb.Output()
         
+        return self.msb2lsb.Output()
+
+    def pbfOut(self):
+        return self.pbf.Output()
+    
     ## Combinatorial stuff goes here
     #  lsb should be a vec like x
     def Calc(self, x, lsb) -> None:        
@@ -125,22 +132,23 @@ class OHM_v2:
                     self.latchInput[i] = inputs[i]
                                         
         if (sum(self.flags) == (self.d2-1)):            
-            self.done = 1
-            self.doneOut = 0     
-                
+            #print(f"===========> GOT DONE!!!!!!!!")
+            self.done = 1                        
+            #self.doneOut = 0
+        else:
+            self.done = 0               
+        
+        if self.doneOut == 1:        
+            self.msb2lsb.Switch()
+
         
     # State stuff goes here
     def Step(self, lsb) -> None:        
-
-        if self.doneOut == 1:        
-            self.msb2lsb.Switch()
-            # Negate MSB to convert from offset back to twos complement                
-            self.msb2lsb.Step(1-self.pbf.Output())
-        else:
-            self.msb2lsb.Step(self.pbf.Output())
         
-        self.doneOut = self.done
-        self.done = 0
+        print(f"  OHM Step: Done {self.done} -> {self.doneOut}")
+        
+        self.msb2lsb.Step(self.pbf.Output())
+        self.doneOut = self.done                
 
         for i in range(self.d):
             self.lsb2msb[i].Step(self.addp[i].Output()) 

@@ -1,12 +1,19 @@
+from bls.DataIO import SerializeMSBTwos, SerializeLSBTwos
 
 class lsb2msb_v2:    
     
     def __init__(self) -> None:             
         self.Reset()
     
-    def Reset(self) -> None:
+    def Reset(self, inputId = -1) -> None:
         self.state = [list(), list()]        
         self.mode = 0
+        readMode = 1 - self.mode    
+        if inputId > -1: 
+            #initId = SerializeMSBTwos(inputId, 4)
+            initId = SerializeLSBTwos(inputId, 4)
+            print(f"Initializing L2M with {initId}")
+            self.state[readMode] = initId
 
     def Output(self) -> int:
         readMode = 1 - self.mode    
@@ -36,9 +43,12 @@ class lsb2msb_v2:
         mem0 = [str(el) for el in self.state[0]]            
         mem1 = [str(el) for el in self.state[1]]
         #print(temps + "]")
-
-        print(f"W:{mem0}")
-        print(f"R:{mem1}")
+        if self.mode == 0:
+            print(f"W:{mem0}")
+            print(f"R:{mem1}")
+        else:
+            print(f"W:{mem1}")
+            print(f"R:{mem0}")
             
             
         

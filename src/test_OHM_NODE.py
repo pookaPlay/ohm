@@ -1,15 +1,27 @@
 from bls.OHM_NODE_TEST import RunNode
 
 
+
 def test_RunNode():
-    ptf = "median"
-    input = [[101, 2, 35], [101, 2, 35], [101, 2, 35], [101, 2, 35]]
-    expected = [2, 0, 1, 1, 2, 0, 1]    
-    ret = RunNode(input, ptf)    
+    #ptf = "median"
+    ptf = "max"    
+    NBitsIn = 4
+    NBitsOut = 4
+    NSteps = 15
+    rep = 10
+    
+    input = [1, 2, 3]
+    
+    input = [input.copy() for _ in range(rep)]
+
+    expected = [0, 2, 2, 2, 2] 
+    ret = RunNode(input, ptf, NBitsIn, NBitsOut, NSteps)    
     print(f"Ret: {ret}")
 
 
-print(f"#######################################")
-print(f"NODE TEST BEGIN")
-print(f"#######################################")
-test_RunNode()
+if __name__ == "__main__":
+    print(f"#######################################")
+    print(f"NODE TEST BEGIN")
+    
+    test_RunNode()
+    
