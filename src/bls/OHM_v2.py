@@ -145,8 +145,10 @@ class OHM_v2:
     def Step(self, lsb) -> None:        
         
         print(f"  OHM Step: Done {self.done} -> {self.doneOut}")
-        
-        self.msb2lsb.Step(self.pbf.Output())
+        if self.doneOut == 1:
+            self.msb2lsb.Step(1-self.pbf.Output())
+        else:
+            self.msb2lsb.Step(self.pbf.Output())
         self.msb2lsb.Print("  ")
         
         self.doneOut = self.done                

@@ -1,6 +1,6 @@
 from bls.DataIO import DeserializeLSBTwos
 
-class DataWriter():
+class DataWriter_v2():
     def __init__(self):
         self.result = list()
         self.lsb = list()
@@ -8,8 +8,9 @@ class DataWriter():
         self.finalResult = list()
 
     def Print(self):        
-        print(f"Result: {self.result}")
         print(f"LSB   : {self.lsb}")
+        print(f"Result: {self.result}")
+        
         #print(f"Data Writer: {self.lastResult}")
 
     def PrintAll(self):        

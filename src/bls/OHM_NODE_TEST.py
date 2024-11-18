@@ -1,5 +1,5 @@
-from bls.DataReader_v2 import DataReader
-from bls.DataWriter_v2 import DataWriter
+from bls.DataReader_v2 import DataReader_v2
+from bls.DataWriter_v2 import DataWriter_v2
 from bls.OHM_v2 import OHM_v2
 
 
@@ -7,9 +7,9 @@ def RunNode(input, ptf, NBitsIn = 4, NBitsOut = 4, NSteps = 120):
 
     D = len(input[0])   
 
-    data = DataReader(input, NBitsIn, NBitsOut)    
+    data = DataReader_v2(input, NBitsIn, NBitsOut)    
     ohm = OHM_v2(D, NBitsIn, NBitsOut, ptf=ptf)        
-    output = DataWriter()    
+    output = DataWriter_v2()    
     
     data.Reset()        
     ohm.Reset()        
@@ -46,22 +46,3 @@ def RunNode(input, ptf, NBitsIn = 4, NBitsOut = 4, NSteps = 120):
     
     return output.Output()
 
-
-
-def test_RunNode():
-    ptf = "median"
-    #ptf = "max"
-    input = [[1, 2, 4], [1, 2, 4], [1, 2, 4]]
-    expected = [0, 2, 2, 2, 2] 
-    ret = RunNode(input, ptf)    
-    print(f"Ret: {ret}")
-
-
-if __name__ == "__main__":
-    print(f"#######################################")
-    print(f"NODE TEST BEGIN")
-    print(f"#######################################")
-    test_RunNode()
-    print(f"#######################################")
-    print(f"NODE TEST END")
-    print(f"#######################################")
