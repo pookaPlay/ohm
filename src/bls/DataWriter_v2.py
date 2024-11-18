@@ -13,9 +13,8 @@ class DataWriter_v2():
         
         #print(f"Data Writer: {self.lastResult}")
 
-    def PrintAll(self):        
-        pass
-        #print(f"Data Writer: {self.finalResult}")
+    def PrintFinal(self):        
+        print(f"Data Writer: {self.finalResult}")
 
     def Output(self):
         return(self.finalResult)
@@ -27,19 +26,28 @@ class DataWriter_v2():
 
 
     def Step(self, x, lsb):
-
         self.result.append(x)
-        self.lsb.append(lsb)
-
-        # if (lsb == 1):
-        #     if len(self.result) > 0:
-        #         self.lastResult = DeserializeLSBTwos(self.result)                
-        #         print(f"   Writer: {self.lastResult} from {self.result} of length {len(self.result)}")
-        #         self.finalResult.append(self.lastResult)
-        #     self.result = list()
+        self.lsb.append(lsb)        
+    
+    def BatchProcess(self):        
+        firstOne = -1
+        secondOne = -1
+        for i in range(len(self.result)):
+            if self.lsb[i] == 1:
+                if firstOne == -1:
+                    firstOne = i
+                else:
+                    if secondOne == -1:
+                        secondOne = i
+                    else:
+                        firstOne = secondOne
+                        secondOne = i   
+                        # extract from firstOne to i 
+                        result = DeserializeLSBTwos(self.result[firstOne:secondOne])
+                        print(f"Got Result: {result} from length {len(self.result[firstOne:secondOne])}")
+                        self.finalResult.append(result)
                 
-        # self.result.append(x)
-
+                    
         
 
         

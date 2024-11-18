@@ -10,7 +10,7 @@ def test_RunNode():
     NSteps = 30
     rep = 10
     
-    input = [1, 2, 3]
+    input = [4, 2, 1]
     
     input = [input.copy() for _ in range(rep)]
 

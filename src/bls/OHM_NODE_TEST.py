@@ -43,6 +43,8 @@ def RunNode(input, ptf, NBitsIn = 4, NBitsOut = 4, NSteps = 120):
         ohm.Step(data.lsbIn())
         
     output.Print()
+    output.BatchProcess()
+    output.PrintFinal()
     
     return output.Output()
 
