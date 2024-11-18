@@ -81,7 +81,6 @@ class OHM_v2:
         #return self.lsbAtPBF.Output()
 
     def Output(self) -> int:
-        
         return self.msb2lsb.Output()
 
     def pbfOut(self):
@@ -134,7 +133,7 @@ class OHM_v2:
         if (sum(self.flags) == (self.d2-1)):            
             #print(f"===========> GOT DONE!!!!!!!!")
             self.done = 1                        
-            #self.doneOut = 0
+            self.doneOut = 0
         else:
             self.done = 0               
         
@@ -148,6 +147,8 @@ class OHM_v2:
         print(f"  OHM Step: Done {self.done} -> {self.doneOut}")
         
         self.msb2lsb.Step(self.pbf.Output())
+        self.msb2lsb.Print("  ")
+        
         self.doneOut = self.done                
 
         for i in range(self.d):

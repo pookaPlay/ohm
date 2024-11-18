@@ -47,8 +47,8 @@ class lsb2msb_v2:
             print(f"W:{mem0}")
             print(f"R:{mem1}")
         else:
-            print(f"W:{mem1}")
             print(f"R:{mem0}")
+            print(f"W:{mem1}")
             
             
         
