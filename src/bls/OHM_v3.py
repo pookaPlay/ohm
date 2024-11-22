@@ -93,7 +93,7 @@ class OHM_v3:
     ## Combinatorial stuff goes here
     #  lsb should be a vec like x
     def Calc(self, x, lsb) -> None:        
-
+        print(f"OHM CALC")
         nx = [1-x[i] for i in range(len(x))]
 
         for i in range(self.d):
@@ -108,16 +108,10 @@ class OHM_v3:
 
                 self.flags[i] = 0
                 self.flags[ni] = 0
-                #self.latchInput[i] = 0
 
         # Get the inputs for the PBF
         inputs = [self.lsb2msb[i].Output() for i in range(self.d2)]
-        
-        # Negate if msb/lsb 
-        for i in range(self.d):            
-            if lsb[i] == 1:            
-                inputs[i] = 1-inputs[i]
-                inputs[i + self.d] = 1-inputs[i + self.d]
+        print(f" PBF inputs: {inputs}")
 
         # Calc PBF
         self.pbf.Calc(inputs)
@@ -139,15 +133,7 @@ class OHM_v3:
     def Step(self) -> None:        
         
         print(f"OHM STEP")
-        if self.msb2lsb.SwitchStep():
-            self.msb2lsb.Step(1-self.pbf.Output())
-        else:
-            self.msb2lsb.Step(self.pbf.Output())
-        
-        #self.msb2lsb.Print("M2L ")
-        
-        self.doneDelay = self.done                
-        self.doneOut = 0
+        self.msb2lsb.Step(self.pbf.Output())               
 
         for i in range(self.d):
             self.lsb2msb[i].Step(self.addp[i].Output(), self.flags[i])             
@@ -183,6 +169,5 @@ class OHM_v3:
         print(f" =Output =====")
         self.pbf.Print(" ")
         #print(f"  PBF: {str(inputs)} -> {self.pbf.Output()}")        
-        self.msb2lsb.Print(prefix)
-        print(f" LSB-OUT: {self.doneDelay}")
+        self.msb2lsb.Print(prefix)        
 

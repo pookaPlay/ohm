@@ -25,8 +25,12 @@ class msb2lsb_v2:
     def Output(self) -> int:
         readMode = 1 - self.mode    
         #print(f"Reading with mode {readMode} of length {len(self.state[readMode])}")
-        if len(self.state[readMode]) > 0:
+        if len(self.state[readMode]) > 1:
             firstVal = self.state[readMode][-1]
+        #elif len(self.state[readMode]) > 0:
+        #    # Negate MSB
+        #    print(f"M2L: Negating MSB (last one)")
+        #    firstVal = 1 - self.state[readMode][0]
         else:
             print(f"WARNING: M2L out of POP!")
             firstVal = 0
@@ -35,13 +39,19 @@ class msb2lsb_v2:
     
     def Step(self, input) -> None:        
         
-        self.state[self.mode].append(input)        
-        
-        if len(self.state[1 - self.mode]) > 1:  # hold last one
-            self.state[1 - self.mode].pop()
+        self.state[self.mode].append(input)
 
-        if self.onSwitchStep == 1:
-            self.onSwitchStep = 0
+        # if self.onSwitchStep == 1:       
+        #     # Negating MSB     
+        #     print(f"  NEGATED OUT: {1-input}")
+        #     self.state[self.mode].append(1 - input)        
+        #     self.onSwitchStep = 0
+        # else: 
+        #     print(f"  OUT: {input}")
+        #     self.state[self.mode].append(input)                            
+            
+        if len(self.state[1 - self.mode]) > 1:  # hold last one
+            self.state[1 - self.mode].pop()                    
 
         if self.switchNext == 1:
             self.Switch()
