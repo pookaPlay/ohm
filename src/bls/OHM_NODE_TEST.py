@@ -1,6 +1,6 @@
 from bls.DataReader_v2 import DataReader_v2
 from bls.DataWriter_v2 import DataWriter_v2
-from bls.OHM_v2 import OHM_v2
+from bls.OHM_v3 import OHM_v3
 
 
 def RunNode(input, ptf, NBitsIn = 4, NBitsOut = 4, NSteps = 120):
@@ -8,7 +8,7 @@ def RunNode(input, ptf, NBitsIn = 4, NBitsOut = 4, NSteps = 120):
     D = len(input[0])   
 
     data = DataReader_v2(input, NBitsIn, NBitsOut)    
-    ohm = OHM_v2(D, NBitsIn, NBitsOut, ptf=ptf)        
+    ohm = OHM_v3(D, NBitsIn, NBitsOut, ptf=ptf)        
     output = DataWriter_v2()    
     
     data.Reset()        
@@ -24,8 +24,8 @@ def RunNode(input, ptf, NBitsIn = 4, NBitsOut = 4, NSteps = 120):
 
     output.Step(ohm.Output(), ohm.lsbOut())    
     
-    print(f"--- Stepping OHM with data lsb {data.lsbIn()}")
-    ohm.Step(data.lsbIn())                    
+    
+    ohm.Step()                    
 
     for bi in range(NSteps):
         print(f"======================================")
@@ -38,9 +38,8 @@ def RunNode(input, ptf, NBitsIn = 4, NBitsOut = 4, NSteps = 120):
         
         print(f"--- OUT: {ohm.Output()} LSB: {ohm.lsbOut()}")
         output.Step(ohm.Output(), ohm.lsbOut())            
-        
-        print(f"--- OHM STEP LSB IN: {data.lsbIn()}")
-        ohm.Step(data.lsbIn())
+                
+        ohm.Step()
         
     output.Print()
     output.BatchProcess()

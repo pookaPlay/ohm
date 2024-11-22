@@ -9,11 +9,13 @@ class lsb2msb_v2:
         self.state = [list(), list()]        
         self.mode = 0
         readMode = 1 - self.mode    
-        if inputId > -1: 
-            #initId = SerializeMSBTwos(inputId, 4)
-            initId = SerializeLSBTwos(inputId, 4)
-            print(f"Initializing L2M with {initId}")
-            self.state[readMode] = initId
+        # if inputId > -1: 
+        #     #initId = SerializeMSBTwos(inputId, 4)
+        #     initId = SerializeLSBTwos(inputId, 4)
+        #     print(f"Initializing L2M with {initId}")
+        #     self.state[readMode] = initId
+        self.onSwitchStep = 0
+        self.switchNext = 0
 
     def Output(self) -> int:
         readMode = 1 - self.mode    
@@ -26,17 +28,29 @@ class lsb2msb_v2:
 
         return firstVal
     
-    def Step(self, input) -> None:
+    def Switch(self):
+        self.mode = 1 - self.mode
+        self.onSwitchStep = 1
+        self.switchNext = 0
+
+    def SetSwitchNext(self):        
+        self.onSwitchStep = 0
+        self.switchNext = 1
+
+    def Step(self, input, flag = 0) -> None:
         #print(f"L2M write at {self.wi} : {input}")
         self.state[self.mode].append(input)        
         
         if len(self.state[1 - self.mode]) > 0:
-            self.state[1 - self.mode].pop()
+            if flag == 0:
+                self.state[1 - self.mode].pop()
         
+        if self.onSwitchStep == 1:
+            self.onSwitchStep = 0
         
-    def Switch(self):
-        self.mode = 1 - self.mode
-
+        if self.switchNext == 1:
+            self.Switch()
+        
     def Print(self, prefix="") -> None:        
         temps = prefix + "L2M: "
 

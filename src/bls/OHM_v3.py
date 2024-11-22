@@ -8,7 +8,9 @@ from bls.SRL import SRL
 from bls.msb2lsb_v2 import msb2lsb_v2
 from bls.lsb2msb_v2 import lsb2msb_v2
 
-class OHM_v2:
+## QSELF: is two's complement less adventageous in bit-serial domain?
+
+class OHM_v3:
     
     def __init__(self, D=2, Nin = 4, Nout = 5, ptf="") -> None:
         ## Nin is the stored precision of weights
@@ -80,9 +82,7 @@ class OHM_v2:
         
                     
     def lsbOut(self) -> int:
-        
-        #return self.lsbOut
-        return self.doneOut
+        return self.msb2lsb.SwitchStep()
 
     def Output(self) -> int:
         return self.msb2lsb.Output()
@@ -113,17 +113,11 @@ class OHM_v2:
         # Get the inputs for the PBF
         inputs = [self.lsb2msb[i].Output() for i in range(self.d2)]
         
-        # Negate if msb/lsb otherwise check flags to latch inputs
-        for i in range(self.d):
-            ni = i + self.d
+        # Negate if msb/lsb 
+        for i in range(self.d):            
             if lsb[i] == 1:            
                 inputs[i] = 1-inputs[i]
-                inputs[ni] = 1-inputs[ni]
-            else:
-                if self.flags[i] == 1:
-                    inputs[i] = self.latchInput[i]
-                if self.flags[ni] == 1:
-                    inputs[ni] = self.latchInput[ni]
+                inputs[i + self.d] = 1-inputs[i + self.d]
 
         # Calc PBF
         self.pbf.Calc(inputs)
@@ -131,36 +125,33 @@ class OHM_v2:
         for i in range(self.d2):
             if self.flags[i] == 0:
                 if inputs[i] != self.pbf.Output():
-                    self.flags[i] = 1
-                    self.latchInput[i] = inputs[i]
-
-        if self.doneDelay == 1:        
-            self.msb2lsb.Switch()
-            self.doneOut = 1
+                    self.flags[i] = 1                    
                                 
         if (sum(self.flags) == (self.d2-1)):            
             #print(f"===========> GOT DONE!!!!!!!!")
-            self.done = 1                           
+            self.done = 1
+            self.msb2lsb.SetSwitchNext()
         else:
             self.done = 0           
         
         
     # State stuff goes here
-    def Step(self, lsb) -> None:        
+    def Step(self) -> None:        
         
-        print(f"OHM STEP: Done {self.done} -> {self.doneDelay}")
-        if self.doneDelay == 1:
+        print(f"OHM STEP")
+        if self.msb2lsb.SwitchStep():
             self.msb2lsb.Step(1-self.pbf.Output())
         else:
             self.msb2lsb.Step(self.pbf.Output())
-        self.msb2lsb.Print("M2L ")
+        
+        #self.msb2lsb.Print("M2L ")
         
         self.doneDelay = self.done                
         self.doneOut = 0
 
         for i in range(self.d):
-            self.lsb2msb[i].Step(self.addp[i].Output()) 
-            self.lsb2msb[i+self.d].Step(self.addn[i].Output()) 
+            self.lsb2msb[i].Step(self.addp[i].Output(), self.flags[i])             
+            self.lsb2msb[i+self.d].Step(self.addn[i].Output(), self.flags[i+self.d]) 
             
             self.addp[i].Step()  
             self.addn[i].Step()

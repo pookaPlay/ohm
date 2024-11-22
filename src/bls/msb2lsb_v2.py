@@ -7,19 +7,26 @@ class msb2lsb_v2:
     def Reset(self) -> None:
         self.state = [list(), list()]        
         self.mode = 0                
+        self.onSwitchStep = 0
+        self.switchNext = 0
+
+    def SwitchStep(self):
+        return self.onSwitchStep 
+
+    def Switch(self):
+        self.mode = 1 - self.mode
+        self.onSwitchStep = 1        
+        self.switchNext = 0
+                
+    def SetSwitchNext(self):        
+        self.onSwitchStep = 0
+        self.switchNext = 1
 
     def Output(self) -> int:
         readMode = 1 - self.mode    
         #print(f"Reading with mode {readMode} of length {len(self.state[readMode])}")
         if len(self.state[readMode]) > 0:
             firstVal = self.state[readMode][-1]
-            # if len(self.state[readMode]) == 1:
-            #     firstVal = 1 - self.state[readMode][-1]
-            #     print(f"###############################################")
-            #     print(f"###############################################")
-            #     print(f"NOTE: Returning MSB negated")
-            #     print(f"###############################################")
-            #     print(f"###############################################")
         else:
             print(f"WARNING: M2L out of POP!")
             firstVal = 0
@@ -27,15 +34,18 @@ class msb2lsb_v2:
         return firstVal
     
     def Step(self, input) -> None:        
-        #print(f"L2M write at {self.wi} : {input}")
+        
         self.state[self.mode].append(input)        
         
-        if len(self.state[1 - self.mode]) > 0:
+        if len(self.state[1 - self.mode]) > 1:  # hold last one
             self.state[1 - self.mode].pop()
-                
-    def Switch(self):
-        self.mode = 1 - self.mode        
-            
+
+        if self.onSwitchStep == 1:
+            self.onSwitchStep = 0
+
+        if self.switchNext == 1:
+            self.Switch()
+
     def Print(self, prefix="") -> None:        
         temps = prefix + "M2L: "
 
