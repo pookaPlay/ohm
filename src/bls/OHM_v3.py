@@ -111,11 +111,12 @@ class OHM_v3:
 
         # Get the inputs for the PBF
         inputs = [self.lsb2msb[i].Output() for i in range(self.d2)]
-        print(f" PBF inputs: {inputs}")
+        #print(f" PBF inputs: {inputs}")
 
         # Calc PBF
         self.pbf.Calc(inputs)
-
+        self.pbf.Print(" ")
+        
         for i in range(self.d2):
             if self.flags[i] == 0:
                 if inputs[i] != self.pbf.Output():
@@ -128,6 +129,8 @@ class OHM_v3:
         else:
             self.done = 0           
         
+        print(f" FLG: {self.flags} -> {self.done}")
+        self.msb2lsb.Print("M2L")        
         
     # State stuff goes here
     def Step(self) -> None:        

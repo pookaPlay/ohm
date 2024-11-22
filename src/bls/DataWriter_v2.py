@@ -1,4 +1,4 @@
-from bls.DataIO import DeserializeLSBTwos
+from bls.DataIO import DeserializeLSBTwos, DeserializeLSBOffset
 
 class DataWriter_v2():
     def __init__(self):
@@ -43,7 +43,8 @@ class DataWriter_v2():
                         firstOne = secondOne
                         secondOne = i   
                         # extract from firstOne to i 
-                        result = DeserializeLSBTwos(self.result[firstOne:secondOne])
+                        #result = DeserializeLSBTwos(self.result[firstOne:secondOne])
+                        result = DeserializeLSBOffset(self.result[firstOne:secondOne])
                         print(f"Got Result: {result} from length {len(self.result[firstOne:secondOne])}")
                         self.finalResult.append(result)
                 

@@ -8,9 +8,8 @@ def test_RunNode():
     NSteps = 16
     rep = 10
     
-    input = [3, 7, 1]  # needs 2 bits 
-    input = [4, 7, 1]  # needs 3 bits
-    input = [6, 5, 1]  # needs 4 bits
+    input = [6, 7, 1]  # needs 4 bits
+    input = [6, 5, 2]  # needs 
     input = [input.copy() for _ in range(rep)]
 
     expected = [0, 2, 2, 2, 2] 

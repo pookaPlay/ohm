@@ -34,9 +34,8 @@ def RunNode(input, ptf, NBitsIn = 4, NBitsOut = 4, NSteps = 120):
         data.Print()
         
         ohm.Calc(data.Output(), data.lsbIn())        
-        #ohm.Print("", 1)
-        
-        print(f"--- OUT: {ohm.Output()} LSB: {ohm.lsbOut()}")
+        #ohm.Print("", 1)        
+        #print(f"--- OUT: {ohm.Output()} LSB: {ohm.lsbOut()}")
         output.Step(ohm.Output(), ohm.lsbOut())            
                 
         ohm.Step()

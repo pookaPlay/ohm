@@ -26,10 +26,10 @@ class lsb2msb_v2:
             #print(f"WARNING: L2M out of POP!")
             firstVal = 0
 
-        if self.onSwitchStep == 1:
-            # negate msb
-            print(f"  - Negating MSB")
-            firstVal = 1 - firstVal
+        #if self.onSwitchStep == 1:
+        #    # negate msb
+        #    print(f"  - Negating MSB")
+        #    firstVal = 1 - firstVal
 
         return firstVal
     
