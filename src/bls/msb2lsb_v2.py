@@ -14,6 +14,7 @@ class msb2lsb_v2:
         return self.onSwitchStep 
 
     def Switch(self):
+        print(f"M2L: Switching mem")
         self.mode = 1 - self.mode
         self.onSwitchStep = 1        
         self.switchNext = 0

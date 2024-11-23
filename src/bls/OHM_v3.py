@@ -121,22 +121,25 @@ class OHM_v3:
             if self.flags[i] == 0:
                 if inputs[i] != self.pbf.Output():
                     self.flags[i] = 1                    
-                                
-        if (sum(self.flags) == (self.d2-1)):            
-            #print(f"===========> GOT DONE!!!!!!!!")
-            self.done = 1
-            self.msb2lsb.SetSwitchNext()
+
+        # might get away with this for 4 bit
+        if self.done == 0:
+            if (sum(self.flags) == (self.d2-1)):            
+                #print(f"===========> GOT DONE!!!!!!!!")
+                self.done = 1
+                self.msb2lsb.SetSwitchNext()
         else:
             self.done = 0           
         
         print(f" FLG: {self.flags} -> {self.done}")
-        self.msb2lsb.Print("M2L")        
+        #self.msb2lsb.Print("M2L")        
         
     # State stuff goes here
     def Step(self) -> None:        
         
         print(f"OHM STEP")
         self.msb2lsb.Step(self.pbf.Output())               
+        self.msb2lsb.Print("M2L")
 
         for i in range(self.d):
             self.lsb2msb[i].Step(self.addp[i].Output(), self.flags[i])             

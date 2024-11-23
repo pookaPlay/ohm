@@ -1,15 +1,16 @@
 from bls.OHM_NODE_TEST import RunNode
 
 def test_RunNode():
-    #ptf = "median"
-    ptf = "max"    
+    ptf = "median"
+    #ptf = "max"    
     NBitsIn = 4
     NBitsOut = 4
     NSteps = 16
     rep = 10
     
-    input = [6, 7, 1]  # needs 4 bits
-    input = [6, 5, 2]  # needs 
+    
+    input = [6, 7, 5]  # 6, 7, 5 -> 7
+    #input = [6, 1, 2]  # 6, 1, 5 -> 6
     input = [input.copy() for _ in range(rep)]
 
     expected = [0, 2, 2, 2, 2] 

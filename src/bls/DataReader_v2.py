@@ -13,7 +13,9 @@ class DataReader_v2():
 
         #self.data = [SerializeMSBTwos(input[self.ni][d], self.NIn) for d in range(self.D)]
         self.data = [SerializeMSBOffset(input[self.ni][d], self.NIn) for d in range(self.D)]
-        
+        for d in range(self.D):
+            print(f"Input: {self.input[self.ni][d]} -> {self.data[d]}")
+
         for d in range(self.D):
             self.data[d].reverse()
 
@@ -51,7 +53,8 @@ class DataReader_v2():
             #self.data = [SerializeMSBTwos(self.input[self.ni][d], self.NIn) for d in range(self.D)]
             self.data = [SerializeMSBOffset(self.input[self.ni][d], self.NIn) for d in range(self.D)]
             for d in range(self.D):
-                self.data[d].reverse()                
+                print(f"Input: {self.input[self.ni][d]} -> {self.data[d]}")
+                self.data[d].reverse()                    
         else:
             self.bi = self.bi + 1
         
