@@ -5,7 +5,7 @@ def test_RunNode():
     #ptf = "max"    
     NBitsIn = 4
     NBitsOut = 4
-    NSteps = 16
+    NSteps = 20
     rep = 10
     
     

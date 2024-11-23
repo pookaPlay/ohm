@@ -7,7 +7,6 @@ from bls.PTF import PTF
 from bls.SRL import SRL
 from bls.msb2lsb import msb2lsb
 from bls.lsb2msb import lsb2msb
-from bls.lsb2msb_v2 import lsb2msb_v2
 
 class OHM:
     
@@ -32,8 +31,7 @@ class OHM:
         self.addp = [ADD() for _ in range(self.d)]
         self.addn = [ADD() for _ in range(self.d)]
         
-        #self.lsb2msb = [lsb2msb(self.Nout) for _ in range(self.d2)]
-        self.lsb2msb = [lsb2msb_v2() for _ in range(self.d2)]
+        self.lsb2msb = [lsb2msb(self.Nout) for _ in range(self.d2)]        
                
         self.lsbAtPBF = SRL(Nout*2)
         self.msbAtPBF = SRL(1)

@@ -62,8 +62,9 @@ class OHM_v3:
 
             self.wp[i].Reset(self.zeros)
             self.addp[i].Reset()
- 
+             
             self.wn[i].Reset(self.one)
+            #self.wn[i].Reset(self.zeros)            
             self.addn[i].Reset()
 
             self.lsb2msb[i].Reset()

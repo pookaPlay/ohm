@@ -28,12 +28,11 @@ class DataWriter():
     def Step(self, x, lsb, msb):
                 
         if (lsb == 1):
+            if len(self.result) > 0:
+                self.lastResult = DeserializeLSBTwos(self.result)                
+                print(f"   Writer: {self.lastResult} from {self.result} of length {len(self.result)}")
+                self.finalResult.append(self.lastResult)
             self.result = list()
 
         self.result.append(x)
-
-        if (msb == 1):        
-            self.lastResult = DeserializeLSBTwos(self.result)                
-            print(f"   Writer: {self.lastResult} from {self.result}")
-            self.finalResult.append(self.lastResult)
 
