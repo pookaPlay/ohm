@@ -4,10 +4,10 @@ from DataIO import SerializeLSBOffset, DeserializeLSBOffset, SerializeLSBTwos, D
 def test_ADD4():
 
     NBits = 4
-    input = [2, 1]
+    input = [2, -3]
     print(input)
-    #inputs = [SerializeLSBOffset(input[i], NBits) for i in range(len(input))]
-    inputs = [SerializeLSBTwos(input[i], NBits) for i in range(len(input))]
+    inputs = [SerializeLSBOffset(input[i], NBits) for i in range(len(input))]
+    #inputs = [SerializeLSBTwos(input[i], NBits) for i in range(len(input))]
         
     print(inputs)
         
@@ -23,7 +23,7 @@ def test_ADD4():
     for bi in range(NBits-1):
         adder.Step()
 
-        adder.Calc(inputs[0][bi+1], inputs[1][bi+1])
+        adder.Calc(inputs[0][bi+1], inputs[1][bi+1], 0)
         output = adder.Output()
         result.append(output)        
 
