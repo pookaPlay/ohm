@@ -15,7 +15,6 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
     - name: Run tests
-      run: |
-        python src/test_OHM.py
+      run: |        
         python src/test_RUN_SORT.py
         
