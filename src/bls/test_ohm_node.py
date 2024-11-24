@@ -3,7 +3,7 @@ from bls.DataWriter import DataWriter
 from bls.OHM import OHM
 from bls.lsbSource import lsbSource
 
-def RunTest():
+def test_ohm_node():
     
     input = [6, 1, 2]  # produces alternating 2 bit outputs
     input = [6, 7, 5]  # works with max    
@@ -80,3 +80,4 @@ def RunTest():
     
     return output.Output()
 
+test_ohm_node()
