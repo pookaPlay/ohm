@@ -42,11 +42,11 @@ class DataWriter_v2():
                     else:
                         firstOne = secondOne
                         secondOne = i   
-                        # extract from firstOne to i 
-                        #result = DeserializeLSBTwos(self.result[firstOne:secondOne])
-                        result = DeserializeLSBOffset(self.result[firstOne:secondOne])
-                        print(f"Got Result: {result} from length {len(self.result[firstOne:secondOne])}")
-                        self.finalResult.append(result)
+
+                    #result = DeserializeLSBTwos(self.result[firstOne:secondOne])
+                    result = DeserializeLSBOffset(self.result[firstOne:secondOne])
+                    print(f"Got Result: {result} from length {len(self.result[firstOne:secondOne])}")
+                    self.finalResult.append(result)
                 
                     
         

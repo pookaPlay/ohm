@@ -77,9 +77,6 @@ class OHM_v3:
         self.pbf.Reset()
         self.msb2lsb.Reset()        
         self.done = 0
-        self.doneDelay = 0
-        self.doneOut = 0
-        self.doneOutDelay = 0
         
                     
     def lsbOut(self) -> int:

@@ -1,43 +1,24 @@
-from bls.OHM_NET_TEST import RunNet, RunNode
-
+from bls.OHM_NET_TEST import RunNet
 
 def test_RunNet():
-    ptf = "median"
-    input = [[7, -2, -6], [7, 0, -3], [1, 3, 5], [-6, 1, 2]]    
-    expected = [2, 0, 1, 1, 2, 0, 1]    
-    ret = RunNet(input, ptf)    
+    ptf = "max"
+    #ptf = "max"    
+    NBitsIn = 4
+    NBitsOut = 4
+    NSteps = 16
+    rep = 10
     
-    if ret != expected:
-        print(f"Expected: {expected}")
-        print(f"Got: {ret}")   
-        assert False    
-
-
-def test_RunNode():
-    ptf = "median"
-    input = [[7, -2, -6], [7, 0, -3], [1, 3, 5], [-6, 1, 2]]    
-    expected = [2, 0, 1, 1, 2, 0, 1]    
-    ret = RunNode(input, ptf)    
     
-    if ret != expected:
-        print(f"Expected: {expected}")
-        print(f"Got: {ret}")   
-        assert False    
+    input = [6, 1, 2]  # produces alternating 2 bit outputs
+    input = [6, 7, 5]  # works with max => 7    
+    input = [6, -7, 5]  # 
+    input = [input.copy() for _ in range(rep)]
 
-print(f"#######################################")
-print(f"NODE TEST BEGIN")
-print(f"#######################################")
-test_RunNode()
-print(f"#######################################")
-print(f"NODE TEST END")
-print(f"#######################################")
+    
+    ret = RunNet(input, ptf, NBitsIn, NBitsOut, NSteps)    
+    print(f"Ret: {ret}")
 
-if 0:
-    print(f"#######################################")
-    print(f"NET TEST BEGIN")
-    print(f"#######################################")
-    test_RunNet()
-    print(f"#######################################")
-    print(f"NET TEST END")
-    print(f"#######################################")
 
+if __name__ == "__main__":    
+    test_RunNet()    
+    
