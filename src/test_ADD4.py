@@ -1,5 +1,5 @@
-from ADD import ADD
-from DataIO import SerializeLSBOffset, DeserializeLSBOffset, SerializeLSBTwos, DeserializeLSBTwos
+from bls.ADD import ADD
+from bls.DataIO import SerializeLSBOffset, DeserializeLSBOffset, SerializeLSBTwos, DeserializeLSBTwos
 
 def test_ADD4():
 
