@@ -1,26 +1,20 @@
 ##################################################
-## Bit Serial OHM Node with both LSB and MSB paths
+## Bit Serial OHM Node with offset binary coding 
+## QSELF: is two's complement less adventageous in bit-serial domain?
 
 from bls.ADD import ADD
 from bls.PTF import PTF
 from bls.msb2lsb import msb2lsb
 from bls.lsb2msb import lsb2msb
 
-## QSELF: is two's complement less adventageous in bit-serial domain?
 
 class OHM():
     
-    def __init__(self, D=2, Nin = 4, Nout = 5, ptf="") -> None:
-        ## Nin is the stored precision of weights
-        ## NOut is the sign extened precision
-        ## Input should be offset binary with NOut bits
-        ## Weights are offset binary as well!
-
-        self.d = D
-        self.d2 = D*2        
-        self.Nin = Nin
-        self.Nout = Nout
+    def __init__(self, param) -> None:
         
+        self.d = param["D"]
+        self.d2 = 2 * self.d
+
         self.addp = [ADD() for _ in range(self.d)]
         self.addn = [ADD() for _ in range(self.d)]
         
@@ -30,9 +24,9 @@ class OHM():
         self.pbf = PTF(self.d2)
         
         # Some presets for debugging
-        if ptf == "min":
+        if param["ptf"] == "min":
             self.pbf.SetMin()
-        elif ptf == "max":          
+        elif param["ptf"] == "max":          
             self.pbf.SetMax()                           
         else:       
             self.pbf.SetMedian()
