@@ -1,17 +1,19 @@
-from bls.DataIO import DeserializeLSBTwos
+from bls.DataIO import DeserializeLSBTwos, DeserializeLSBOffset
 
 class DataWriter():
     def __init__(self):
         self.result = list()
-        self.lastLSB = -1
-        self.lastMSB = -1
+        self.lsb = list()
         self.lastResult = -1
         self.finalResult = list()
 
     def Print(self):        
-        print(f"Data Writer: {self.lastResult}")
+        print(f"LSB   : {self.lsb}")
+        print(f"Result: {self.result}")
+        
+        #print(f"Data Writer: {self.lastResult}")
 
-    def PrintAll(self):        
+    def PrintFinal(self):        
         print(f"Data Writer: {self.finalResult}")
 
     def Output(self):
@@ -19,20 +21,36 @@ class DataWriter():
 
     def Reset(self):
         self.result = list()        
+        self.lsb = list()
         self.finalResult = list()
-        self.lastLSB = -1
-        self.lastMSB = -1
-        self.lastResult = -1
 
 
-    def Step(self, x, lsb, msb):
-                
-        if (lsb == 1):
-            if len(self.result) > 0:
-                self.lastResult = DeserializeLSBTwos(self.result)                
-                print(f"   Writer: {self.lastResult} from {self.result} of length {len(self.result)}")
-                self.finalResult.append(self.lastResult)
-            self.result = list()
-
+    def Step(self, x, lsb):
         self.result.append(x)
+        self.lsb.append(lsb)        
+    
+    def BatchProcess(self):        
+        firstOne = -1
+        secondOne = -1
+        for i in range(len(self.result)):
+            if self.lsb[i] == 1:
+                if firstOne == -1:
+                    firstOne = i
+                else:
+                    if secondOne == -1:
+                        secondOne = i
+                    else:
+                        firstOne = secondOne
+                        secondOne = i   
+
+                    #result = DeserializeLSBTwos(self.result[firstOne:secondOne])
+                    result = DeserializeLSBOffset(self.result[firstOne:secondOne])
+                    print(f"Got Result: {result} from length {len(self.result[firstOne:secondOne])}")
+                    self.finalResult.append(result)
+                
+                    
+        
+
+        
+        
 

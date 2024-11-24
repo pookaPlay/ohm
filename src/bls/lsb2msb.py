@@ -1,66 +1,74 @@
+from bls.DataIO import SerializeMSBTwos, SerializeLSBTwos
 
 class lsb2msb:    
     
-    def __init__(self, N) -> None:
-        self.N = N        
+    def __init__(self) -> None:             
         self.Reset()
     
-    def Reset(self) -> None:
-        self.state = [list(self.N * [0]), list(self.N * [0])]        
+    def Reset(self, inputId = -1) -> None:
+        self.state = [list(), list()]        
         self.mode = 0
-        self.wi = self.N-1
-        self.ri = 0
-        self.done = 0
+        readMode = 1 - self.mode    
+        # if inputId > -1: 
+        #     #initId = SerializeMSBTwos(inputId, 4)
+        #     initId = SerializeLSBTwos(inputId, 4)
+        #     print(f"Initializing L2M with {initId}")
+        #     self.state[readMode] = initId
+        self.onSwitchStep = 0
+        self.switchNext = 0
 
+    def Output(self) -> int:
+        readMode = 1 - self.mode    
+        
+        if len(self.state[readMode]) > 0:
+            firstVal = self.state[readMode][-1]
+        else:
+            #print(f"WARNING: L2M out of POP!")
+            firstVal = 0
+
+        #if self.onSwitchStep == 1:
+        #    # negate msb
+        #    print(f"  - Negating MSB")
+        #    firstVal = 1 - firstVal
+
+        return firstVal
+    
+    def Switch(self):
+        self.mode = 1 - self.mode
+        self.onSwitchStep = 1
+        self.switchNext = 0
+
+    def SetSwitchNext(self):        
+        self.onSwitchStep = 0
+        self.switchNext = 1
+
+    def Step(self, input, flag = 0) -> None:
+        #print(f"L2M write at {self.wi} : {input}")
+        self.state[self.mode].append(input)        
+        
+        if len(self.state[1 - self.mode]) > 0:
+            if flag == 0:
+                self.state[1 - self.mode].pop()
+        
+        if self.onSwitchStep == 1:
+            self.onSwitchStep = 0
+        
+        if self.switchNext == 1:
+            self.Switch()
+        
     def Print(self, prefix="") -> None:        
         temps = prefix + "L2M: "
 
-        mem0 = [str(self.state[0][i]) for i in range(self.N)]            
-        mem1 = [str(self.state[1][i]) for i in range(self.N)]
-
-        if self.mode == 0:    
-            temps += str("W[")
-            for i in range(self.N):
-                if i == self.wi:
-                    temps += "(" + mem0[i] + ")"
-                else:
-                    temps += " " + mem0[i]
-            temps += "] R["
-            for i in range(self.N):
-                if i == self.ri:
-                    temps += "(" + mem1[i] + ")"
-                else:
-                    temps += " " + mem1[i]            
+        mem0 = [str(el) for el in self.state[0]]            
+        mem1 = [str(el) for el in self.state[1]]
+        #print(temps + "]")
+        if self.mode == 0:
+            print(f"W:{mem0}")
+            print(f"R:{mem1}")
         else:
-            temps += str("R[")
-            for i in range(self.N):
-                if i == self.ri:
-                    temps += "(" + mem0[i] + ")"
-                else:
-                    temps += " " + mem0[i]
-            temps += "] W["
-            for i in range(self.N):
-                if i == self.wi:
-                    temps += "(" + mem1[i] + ")"
-                else:
-                    temps += " " + mem1[i]
+            print(f"R:{mem0}")
+            print(f"W:{mem1}")
             
-        print(temps + "]")
-
-
-    def Output(self) -> int:
-        readMode = 1 - self.mode        
-        return self.state[readMode][self.ri]        
-    
-    def Step(self, input) -> None:
-        #print(f"L2M write at {self.wi} : {input}")
-        self.state[self.mode][self.wi] = input                      
+            
         
-        #print(f"L2M step {self.wi} : {input} with hold {holdFlag}")
-        self.ri += 1
-        
-        self.wi -= 1
-        if self.wi < 0:
-            self.wi = self.N-1
-            self.ri = 0
-            self.mode = 1 - self.mode                    
+

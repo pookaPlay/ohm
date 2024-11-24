@@ -13,9 +13,6 @@ class ADD:
         if verbose > 0:
             print(prefix + f"ADD : {self.sum}, {self.cout} from {self.a}, {self.b} and {self.cin}")
     
-    def COut(self) -> int:
-        return self.cout
-    
     def Output(self) -> int:
         return self.sum
 

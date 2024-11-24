@@ -1,64 +1,70 @@
 
 class msb2lsb:    
     
-    def __init__(self, N) -> None:
-        self.N = N     
-        self.Reset()   
-
+    def __init__(self) -> None:             
+        self.Reset()
+    
     def Reset(self) -> None:
-        self.state = [list(self.N * [0]), list(self.N * [0])]        
-        self.mode = 0
-        self.wi = 0
-        self.ri = self.N-1
+        self.state = [list(), list()]        
+        self.mode = 0                
+        self.onSwitchStep = 0
+        self.switchNext = 0
+
+    def SwitchStep(self):
+        return self.onSwitchStep 
+
+    def Switch(self):
+        print(f"M2L: Switching mem")
+        self.mode = 1 - self.mode
+        self.onSwitchStep = 1        
+        self.switchNext = 0
+                
+    def SetSwitchNext(self):        
+        self.onSwitchStep = 0
+        self.switchNext = 1
+
+    def Output(self) -> int:
+        readMode = 1 - self.mode    
+        #print(f"Reading with mode {readMode} of length {len(self.state[readMode])}")
+        if len(self.state[readMode]) > 0:
+            firstVal = self.state[readMode][-1]
+        #elif len(self.state[readMode]) > 0:
+        #    # Negate MSB
+        #    print(f"M2L: Negating MSB (last one)")
+        #    firstVal = 1 - self.state[readMode][0]
+        else:
+            print(f"WARNING: M2L out of POP!")
+            firstVal = 0
+
+        return firstVal
+    
+    def Step(self, input) -> None:        
+        
+        self.state[self.mode].append(input)
+        
+        if self.onSwitchStep == 1:
+            self.onSwitchStep = 0                    
+            
+        if len(self.state[1 - self.mode]) > 1:  # hold last one
+            self.state[1 - self.mode].pop()                    
+
+        if self.switchNext == 1:
+            self.Switch()
 
     def Print(self, prefix="") -> None:        
         temps = prefix + "M2L: "
 
-        mem0 = [str(self.state[0][i]) for i in range(self.N)]            
-        mem1 = [str(self.state[1][i]) for i in range(self.N)]
+        mem0 = [str(el) for el in self.state[0]]            
+        mem1 = [str(el) for el in self.state[1]]
+        #print(temps + "]")
 
-        if self.mode == 0:    
-            temps += str("W[")
-            for i in range(self.N):
-                if i == self.wi:
-                    temps += "(" + mem0[i] + ")"
-                else:
-                    temps += " " + mem0[i]
-            temps += "] R["
-            for i in range(self.N):
-                if i == self.ri:
-                    temps += "(" + mem1[i] + ")"
-                else:
-                    temps += " " + mem1[i]            
+        if self.mode == 0:
+            print(f"W:{mem0}")
+            print(f"R:{mem1}")
         else:
-            temps += str("R[")
-            for i in range(self.N):
-                if i == self.ri:
-                    temps += "(" + mem0[i] + ")"
-                else:
-                    temps += " " + mem0[i]
-            temps += "] W["
-            for i in range(self.N):
-                if i == self.wi:
-                    temps += "(" + mem1[i] + ")"
-                else:
-                    temps += " " + mem1[i]
+            print(f"R:{mem0}")
+            print(f"W:{mem1}")
             
-        print(temps + "]")
-
-
-    def Output(self) -> int:
-        readMode = 1 - self.mode        
-        return self.state[readMode][self.ri]        
-    
-    def Step(self, input, holdFlag=0) -> None:
-        self.state[self.mode][self.wi] = input
+            
         
-        if holdFlag == 0:
-            self.ri -= 1
-        
-        self.wi += 1
-        if self.wi == self.N:
-            self.wi = 0
-            self.ri = self.N-1
-            self.mode = 1 - self.mode                    
+

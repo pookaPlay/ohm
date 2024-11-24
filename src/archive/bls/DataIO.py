@@ -24,12 +24,6 @@ def SerializeMSBOffset(data, NBits=8):
 
     return(output)            
 
-def SerializeLSBOffset(data, NBits=8):
-    
-    result = SerializeMSBOffset(data, NBits)
-    result.reverse()
-    return(result)
-
 def SerializeMSBTwos(input, NBits=8):
     # expects data to lie between -2^(NBits-1) and 2^(NBits-1)
     result = SerializeMSBOffset(input, NBits)
