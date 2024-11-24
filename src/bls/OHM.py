@@ -12,6 +12,8 @@ class OHM():
     
     def __init__(self, param) -> None:
         
+        self.param = param
+        
         self.d = param["D"]
         self.d2 = 2 * self.d
 
