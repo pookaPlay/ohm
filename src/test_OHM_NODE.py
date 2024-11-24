@@ -1,4 +1,4 @@
-from bls.OHM_NODE_TEST import RunNode
+from bls.OHM_NODE_TEST_v4 import RunNode
 
 def test_RunNode():
     ptf = "max"

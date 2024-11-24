@@ -10,7 +10,7 @@ from bls.lsb2msb_v2 import lsb2msb_v2
 
 ## QSELF: is two's complement less adventageous in bit-serial domain?
 
-class OHM_v3:
+class OHM_v4:
     
     def __init__(self, D=2, Nin = 4, Nout = 5, ptf="") -> None:
         ## Nin is the stored precision of weights
@@ -23,25 +23,13 @@ class OHM_v3:
         self.Nin = Nin
         self.Nout = Nout
         
-        # default weights        
-        self.zeros = list(self.Nin * [0])
-        self.one = self.zeros.copy()
-        self.one[self.Nin-1] = 1                
-
-        self.wp = [CCSRL(self.Nin, self.Nout) for _ in range(self.d)]
-        self.wn = [CCSRL(self.Nin, self.Nout) for _ in range(self.d)]        
         self.addp = [ADD() for _ in range(self.d)]
         self.addn = [ADD() for _ in range(self.d)]
         
-        #self.lsb2msb = [lsb2msb(self.Nout) for _ in range(self.d2)]
-        self.lsb2msb = [lsb2msb_v2() for _ in range(self.d2)]
+        self.lsb2msb = [lsb2msb_v2() for _ in range(self.d2)]        
 
-        #self.lsbDelayed = SRL(1)
-
-        self.flags = list(self.d2 * [0])                               
-        self.latchInput = list(self.d2 * [0])
-
-        self.pbf = PTF(self.d2)                
+        self.flags = list(self.d2 * [0])
+        self.pbf = PTF(self.d2)
         
         # Some presets for debugging
         if ptf == "min":
@@ -53,24 +41,15 @@ class OHM_v3:
 
         self.msb2lsb = msb2lsb_v2()
         self.done = 0  
-        self.doneDelay = 0      
-        self.doneOut = 0
         
     def Reset(self) -> None:
         
         for i in range(self.d):
 
-            self.wp[i].Reset(self.zeros)
             self.addp[i].Reset()
-             
-            self.wn[i].Reset(self.one)
-            #self.wn[i].Reset(self.zeros)            
             self.addn[i].Reset()
-
             self.lsb2msb[i].Reset()
             self.lsb2msb[i+self.d].Reset()
-            #self.lsb2msb[i].Reset(i)
-            #self.lsb2msb[i+self.d].Reset(i+self.d)
             
         self.flags = list(self.d2 * [0])                        
         self.latchInput = list(self.d2 * [0])
@@ -90,15 +69,15 @@ class OHM_v3:
     
     ## Combinatorial stuff goes here
     #  lsb should be a vec like x
-    def Calc(self, x, lsb) -> None:        
+    def Calc(self, x, wp, wn, lsb) -> None:        
         print(f"OHM CALC")
         nx = [1-x[i] for i in range(len(x))]
 
         for i in range(self.d):
             ni = i + self.d
 
-            self.addp[i].Calc(x[i], self.wp[i].Output(), lsb[i]) 
-            self.addn[i].Calc(nx[i], self.wn[i].Output(), lsb[i])
+            self.addp[i].Calc(x[i], wp[i], lsb[i]) 
+            self.addn[i].Calc(nx[i], wn[i], lsb[i])
 
             if lsb[i] == 1:
                 self.lsb2msb[i].Switch()                                            
@@ -145,9 +124,6 @@ class OHM_v3:
             
             self.addp[i].Step()  
             self.addn[i].Step()
-
-            self.wp[i].Step()
-            self.wn[i].Step()
 
     def Print(self, prefix="", showInput=1) -> None:
         #print(f"==============================")
