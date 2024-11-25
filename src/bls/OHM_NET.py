@@ -21,18 +21,18 @@ class OHM_NET:
         self.wOne = self.wZero.copy()
         self.wOne[0] = 1
         self.wOne[self.K-1] = 0
+
         self.wp = [[[lsbSource(self.K, self.wZero) for _ in range(self.D)] for _ in range(self.W)] for _ in range(self.L)]
         self.wn = [[[lsbSource(self.K, self.wOne) for _ in range(self.D)] for _ in range(self.W)] for _ in range(self.L)]
-
         self.ohm = [[OHM(param) for wi in range(self.W)] for li in range(self.L)]
-
         
         # 1D convolution with wrapping
-        self.idx = [get_window_indices(wi, self.D, self.D) for wi in range(self.W)]        
+        self.idx = [get_window_indices(wi, self.D, self.W) for wi in range(self.W)]        
+        print(f"OHM_NET WINDOW INDICES\n{self.idx}")
         #for i in range(self.W):                
         #    if self.D == self.W:  # shift left
         #        self.idx[i] = int(self.idx[i][int(self.W/2):] + self.idx[i][:int(self.W/2)])
-        print(f"OHM_NET WINDOW INDICES\n{self.idx}")
+        
         
         
     def Reset(self) -> None:        
@@ -42,24 +42,20 @@ class OHM_NET:
         
                 
     def lsbOut(self) -> int:
-        ret = [ohmi.lsbOut() for ohmi in self.ohm[0]]
+        ret = [[ohm.lsbOut() for ohm in layer] for layer in self.ohm]
         return ret
 
     def Output(self) -> int:
-        ret = [ohmi.Output() for ohmi in self.ohm[0]]
+        ret = [[ohm.Output() for ohm in layer] for layer in self.ohm]
         return ret        
         
     # Combinatorial stuff goes here
     def Calc(self, x, lsb) -> None:        
         print(f"OHM_NET CALC")        
-        #print(self.idx)
-
-        for wi in range(self.W):
-            print(x)
-            inputs = [x[i] for i in self.idx[wi]]
-            #inputs = x
-            print(f"Inputs for node {wi}: {inputs}")
-
+        print(f"Layer: 0")
+        for wi in range(self.W):            
+            inputs = [x[i] for i in self.idx[wi]]            
+            #print(f"Inputs for node {wi}: {inputs}")
             for i in range(len(inputs)):
                 if lsb[i] == 1:
                     self.wp[0][wi][i].Reset()
@@ -70,10 +66,21 @@ class OHM_NET:
             self.ohm[0][wi].Calc(inputs, wpin, wnin, lsb)
 
         for li in range(1, self.L):
+            print(f"Layer: {li}")
             for wi in range(self.W):
+                
+                inputs = [self.ohm[li-1][i].Output() for i in self.idx[wi]]
+                lsbs = [self.ohm[li-1][i].lsbOut() for i in self.idx[wi]]
+
+                for i in range(len(inputs)):
+                    if lsb[i] == 1:
+                        self.wp[li][wi][i].Reset()
+                        self.wn[li][wi][i].Reset()                
+
                 wpin = [wpi.Output() for wpi in self.wp[li][wi]]
                 wnin = [wni.Output() for wni in self.wn[li][wi]]
-                self.ohm[li][wi].Calc(x, wpin, wnin, lsb)
+                
+                self.ohm[li][wi].Calc(inputs, wpin, wnin, lsbs)
                 
         
     # State stuff goes here
