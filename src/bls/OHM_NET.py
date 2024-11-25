@@ -54,8 +54,8 @@ class OHM_NET:
 
         for wi in range(self.W):
             print(x)
-            #inputs = [x[i] for i in self.idx[wi]]
-            inputs = x
+            inputs = [x[i] for i in self.idx[wi]]
+            #inputs = x
             print(f"Inputs for node {wi}: {inputs}")
 
             for i in range(len(inputs)):
