@@ -1,30 +1,38 @@
 from bls.OHM import OHM
 from bls.lsbSource import lsbSource
+from bls.NeighborhoodUtil import get_window_indices, get_reflected_indices
+
+def NOT(x):
+    return 1 - x
 
 class OHM_NET:
     
     def __init__(self, param) -> None:
 
         self.param = param
-        #self.numStack = param['numStack']      # number of parallel nodes        
-        self.L = param['L']
-        self.W = param['W']
-        self.D = param['D']  
-        self.K = param['K']  
+        
+        self.L = param['L']     # Number of layers
+        self.W = param['W']     # number of parallel nodes
+        self.D = param['D']     # This is the node fan-in before mirroring
+        self.K = param['K']     # This is the nominal (start) precision
         
         self.wZero = self.K * [0]
         self.wZero[self.K-1] = 1
         self.wOne = self.wZero.copy()
         self.wOne[0] = 1
         self.wOne[self.K-1] = 1
-        #print(f"Defaults in offset code: {self.wZero} and {self.wOne}")
-
-        #self.wp = [lsbSource(self.K, self.wZero) for _ in range(self.D)]        
-        #self.wn = [lsbSource(self.K, self.wOne) for _ in range(self.D)]
         self.wp = [[[lsbSource(self.K, self.wZero) for _ in range(self.D)] for _ in range(self.W)] for _ in range(self.L)]
         self.wn = [[[lsbSource(self.K, self.wOne) for _ in range(self.D)] for _ in range(self.W)] for _ in range(self.L)]
-        self.ohm = [[OHM(param) for _ in range(self.W)] for _ in range(self.L)]
-        
+
+        self.ohm = [[OHM(param) for wi in range(self.W)] for li in range(self.L)]
+
+        # 1D convolution with wrapping
+        self.inputIndex = [[get_window_indices(wi, self.D, self.W) for wi in range(self.W)] for li in range(self.L)]
+        if self.D == self.W:  # shift left 
+            self.inputIndex = self.inputIndex[int(self.W/2):] + self.inputIndex[:int(self.W/2)]
+        # 1D convolution with reflection
+        ##self.inIndexA = get_reflected_indices(adderInstance, self.numInputs, self.memD)                        
+
         
         
     def Reset(self) -> None:        
@@ -41,7 +49,23 @@ class OHM_NET:
         
     # Combinatorial stuff goes here
     def Calc(self, x, lsb) -> None:        
-        for l in range(self.L):
+
+        # self.aInputs = [memA.Output(aIndex) for aIndex in self.inIndexA]
+        # # mirror inputs
+        # for ai in range(self.numInputs):
+        #     self.aInputs[ai+self.numInputs] = NOT(self.aInputs[ai])
+
+        # self.bInputs = [memB.Output(bIndex) for bIndex in self.inIndexB]
+
+        # for ai in range(len(self.adders)):
+        #     self.adders[ai].Calc(self.aInputs[ai], self.bInputs[ai], lsb)
+
+        for w in range(self.W):
+            wpin = [wpi.Output() for wpi in self.wp[0][w]]
+            wnin = [wni.Output() for wni in self.wn[0][w]]
+            self.ohm[0][w].Calc(x, wpin, wnin, lsb)
+
+        for l in range(1, self.L):
             for w in range(self.W):
                 wpin = [wpi.Output() for wpi in self.wp[l][w]]
                 wnin = [wni.Output() for wni in self.wn[l][w]]

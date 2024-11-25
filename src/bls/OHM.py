@@ -7,7 +7,6 @@ from bls.PTF import PTF
 from bls.msb2lsb import msb2lsb
 from bls.lsb2msb import lsb2msb
 
-
 class OHM():
     
     def __init__(self, param) -> None:
