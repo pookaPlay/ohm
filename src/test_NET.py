@@ -7,14 +7,15 @@ def test_NET():
     param = {
         "ptf" : "max",
         "nsteps" : 16,        
-        "K" : 4,
-        "D" : 2,
+        "K" : 4,        
+        "W" : 1,
+        "L" : 1        
     }
 
     input = [6, 1, 2]  # produces alternating 2 bit outputs
     input = [6, 7, 5]  # works with max    
     input = [input.copy() for _ in range(10)]
-
+    
     param["D"] = len(input[0])   
     D = param["D"]
     K = param["K"]
@@ -53,7 +54,7 @@ def test_NET():
     output.Print()
     output.BatchProcess()
     output.PrintFinal()
-    
+    ohm.Print(">>>", 1)
     return output.Output()
 
 test_NET()
