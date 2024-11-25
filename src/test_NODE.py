@@ -23,17 +23,12 @@ def test_NODE():
     data = DataReader(input, K, K)    
 
     wZero = K * [0]
-    wZero[K-1] = 1
+    wZero[K-1] = 0
     wOne = wZero.copy()
     wOne[0] = 1
-    wOne[K-1] = 1
+    wOne[K-1] = 0
     print(f"Defaults in offset code: {wZero} and {wOne}")
     
-    wZero = K * [0]
-    wOne = wZero.copy()
-    wOne[0] = 1        
-    print(f"Defaults: {wZero} and {wOne}")
-
     wp = [lsbSource(K, wZero) for _ in range(D)]        
     wn = [lsbSource(K, wOne) for _ in range(D)]        
 
