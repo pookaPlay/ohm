@@ -80,7 +80,7 @@ def test_NODE():
         #[wni.Print() for wni in wn]
 
         ohm.Calc(data.Output(), wpin, wnin, data.lsbIn())        
-        ohm.Print("   ", 1)        
+        #ohm.Print("   ", 1)        
         #print(f"--- OUT: {ohm.Output()} LSB: {ohm.lsbOut()}")
         output.Step(ohm.Output(), ohm.lsbOut())            
                 
