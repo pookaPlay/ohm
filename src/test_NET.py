@@ -1,19 +1,19 @@
 from bls.DataReader import DataReader
-from bls.MultiDataWriter import MultiDataWriter
+from bls.LayeredMultiDataWriter import LayeredMultiDataWriter
 from bls.OHM_NET import OHM_NET
 
 def test_NET():
     
     param = {
         "ptf" : "max",
-        "nsteps" : 12,        
+        "nsteps" : 24,        
         "K" : 4,        
-        "W" : 3,
-        "L" : 1        
+        "W" : 4,
+        "L" : 3        
     }
 
-    input = [6, 1, 2]  # produces alternating 2 bit outputs
-    input = [6, 7, 5]  # works with max    
+    input = [6, 1, 2, 3]  # produces alternating 2 bit outputs
+    input = [6, 7, 5, 3]  # works with max    
     input = [input.copy() for _ in range(10)]
     
     param["D"] = len(input[0])   
@@ -26,18 +26,17 @@ def test_NET():
 
     ohm = OHM_NET(param)        
 
-    output = MultiDataWriter(W)
-    
+    output = LayeredMultiDataWriter(L, W)
+        
     data.Reset()        
-    ohm.Reset()        
-    output.Reset()
+    ohm.Reset()            
 
     print(f"== {0} ============================")
     data.Print()
 
     ohm.Calc(data.Output(), data.lsbIn())
-
-    output.Step(ohm.Output(), ohm.lsbOut())            
+    
+    output.Step(ohm.Output(), ohm.lsbOut())
     
     ohm.Step()                        
 
