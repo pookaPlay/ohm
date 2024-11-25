@@ -26,13 +26,13 @@ class OHM_NET:
 
         self.ohm = [[OHM(param) for wi in range(self.W)] for li in range(self.L)]
 
+        
         # 1D convolution with wrapping
-        self.inputIndex = [[get_window_indices(wi, self.D, self.W) for wi in range(self.W)] for li in range(self.L)]
-        if self.D == self.W:  # shift left 
-            self.inputIndex = self.inputIndex[int(self.W/2):] + self.inputIndex[:int(self.W/2)]
-        # 1D convolution with reflection
-        ##self.inIndexA = get_reflected_indices(adderInstance, self.numInputs, self.memD)                        
-
+        self.idx = [get_window_indices(wi, self.D, self.D) for wi in range(self.W)]        
+        #for i in range(self.W):                
+        #    if self.D == self.W:  # shift left
+        #        self.idx[i] = int(self.idx[i][int(self.W/2):] + self.idx[i][:int(self.W/2)])
+        print(f"OHM_NET WINDOW INDICES\n{self.idx}")
         
         
     def Reset(self) -> None:        
@@ -49,27 +49,26 @@ class OHM_NET:
         
     # Combinatorial stuff goes here
     def Calc(self, x, lsb) -> None:        
+        print(f"OHM_NET CALC")        
+        print(self.idx)
 
-        # self.aInputs = [memA.Output(aIndex) for aIndex in self.inIndexA]
-        # # mirror inputs
-        # for ai in range(self.numInputs):
-        #     self.aInputs[ai+self.numInputs] = NOT(self.aInputs[ai])
+        for wi in range(self.W):
+            input = [x[i] for i in self.idx[wi]]
+            mirroredInput = [1 - input[i] for i in range(self.D)]
+            inputs = input + mirroredInput
+            print(f"Input: {inputs}")
 
-        # self.bInputs = [memB.Output(bIndex) for bIndex in self.inIndexB]
+            # for ai in range(self.numInputs):
+            #     self.aInputs[ai+self.numInputs] = NOT(self.aInputs[ai])            
+            wpin = [wpi.Output() for wpi in self.wp[0][wi]]
+            wnin = [wni.Output() for wni in self.wn[0][wi]]
+            self.ohm[0][wi].Calc(inputs, wpin, wnin, lsb)
 
-        # for ai in range(len(self.adders)):
-        #     self.adders[ai].Calc(self.aInputs[ai], self.bInputs[ai], lsb)
-
-        for w in range(self.W):
-            wpin = [wpi.Output() for wpi in self.wp[0][w]]
-            wnin = [wni.Output() for wni in self.wn[0][w]]
-            self.ohm[0][w].Calc(x, wpin, wnin, lsb)
-
-        for l in range(1, self.L):
-            for w in range(self.W):
-                wpin = [wpi.Output() for wpi in self.wp[l][w]]
-                wnin = [wni.Output() for wni in self.wn[l][w]]
-                self.ohm[l][w].Calc(x, wpin, wnin, lsb)
+        for li in range(1, self.L):
+            for wi in range(self.W):
+                wpin = [wpi.Output() for wpi in self.wp[li][wi]]
+                wnin = [wni.Output() for wni in self.wn[li][wi]]
+                self.ohm[li][wi].Calc(x, wpin, wnin, lsb)
                 
         
     # State stuff goes here

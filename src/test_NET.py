@@ -8,7 +8,7 @@ def test_NET():
         "ptf" : "max",
         "nsteps" : 16,        
         "K" : 4,        
-        "W" : 1,
+        "W" : 3,
         "L" : 1        
     }
 
