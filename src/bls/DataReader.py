@@ -1,4 +1,4 @@
-from bls.DataIO import SerializeMSBTwos, SerializeMSBOffset
+from bls.DataIO import SerializeMSBTwos, SerializeLSBTwos, SerializeMSBOffset, SerializeLSBOffset
 
 class DataReader():
     def __init__(self, input=[[5, 7, 6]], NBitsIn=7, NBitsOut=8):
@@ -11,13 +11,11 @@ class DataReader():
         self.bi = 0
         self.ni = 0
 
-        #self.data = [SerializeMSBTwos(input[self.ni][d], self.NIn) for d in range(self.D)]
-        self.data = [SerializeMSBOffset(input[self.ni][d], self.NIn) for d in range(self.D)]
-        for d in range(self.D):
-            print(f"Input: {self.input[self.ni][d]} -> {self.data[d]}")
+        self.data = [SerializeLSBOffset(input[self.ni][d], self.NIn) for d in range(self.D)]
+        #self.data = [SerializeLSBTwos(input[self.ni][d], self.NIn) for d in range(self.D)]
 
         for d in range(self.D):
-            self.data[d].reverse()
+            print(f"Input: {self.input[self.ni][d]} -> {self.data[d]}")
 
         self.slice = [self.data[d][self.bi] for d in range(self.D)]        
         self.lsb = [1] * self.D
@@ -50,10 +48,9 @@ class DataReader():
             if self.ni == self.N:
                 self.ni = 0
 
-            #self.data = [SerializeMSBTwos(self.input[self.ni][d], self.NIn) for d in range(self.D)]
-            self.data = [SerializeMSBOffset(self.input[self.ni][d], self.NIn) for d in range(self.D)]
-            for d in range(self.D):
-                self.data[d].reverse()
+            self.data = [SerializeLSBOffset(self.input[self.ni][d], self.NIn) for d in range(self.D)]
+            #self.data = [SerializeLSBTwos(self.input[self.ni][d], self.NIn) for d in range(self.D)]
+            for d in range(self.D):                
                 print(f"Input: {self.input[self.ni][d]} -> {self.data[d]}")                
         else:
             self.bi = self.bi + 1

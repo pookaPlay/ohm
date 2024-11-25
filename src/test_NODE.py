@@ -7,14 +7,15 @@ from bls.DataIO import SerializeLSBTwos, SerializeMSBTwos, SerializeMSBOffset, S
 def test_NODE():
     
     param = {
-        "ptf" : "max",
-        "nsteps" : 16,        
+        "ptf" : "med",
+        "nsteps" : 12,        
         "K" : 4,
         "D" : 3,
     }
 
     #input = [6, 1, 2]  # produces alternating 2 bit outputs
     input = [6, 7, 5]  # works with max    
+    input = [6, 4, 5]  # works with min and med!
     input = [input.copy() for _ in range(10)]
 
     param["D"] = len(input[0])   
@@ -32,7 +33,7 @@ def test_NODE():
     
     wp = [lsbSource(K, wZero) for _ in range(D)]        
     wn = [lsbSource(K, wOne) for _ in range(D)]        
-
+    
     ohm = OHM(param)         
 
     output = DataWriter()    
@@ -49,6 +50,10 @@ def test_NODE():
     wpin = [wpi.Output() for wpi in wp]
     wnin = [wni.Output() for wni in wn]
 
+    #print(f"Going into adders")
+    #[wpi.Print() for wpi in wp]
+    #[wni.Print() for wni in wn]
+    
     ohm.Calc(data.Output(), wpin, wnin, data.lsbIn())
     #print(f"--- OUT: {ohm.Output()}      LSB: {ohm.lsbOut()}")
     #ohm.Print("", 1)
@@ -70,8 +75,12 @@ def test_NODE():
         wpin = [wpi.Output() for wpi in wp]
         wnin = [wni.Output() for wni in wn]
 
+        #print(f"Going into adders")
+        #[wpi.Print() for wpi in wp]
+        #[wni.Print() for wni in wn]
+
         ohm.Calc(data.Output(), wpin, wnin, data.lsbIn())        
-        #ohm.Print("", 1)        
+        ohm.Print("   ", 1)        
         #print(f"--- OUT: {ohm.Output()} LSB: {ohm.lsbOut()}")
         output.Step(ohm.Output(), ohm.lsbOut())            
                 

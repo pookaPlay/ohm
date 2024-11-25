@@ -45,7 +45,7 @@ class OHM():
             self.lsb2msb[i+self.d].Reset()
             
         self.flags = list(self.d2 * [0])                        
-        self.latchInput = list(self.d2 * [0])
+        
         self.pbf.Reset()
         self.msb2lsb.Reset()        
         self.done = 0
@@ -78,14 +78,14 @@ class OHM():
 
                 self.flags[i] = 0
                 self.flags[ni] = 0
+                #self.done = 0
 
         # Get the inputs for the PBF
         inputs = [self.lsb2msb[i].Output() for i in range(self.d2)]
         #print(f" PBF inputs: {inputs}")
 
         # Calc PBF
-        self.pbf.Calc(inputs)
-        self.pbf.Print(" ")
+        self.pbf.Calc(inputs)        
         
         for i in range(self.d2):
             if self.flags[i] == 0:
@@ -100,16 +100,15 @@ class OHM():
                 self.msb2lsb.SetSwitchNext()
         else:
             self.done = 0           
-        
-        print(f" FLG: {self.flags} -> {self.done}")
+                
         #self.msb2lsb.Print("M2L")        
         
     # State stuff goes here
     def Step(self) -> None:        
         
-        print(f"OHM STEP")
+        #print(f"OHM STEP")
         self.msb2lsb.Step(self.pbf.Output())               
-        self.msb2lsb.Print("M2L")
+        #self.msb2lsb.Print("M2L")
 
         for i in range(self.d):
             self.lsb2msb[i].Step(self.addp[i].Output(), self.flags[i])             
@@ -138,8 +137,9 @@ class OHM():
                 self.lsb2msb[i+self.d].Print(input)
         
         #inputs = [self.lsb2msb[i].Output() for i in range(self.d2)]
-        print(f"{prefix} =Output =====")
-        self.pbf.Print(prefix)
+        print(f" = Output =====")
+        self.pbf.Print()
+        print(f" FLG: {self.flags} -> {self.done}")
         #print(f"  PBF: {str(inputs)} -> {self.pbf.Output()}")        
         self.msb2lsb.Print(prefix)        
 

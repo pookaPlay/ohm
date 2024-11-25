@@ -1,19 +1,14 @@
 from bls.DataIO import SerializeMSBTwos, SerializeLSBTwos
+from bls.DataIO import DeserializeLSBTwos, DeserializeLSBOffset
 
 class lsb2msb:    
     
     def __init__(self) -> None:             
         self.Reset()
     
-    def Reset(self, inputId = -1) -> None:
+    def Reset(self) -> None:
         self.state = [list(), list()]        
-        self.mode = 0
-        readMode = 1 - self.mode    
-        # if inputId > -1: 
-        #     #initId = SerializeMSBTwos(inputId, 4)
-        #     initId = SerializeLSBTwos(inputId, 4)
-        #     print(f"Initializing L2M with {initId}")
-        #     self.state[readMode] = initId
+        self.mode = 0        
         self.onSwitchStep = 0
         self.switchNext = 0
 
@@ -23,13 +18,8 @@ class lsb2msb:
         if len(self.state[readMode]) > 0:
             firstVal = self.state[readMode][-1]
         else:
-            #print(f"WARNING: L2M out of POP!")
+            print(f"WARNING: L2M out of POP!")
             firstVal = 0
-
-        #if self.onSwitchStep == 1:
-        #    # negate msb
-        #    print(f"  - Negating MSB")
-        #    firstVal = 1 - firstVal
 
         return firstVal
     
@@ -56,18 +46,21 @@ class lsb2msb:
         if self.switchNext == 1:
             self.Switch()
         
-    def Print(self, prefix="") -> None:        
-        temps = prefix + "L2M: "
+    def Print(self, prefix="") -> None:                
+        mem0off = DeserializeLSBOffset(self.state[0])
+        #mem0twos = DeserializeLSBTwos(mem0)
+        mem1off = DeserializeLSBOffset(self.state[1])
+        #mem1twos = DeserializeLSBTwos(mem1)
 
         mem0 = [str(el) for el in self.state[0]]            
         mem1 = [str(el) for el in self.state[1]]
-        #print(temps + "]")
+
         if self.mode == 0:
-            print(f"W:{mem0}")
-            print(f"R:{mem1}")
+            print(f"W:{mem0} (off: {mem0off})")
+            print(f"R:{mem1} (off: {mem1off})")
         else:
-            print(f"R:{mem0}")
-            print(f"W:{mem1}")
+            print(f"R:{mem0} (off: {mem0off})")
+            print(f"W:{mem1} (off: {mem1off})")
             
             
         
