@@ -63,9 +63,9 @@ class OHM():
     ## Combinatorial stuff goes here
     #  lsb should be a vec like x
     def Calc(self, x, wp, wn, lsb) -> None:        
-        print(f"OHM CALC")
+        #print(f"OHM CALC")
         nx = [1-x[i] for i in range(len(x))]
-
+        #print(f"  {x} and {nx}")
         for i in range(self.d):
             ni = i + self.d
 

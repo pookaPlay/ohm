@@ -2,13 +2,16 @@
 class lsbSource:    
     
     def __init__(self, N, listDefault = []) -> None:
-        self.N = N     
-        self.Reset()   
-        if len(listDefault) > 0:
-            self.state = listDefault.copy()
+        self.N = N  
+        self.default = list(self.N * [0])    
 
-    def Reset(self) -> None:
-        self.state = list(self.N * [0])        
+        if len(listDefault) > 0:
+            self.default = listDefault.copy()
+            
+        self.Reset()   
+
+    def Reset(self) -> None:           
+        self.state = self.default.copy()
         self.ri = 0
 
     def Print(self, prefix="") -> None:                

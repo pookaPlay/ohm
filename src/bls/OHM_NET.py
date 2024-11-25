@@ -17,10 +17,10 @@ class OHM_NET:
         self.K = param['K']     # This is the nominal (start) precision
         
         self.wZero = self.K * [0]
-        self.wZero[self.K-1] = 1
+        self.wZero[self.K-1] = 0
         self.wOne = self.wZero.copy()
         self.wOne[0] = 1
-        self.wOne[self.K-1] = 1
+        self.wOne[self.K-1] = 0
         self.wp = [[[lsbSource(self.K, self.wZero) for _ in range(self.D)] for _ in range(self.W)] for _ in range(self.L)]
         self.wn = [[[lsbSource(self.K, self.wOne) for _ in range(self.D)] for _ in range(self.W)] for _ in range(self.L)]
 
@@ -50,16 +50,19 @@ class OHM_NET:
     # Combinatorial stuff goes here
     def Calc(self, x, lsb) -> None:        
         print(f"OHM_NET CALC")        
-        print(self.idx)
+        #print(self.idx)
 
         for wi in range(self.W):
-            input = [x[i] for i in self.idx[wi]]
-            mirroredInput = [1 - input[i] for i in range(self.D)]
-            inputs = input + mirroredInput
-            print(f"Input: {inputs}")
+            print(x)
+            #inputs = [x[i] for i in self.idx[wi]]
+            inputs = x
+            print(f"Inputs for node {wi}: {inputs}")
 
-            # for ai in range(self.numInputs):
-            #     self.aInputs[ai+self.numInputs] = NOT(self.aInputs[ai])            
+            for i in range(len(inputs)):
+                if lsb[i] == 1:
+                    self.wp[0][wi][i].Reset()
+                    self.wn[0][wi][i].Reset()                
+
             wpin = [wpi.Output() for wpi in self.wp[0][wi]]
             wnin = [wni.Output() for wni in self.wn[0][wi]]
             self.ohm[0][wi].Calc(inputs, wpin, wnin, lsb)

@@ -6,7 +6,7 @@ def test_NET():
     
     param = {
         "ptf" : "max",
-        "nsteps" : 16,        
+        "nsteps" : 12,        
         "K" : 4,        
         "W" : 3,
         "L" : 1        

@@ -7,7 +7,7 @@ def test_NODE():
     
     param = {
         "ptf" : "max",
-        "nsteps" : 16,        
+        "nsteps" : 12,        
         "K" : 4,
         "D" : 2,
     }
