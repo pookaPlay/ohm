@@ -2,17 +2,18 @@ from bls.DataReader import DataReader
 from bls.DataWriter import DataWriter
 from bls.OHM import OHM
 from bls.lsbSource import lsbSource
+from bls.DataIO import SerializeLSBTwos, SerializeMSBTwos, SerializeMSBOffset, SerializeLSBOffset
 
 def test_NODE():
     
     param = {
         "ptf" : "max",
-        "nsteps" : 12,        
+        "nsteps" : 16,        
         "K" : 4,
-        "D" : 2,
+        "D" : 3,
     }
 
-    input = [6, 1, 2]  # produces alternating 2 bit outputs
+    #input = [6, 1, 2]  # produces alternating 2 bit outputs
     input = [6, 7, 5]  # works with max    
     input = [input.copy() for _ in range(10)]
 
@@ -22,11 +23,11 @@ def test_NODE():
 
     data = DataReader(input, K, K)    
 
-    wZero = K * [0]
-    wZero[K-1] = 0
-    wOne = wZero.copy()
-    wOne[0] = 1
-    wOne[K-1] = 0
+    #wZero = SerializeLSBOffset(0, K)
+    #wOne = SerializeLSBOffset(1, K)
+    wZero = SerializeLSBTwos(0, K)
+    wOne = SerializeLSBTwos(1, K)
+
     print(f"Defaults in offset code: {wZero} and {wOne}")
     
     wp = [lsbSource(K, wZero) for _ in range(D)]        

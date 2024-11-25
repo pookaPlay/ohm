@@ -3,7 +3,7 @@ class lsbSource:
     
     def __init__(self, N, listDefault = []) -> None:
         self.N = N  
-        self.default = list(self.N * [0])    
+        self.default = self.N * [0]    
 
         if len(listDefault) > 0:
             self.default = listDefault.copy()
