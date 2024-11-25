@@ -42,10 +42,12 @@ class OHM_NET:
         
                 
     def lsbOut(self) -> int:
-        return self.ohm[0][0].lsbOut()        
+        ret = [ohmi.lsbOut() for ohmi in self.ohm[0]]
+        return ret
 
     def Output(self) -> int:
-        return self.ohm[0][0].Output()
+        ret = [ohmi.Output() for ohmi in self.ohm[0]]
+        return ret        
         
     # Combinatorial stuff goes here
     def Calc(self, x, lsb) -> None:        

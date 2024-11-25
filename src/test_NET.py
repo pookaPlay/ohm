@@ -1,5 +1,5 @@
 from bls.DataReader import DataReader
-from bls.DataWriter import DataWriter
+from bls.MultiDataWriter import MultiDataWriter
 from bls.OHM_NET import OHM_NET
 
 def test_NET():
@@ -19,12 +19,14 @@ def test_NET():
     param["D"] = len(input[0])   
     D = param["D"]
     K = param["K"]
+    W = param["W"]
+    L = param["L"]
 
     data = DataReader(input, K, K)    
 
     ohm = OHM_NET(param)        
 
-    output = DataWriter()    
+    output = MultiDataWriter(W)
     
     data.Reset()        
     ohm.Reset()        
