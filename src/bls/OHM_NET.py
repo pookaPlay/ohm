@@ -41,7 +41,6 @@ class OHM_NET:
         
     # Combinatorial stuff goes here
     def Calc(self, x, lsb) -> None:        
-
         for l in range(self.L):
             for w in range(self.W):
                 wpin = [wpi.Output() for wpi in self.wp[l][w]]

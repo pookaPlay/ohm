@@ -54,7 +54,7 @@ def test_NET():
     output.Print()
     output.BatchProcess()
     output.PrintFinal()
-    ohm.Print(">>>", 1)
+    #ohm.Print(">>>", 1)
     return output.Output()
 
 test_NET()

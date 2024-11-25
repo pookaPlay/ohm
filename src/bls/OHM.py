@@ -124,24 +124,23 @@ class OHM():
         #print(f"OHM: {self.d2} inputs")
         #print(prefix + f"################### G2G: {self.done} ###################")
         if showInput:            
-            print(f" +ve ------------------------")
+            print(f"{prefix} +ve ------------------------")
             for i in range(self.d):                
-                prefix = f"   x{i}-"
+                input = f"{prefix}   x{i}-"
                 #self.wp[i].Print(prefix)
                 #self.addp[i].Print(prefix)
-                self.lsb2msb[i].Print(prefix)                        
+                self.lsb2msb[i].Print(input)                        
             
-            print(f" -ve ------------------------")
+            print(f"{prefix} -ve ------------------------")
             for i in range(self.d):                                
-                prefix = f"   x{i}-"                                                
+                input = f"{prefix}   x{i}-"                                                
                 #self.wn[i].Print(prefix)
                 #self.addn[i].Print(prefix)
-                self.lsb2msb[i+self.d].Print(prefix)
-
-        prefix = "  "
+                self.lsb2msb[i+self.d].Print(input)
+        
         #inputs = [self.lsb2msb[i].Output() for i in range(self.d2)]
-        print(f" =Output =====")
-        self.pbf.Print(" ")
+        print(f"{prefix} =Output =====")
+        self.pbf.Print(prefix)
         #print(f"  PBF: {str(inputs)} -> {self.pbf.Output()}")        
         self.msb2lsb.Print(prefix)        
 
