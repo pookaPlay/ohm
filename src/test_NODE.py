@@ -7,7 +7,7 @@ from bls.DataIO import SerializeLSBTwos, SerializeMSBTwos, SerializeMSBOffset, S
 def test_NODE():
     
     param = {
-        "ptf" : "max",
+        "ptf" : "med",
         "nsteps" : 12,        
         "K" : 4,
         "D" : 3,

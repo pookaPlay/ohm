@@ -50,7 +50,7 @@ class OHM():
         self.flags = list(self.d2 * [0])                        
         
         self.pbf.Reset()
-        self.msb2lsb.Reset()        
+        self.msb2lsb.Reset()                
         self.done = 0
         self.debug = 0
         
@@ -99,19 +99,16 @@ class OHM():
                 if inputs[i] != self.pbf.Output():
                     self.flags[i] = 1                    
 
-        if self.debug == self.K:
+        self.done = 0
+        #if self.debug == self.K:
+        #    print(f"   OHM DEBUG DONE")
+        #    self.msb2lsb.SetSwitchNext()
+        #    self.done = 1
+
+        if (sum(self.flags) == (self.d2-1)):            
             print(f"   OHM DONE!!!!!!!!")
-            #self.done = 1
             self.msb2lsb.SetSwitchNext()
-        # if self.done == 0:
-        #     if (sum(self.flags) == (self.d2-1)):            
-        #         print(f"   OHM DONE!!!!!!!!")
-        #         self.done = 1
-        #         self.msb2lsb.SetSwitchNext()
-        # else:
-        #     self.done = 0           
-                
-        #self.msb2lsb.Print("M2L")        
+            self.done = 1
         
     # State stuff goes here
     def Step(self) -> None:        

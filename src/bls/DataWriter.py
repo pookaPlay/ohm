@@ -6,6 +6,7 @@ class DataWriter():
         self.lsb = list()
         self.lastResult = -1
         self.finalResult = list()
+        self.finalLength = list()
 
     def Print(self):        
         print(f"LSB   : {self.lsb}")
@@ -13,8 +14,14 @@ class DataWriter():
         
         #print(f"Data Writer: {self.lastResult}")
 
-    def PrintFinal(self):        
+    def PrintFinal(self):                
+        #temps = f"Data Writer: "
+        #for result, length in zip(self.finalResult, self.finalLength):
+        #    temps += f"{result} ({length}), "
         print(f"Data Writer: {self.finalResult}")
+        print(f"Data Length: {self.finalLength}")
+        
+
 
     def Output(self):
         return(self.finalResult)
@@ -44,9 +51,11 @@ class DataWriter():
                         secondOne = i   
 
                     result = DeserializeLSBTwos(self.result[firstOne:secondOne])
+                    resultLength = len(self.result[firstOne:secondOne])
                     #result = DeserializeLSBOffset(self.result[firstOne:secondOne])
-                    print(f"Got Result: {result} from length {len(self.result[firstOne:secondOne])}")
+                    #print(f"Got Result: {result} from length {resultLength}")
                     self.finalResult.append(result)
+                    self.finalLength.append(resultLength)
                 
                     
         
