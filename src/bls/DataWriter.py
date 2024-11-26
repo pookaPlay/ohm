@@ -43,8 +43,8 @@ class DataWriter():
                         firstOne = secondOne
                         secondOne = i   
 
-                    #result = DeserializeLSBTwos(self.result[firstOne:secondOne])
-                    result = DeserializeLSBOffset(self.result[firstOne:secondOne])
+                    result = DeserializeLSBTwos(self.result[firstOne:secondOne])
+                    #result = DeserializeLSBOffset(self.result[firstOne:secondOne])
                     print(f"Got Result: {result} from length {len(self.result[firstOne:secondOne])}")
                     self.finalResult.append(result)
                 

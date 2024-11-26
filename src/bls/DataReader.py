@@ -11,8 +11,8 @@ class DataReader():
         self.bi = 0
         self.ni = 0
 
-        self.data = [SerializeLSBOffset(input[self.ni][d], self.NIn) for d in range(self.D)]
-        #self.data = [SerializeLSBTwos(input[self.ni][d], self.NIn) for d in range(self.D)]
+        #self.data = [SerializeLSBOffset(input[self.ni][d], self.NIn) for d in range(self.D)]
+        self.data = [SerializeLSBTwos(input[self.ni][d], self.NIn) for d in range(self.D)]
 
         for d in range(self.D):
             print(f"Input: {self.input[self.ni][d]} -> {self.data[d]}")
@@ -48,8 +48,8 @@ class DataReader():
             if self.ni == self.N:
                 self.ni = 0
 
-            self.data = [SerializeLSBOffset(self.input[self.ni][d], self.NIn) for d in range(self.D)]
-            #self.data = [SerializeLSBTwos(self.input[self.ni][d], self.NIn) for d in range(self.D)]
+            #self.data = [SerializeLSBOffset(self.input[self.ni][d], self.NIn) for d in range(self.D)]
+            self.data = [SerializeLSBTwos(self.input[self.ni][d], self.NIn) for d in range(self.D)]
             for d in range(self.D):                
                 print(f"Input: {self.input[self.ni][d]} -> {self.data[d]}")                
         else:
