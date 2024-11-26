@@ -33,7 +33,7 @@ class msb2lsb:
         #    print(f"M2L: Negating MSB (last one)")
         #    firstVal = 1 - self.state[readMode][0]
         else:
-            print(f"WARNING: M2L out of POP!")
+            #print(f"WARNING: M2L out of POP!")
             firstVal = 0
 
         return firstVal

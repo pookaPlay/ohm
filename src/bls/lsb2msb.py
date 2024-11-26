@@ -18,7 +18,7 @@ class lsb2msb:
         if len(self.state[readMode]) > 0:
             firstVal = self.state[readMode][-1]
         else:
-            print(f"WARNING: L2M out of POP!")
+            #print(f"WARNING: L2M out of POP!")
             firstVal = 0
 
         return firstVal

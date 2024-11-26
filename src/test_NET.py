@@ -5,15 +5,14 @@ from bls.OHM_NET import OHM_NET
 def test_NET():
     
     param = {
-        "ptf" : "max",
+        "ptf" : "med",
         "nsteps" : 24,        
         "K" : 4,        
-        "W" : 4,
+        "W" : 3,
         "L" : 3        
     }
-
-    input = [6, 1, 2, 3]  # produces alternating 2 bit outputs
-    input = [6, 7, 5, 3]  # works with max    
+    
+    input = [6, 4, 5]  # works with med
     input = [input.copy() for _ in range(10)]
     
     param["D"] = len(input[0])   

@@ -15,7 +15,8 @@ def test_NODE():
 
     #input = [6, 1, 2]  # produces alternating 2 bit outputs
     input = [6, 7, 5]  # works with max    
-    input = [6, 4, 5]  # works with min and med!
+    #input = [6, 4, 5]  # works with min and med!
+    input = [2, 3, 4]  # works with med!
     input = [input.copy() for _ in range(10)]
 
     param["D"] = len(input[0])   

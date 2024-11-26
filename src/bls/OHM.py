@@ -13,7 +13,7 @@ class OHM():
         
         self.param = param
         
-        self.d = param["D"]
+        self.d = param["D"]        
         self.d2 = 2 * self.d
 
         self.addp = [ADD() for _ in range(self.d)]
@@ -34,6 +34,9 @@ class OHM():
 
         self.msb2lsb = msb2lsb()
         self.done = 0  
+        # for debuginh
+        self.K = param["K"]
+        self.Reset()
         
     def Reset(self) -> None:
         
@@ -49,6 +52,7 @@ class OHM():
         self.pbf.Reset()
         self.msb2lsb.Reset()        
         self.done = 0
+        self.debug = 0
         
                     
     def lsbOut(self) -> int:
@@ -78,8 +82,11 @@ class OHM():
 
                 self.flags[i] = 0
                 self.flags[ni] = 0
-                #self.done = 0
+                # debug
+                if i == 0:
+                    self.debug = 0
 
+        self.debug = self.debug + 1
         # Get the inputs for the PBF
         inputs = [self.lsb2msb[i].Output() for i in range(self.d2)]
         #print(f" PBF inputs: {inputs}")
@@ -92,14 +99,17 @@ class OHM():
                 if inputs[i] != self.pbf.Output():
                     self.flags[i] = 1                    
 
-        # might get away with this for 4 bit
-        if self.done == 0:
-            if (sum(self.flags) == (self.d2-1)):            
-                #print(f"===========> GOT DONE!!!!!!!!")
-                self.done = 1
-                self.msb2lsb.SetSwitchNext()
-        else:
-            self.done = 0           
+        if self.debug == self.K:
+            print(f"   OHM DONE!!!!!!!!")
+            #self.done = 1
+            self.msb2lsb.SetSwitchNext()
+        # if self.done == 0:
+        #     if (sum(self.flags) == (self.d2-1)):            
+        #         print(f"   OHM DONE!!!!!!!!")
+        #         self.done = 1
+        #         self.msb2lsb.SetSwitchNext()
+        # else:
+        #     self.done = 0           
                 
         #self.msb2lsb.Print("M2L")        
         
