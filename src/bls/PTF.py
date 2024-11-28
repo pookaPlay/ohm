@@ -18,6 +18,10 @@ class PTF:
         self.weights = list(self.D * [1])
         self.threshold = 1
 
+    def SetMedMax(self, val=1) -> None:
+        self.weights = list(self.D * [1])
+        self.threshold = self.D/2 - val
+
     def SetMedian(self) -> None:
         self.weights = list(self.D * [1])
         self.threshold = self.D/2

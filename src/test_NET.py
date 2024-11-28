@@ -5,6 +5,7 @@ from bls.OHM_NET import OHM_NET
 def test_NET():
     
     param = {
+        "debugDone" : 0,
         "ptf" : "max",
         "nsteps" : 64,        
         "K" : 4,        
@@ -12,7 +13,7 @@ def test_NET():
         "L" : 3        
     }
     
-    input = [6, 2, 5]  # works with med
+    input = [6, -2, 5]  # works with med
     input = [input.copy() for _ in range(10)]
     
     param["D"] = len(input[0])   

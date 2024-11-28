@@ -1,6 +1,7 @@
 from bls.OHM import OHM
 from bls.lsbSource import lsbSource
 from bls.NeighborhoodUtil import get_window_indices, get_reflected_indices
+from bls.DataIO import SerializeLSBTwos, SerializeMSBTwos, SerializeMSBOffset, SerializeLSBOffset
 
 def NOT(x):
     return 1 - x
@@ -14,13 +15,10 @@ class OHM_NET:
         self.L = param['L']     # Number of layers
         self.W = param['W']     # number of parallel nodes
         self.D = param['D']     # This is the node fan-in before mirroring
-        self.K = param['K']     # This is the nominal (start) precision
-        
-        self.wZero = self.K * [0]
-        self.wZero[self.K-1] = 0
-        self.wOne = self.wZero.copy()
-        self.wOne[0] = 1
-        self.wOne[self.K-1] = 0
+        self.K = param['K']     # This is the nominal (start) precision               
+
+        self.wZero = SerializeLSBTwos(0, self.K)
+        self.wOne = SerializeLSBTwos(1, self.K)
 
         self.wp = [[[lsbSource(self.K, self.wZero) for _ in range(self.D)] for _ in range(self.W)] for _ in range(self.L)]
         self.wn = [[[lsbSource(self.K, self.wOne) for _ in range(self.D)] for _ in range(self.W)] for _ in range(self.L)]

@@ -28,14 +28,15 @@ class OHM():
         if param["ptf"] == "min":
             self.pbf.SetMin()
         elif param["ptf"] == "max":          
-            self.pbf.SetMax()                           
+            self.pbf.SetMax()
+        elif param["ptf"] == "medmax":          
+            self.pbf.SetMedMax()                           
         else:       
             self.pbf.SetMedian()
 
         self.msb2lsb = msb2lsb()
-        self.done = 0  
-        # for debuginh
-        self.K = param["K"]
+        self.done = 0          
+        
         self.Reset()
         
     def Reset(self) -> None:
@@ -100,15 +101,17 @@ class OHM():
                     self.flags[i] = 1                    
 
         self.done = 0
-        #if self.debug == self.K:
-        #    print(f"   OHM DEBUG DONE")
-        #    self.msb2lsb.SetSwitchNext()
-        #    self.done = 1
-
-        if (sum(self.flags) == (self.d2-1)):            
-            print(f"   OHM DONE!!!!!!!!")
-            self.msb2lsb.SetSwitchNext()
-            self.done = 1
+        if self.param["debugDone"] == 1:
+            if self.debug == self.param["K"]:
+                print(f"   OHM DEBUG DONE")
+                self.msb2lsb.SetSwitchNext()
+                self.done = 1
+        else:
+            if (sum(self.flags) == (self.d2-1)):            
+                print(f"   OHM DONE!!!!!!!!")
+                self.msb2lsb.SetSwitchNext()
+                self.done = 1
+                self.flags = list(self.d2 * [0])
         
     # State stuff goes here
     def Step(self) -> None:        
