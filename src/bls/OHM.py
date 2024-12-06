@@ -119,11 +119,12 @@ class OHM():
         self.sumFlags = sum(self.flags)
         if self.sumFlags == self.wasSumFlags:
             if self.sumFlags > 0:
-                print(f"   OHM NO CHANGE IN FLAGS")            
-                self.flagThreshold = self.flagThreshold - 1
-                if self.flagThreshold < 1:
-                    self.flagThreshold = 1
-                print(f"   Decreasing thresh: {self.flagThreshold}")
+                pass
+                #print(f"   OHM NO CHANGE IN FLAGS")            
+                #self.flagThreshold = self.flagThreshold - 1
+                #if self.flagThreshold < 1:
+                #    self.flagThreshold = 1
+                #print(f"   Decreasing thresh: {self.flagThreshold}")
                 
 
         if self.param["debugDone"] == 1:

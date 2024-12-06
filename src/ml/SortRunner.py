@@ -1,5 +1,4 @@
-from bls.OHM_NETWORK_V1 import OHM_NETWORK_V1
-from bls.OHM_NETWORK_V0 import OHM_NETWORK_V0
+from bls.OHM_NET import OHM_NET
 from bls.OHM_PROBE import OHM_PROBE
 import matplotlib.pyplot as plt
 import math
@@ -26,11 +25,7 @@ class SortRunner:
                 
         self.first = self.input[0].tolist()        
 
-        if param['networkVersion'] == 0:
-            self.ohm = OHM_NETWORK_V0(self.first, param)
-        else:
-            self.ohm = OHM_NETWORK_V1(self.first, param)
-            
+        self.ohm = OHM_NET(param)            
         self.probe = OHM_PROBE(param, self.ohm)
         
 

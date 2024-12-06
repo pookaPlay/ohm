@@ -5,10 +5,10 @@ from bls.OHM_NET import OHM_NET
 def test_NET():
     
     param = {
-        "debugDone" : 0,
+        "debugDone" : 1,
         "flagThresh" : -1,
         "ptf" : "max",
-        "nsteps" : 64,        
+        "nsteps" : 25,        
         "K" : 4,        
         "W" : 3,
         "L" : 3        
