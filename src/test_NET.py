@@ -6,6 +6,7 @@ def test_NET():
     
     param = {
         "debugDone" : 0,
+        "flagThresh" : -1,
         "ptf" : "max",
         "nsteps" : 64,        
         "K" : 4,        
@@ -13,7 +14,7 @@ def test_NET():
         "L" : 3        
     }
     
-    input = [6, -2, 5]  # works with med
+    input = [6, 7, 5]  
     input = [input.copy() for _ in range(10)]
     
     param["D"] = len(input[0])   
@@ -36,7 +37,7 @@ def test_NET():
 
     ohm.Calc(data.Output(), data.lsbIn())
     
-    output.Step(ohm.Output(), ohm.lsbOut())
+    output.Step(ohm.Output(), ohm.lsbOut(), ohm.debugOut())
     
     ohm.Step()                        
 
@@ -48,11 +49,10 @@ def test_NET():
 
         ohm.Calc(data.Output(), data.lsbIn())        
 
-        output.Step(ohm.Output(), ohm.lsbOut())                           
-    
+        output.Step(ohm.Output(), ohm.lsbOut(), ohm.debugOut())                               
         ohm.Step()
         
-    output.Print()
+    #output.Print()
     output.BatchProcess()
     output.PrintFinal()
     #ohm.Print(">>>", 1)

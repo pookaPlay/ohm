@@ -17,10 +17,10 @@ class MultiDataWriter():
     def Reset(self):
         [writer.Reset() for writer in self.writers]
 
-    def Step(self, x, lsb):
+    def Step(self, x, lsb, debugTicksTaken):
         assert(len(x) == len(self.writers))
         for i in range(len(x)):
-            self.writers[i].Step(x[i], lsb[i])        
+            self.writers[i].Step(x[i], lsb[i], debugTicksTaken[i])        
     
     def BatchProcess(self):      
         [writer.BatchProcess() for writer in self.writers]

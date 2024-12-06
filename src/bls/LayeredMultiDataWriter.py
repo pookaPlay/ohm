@@ -17,10 +17,10 @@ class LayeredMultiDataWriter():
     def Reset(self):
         [writer.Reset() for writer in self.writers]
 
-    def Step(self, x, lsb):
+    def Step(self, x, lsb, debugTicksTaken):
         assert len(x) == len(self.writers)
         for l in range(len(x)):
-            self.writers[l].Step(x[l], lsb[l])            
+            self.writers[l].Step(x[l], lsb[l], debugTicksTaken[l])            
     
     def BatchProcess(self):      
         [writer.BatchProcess() for writer in self.writers]

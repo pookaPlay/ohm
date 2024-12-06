@@ -39,14 +39,18 @@ class OHM_NET:
         [[ohmi.Reset() for ohmi in layer] for layer in self.ohm]
         
                 
-    def lsbOut(self) -> int:
+    def lsbOut(self):
         ret = [[ohm.lsbOut() for ohm in layer] for layer in self.ohm]
         return ret
 
-    def Output(self) -> int:
+    def Output(self):
         ret = [[ohm.Output() for ohm in layer] for layer in self.ohm]
         return ret        
-        
+
+    def debugOut(self):
+        ret = [[ohm.debugTicksTaken for ohm in layer] for layer in self.ohm]
+        return ret
+
     # Combinatorial stuff goes here
     def Calc(self, x, lsb) -> None:        
         print(f"OHM_NET CALC")        

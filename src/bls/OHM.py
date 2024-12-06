@@ -22,6 +22,13 @@ class OHM():
         self.lsb2msb = [lsb2msb() for _ in range(self.d2)]        
 
         self.flags = list(self.d2 * [0])
+        self.flagThreshold = self.d2 - 1
+        if param["flagThresh"] > -1: 
+            self.flagThreshold = param["flagThresh"]    
+        self.sumFlags = 0
+        self.wasSumFlags = -1
+        
+        
         self.pbf = PTF(self.d2)
         
         # Some presets for debugging
@@ -49,11 +56,19 @@ class OHM():
             self.lsb2msb[i+self.d].Reset()
             
         self.flags = list(self.d2 * [0])                        
-        
+        self.flagThreshold = self.d2 - 1
+        if self.param["flagThresh"] > -1: 
+            self.flagThreshold = self.param["flagThresh"]    
+                
+        self.flagThreshold = self.d2
+        self.sumFlags = 0
+        self.wasSumFlags = -1
+
         self.pbf.Reset()
         self.msb2lsb.Reset()                
         self.done = 0
         self.debug = 0
+        self.debugTicksTaken = 0
         
                     
     def lsbOut(self) -> int:
@@ -101,14 +116,26 @@ class OHM():
                     self.flags[i] = 1                    
 
         self.done = 0
+        self.sumFlags = sum(self.flags)
+        if self.sumFlags == self.wasSumFlags:
+            if self.sumFlags > 0:
+                print(f"   OHM NO CHANGE IN FLAGS")            
+                self.flagThreshold = self.flagThreshold - 1
+                if self.flagThreshold < 1:
+                    self.flagThreshold = 1
+                print(f"   Decreasing thresh: {self.flagThreshold}")
+                
+
         if self.param["debugDone"] == 1:
             if self.debug == self.param["K"]:
                 print(f"   OHM DEBUG DONE")
                 self.msb2lsb.SetSwitchNext()
                 self.done = 1
-        else:
-            if (sum(self.flags) == (self.d2-1)):            
+        else:            
+            if (self.sumFlags >= self.flagThreshold):            
                 print(f"   OHM DONE!!!!!!!!")
+                print(f" FLG: {self.flags} >= {self.flagThreshold}")
+                self.debugTicksTaken = self.debug  # has ticks so save me
                 self.msb2lsb.SetSwitchNext()
                 self.done = 1
                 self.flags = list(self.d2 * [0])
@@ -118,7 +145,8 @@ class OHM():
         
         #print(f"OHM STEP")
         self.msb2lsb.Step(self.pbf.Output())               
-        #self.msb2lsb.Print("M2L")
+        #self.msb2lsb.Print("M2L")        
+        self.wasSumFlags = self.sumFlags
 
         for i in range(self.d):
             self.lsb2msb[i].Step(self.addp[i].Output(), self.flags[i])             

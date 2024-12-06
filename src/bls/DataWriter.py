@@ -4,6 +4,7 @@ class DataWriter():
     def __init__(self):
         self.result = list()
         self.lsb = list()
+        self.ticksTaken = list()
         self.lastResult = -1
         self.finalResult = list()
         self.finalLength = list()
@@ -11,7 +12,7 @@ class DataWriter():
     def Print(self):        
         print(f"LSB   : {self.lsb}")
         print(f"Result: {self.result}")
-        
+        print(f"Ticks : {self.ticksTaken}")
         #print(f"Data Writer: {self.lastResult}")
 
     def PrintFinal(self):                
@@ -20,8 +21,8 @@ class DataWriter():
         #    temps += f"{result} ({length}), "
         print(f"Data Writer: {self.finalResult}")
         print(f"Data Length: {self.finalLength}")
+        print(f"Ticks Taken: {self.ticksTaken}")
         
-
 
     def Output(self):
         return(self.finalResult)
@@ -32,9 +33,10 @@ class DataWriter():
         self.finalResult = list()
 
 
-    def Step(self, x, lsb):
+    def Step(self, x, lsb, ticksTaken):
         self.result.append(x)
         self.lsb.append(lsb)        
+        self.ticksTaken.append(ticksTaken)
     
     def BatchProcess(self):        
         firstOne = -1
