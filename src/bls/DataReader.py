@@ -20,6 +20,7 @@ class DataReader():
         self.slice = [self.data[d][self.bi] for d in range(self.D)]        
         self.lsb = [1] * self.D
         self.msb = 0
+        print(self.data)
 
 
     def Reset(self):

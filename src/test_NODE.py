@@ -3,21 +3,31 @@ from bls.DataWriter import DataWriter
 from bls.OHM import OHM
 from bls.lsbSource import lsbSource
 from bls.DataIO import SerializeLSBTwos, SerializeMSBTwos, SerializeMSBOffset, SerializeLSBOffset
+import random
+
+random.seed(0)
 
 def test_NODE():
-    
+        
+    K = 16
+    D = 16
+    max_value = 2 ** (K - 1)
+
     param = {
-        "debugDone" : 0,
+        "debugDone" : 1,
         "flagThresh" : -1,
         "ptf" : "max",
-        "nsteps" : 16,        
-        "K" : 4,
-        "D" : 3,
+        "nsteps" : K*4,        
+        "K" : K,
+        "D" : D,
     }
 
-    
+        
+    input = [random.randint(1, max_value) for _ in range(D)]
     #input = [6, 7, 5]     
-    input = [1, 2, 4]  
+    #input = [1, 2, 4]  
+    print(f"Input: {input}")
+    
     input = [input.copy() for _ in range(10)]
 
     param["D"] = len(input[0])   
@@ -57,18 +67,17 @@ def test_NODE():
     #[wni.Print() for wni in wn]
     
     ohm.Calc(data.Output(), wpin, wnin, data.lsbIn())    
-    ohm.Print("", 1)
+    #ohm.Print("", 1)
 
-    output.Step(ohm.Output(), ohm.lsbOut(), ohm.debugTicksTaken)    
-    
+    output.Step(ohm.Output(), ohm.lsbOut(), ohm.debugTicksTaken)        
     
     ohm.Step()                        
 
     for bi in range(param["nsteps"]):
-        print(f"======================================")
-        print(f"== {bi+1} ============================")
+        #print(f"======================================")
+        #print(f"== {bi+1} ============================")
         data.Step()
-        data.Print()
+        #data.Print()
                 
         [wpi.Step() for wpi in wp]
         [wni.Step() for wni in wn]
@@ -81,7 +90,7 @@ def test_NODE():
         #[wni.Print() for wni in wn]
 
         ohm.Calc(data.Output(), wpin, wnin, data.lsbIn())        
-        ohm.Print("   ", 1)                
+        #ohm.Print("   ", 1)                
         output.Step(ohm.Output(), ohm.lsbOut(), ohm.debugTicksTaken)            
                 
         ohm.Step()
