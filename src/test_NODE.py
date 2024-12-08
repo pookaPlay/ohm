@@ -14,7 +14,7 @@ def test_NODE():
     max_value = 2 ** (K - 1)
 
     param = {
-        "debugDone" : 1,
+        "debugDone" : 0,
         "flagThresh" : -1,
         "ptf" : "max",
         "nsteps" : K*4,        
@@ -74,8 +74,8 @@ def test_NODE():
     ohm.Step()                        
 
     for bi in range(param["nsteps"]):
-        #print(f"======================================")
-        #print(f"== {bi+1} ============================")
+        print(f"======================================")
+        print(f"== {bi+1} ============================")
         data.Step()
         #data.Print()
                 

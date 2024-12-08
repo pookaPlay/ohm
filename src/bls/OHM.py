@@ -28,6 +28,7 @@ class OHM():
         self.sumFlags = 0
         self.wasSumFlags = -1
         
+        #print(f"Flag thresh: {self.flagThreshold}")
         
         self.pbf = PTF(self.d2)
         
@@ -59,8 +60,7 @@ class OHM():
         self.flagThreshold = self.d2 - 1
         if self.param["flagThresh"] > -1: 
             self.flagThreshold = self.param["flagThresh"]    
-                
-        self.flagThreshold = self.d2
+                        
         self.sumFlags = 0
         self.wasSumFlags = -1
 
@@ -126,7 +126,7 @@ class OHM():
                 #    self.flagThreshold = 1
                 #print(f"   Decreasing thresh: {self.flagThreshold}")
                 
-
+        print(f" SUM: {self.sumFlags} from FLG: {self.flags} >= {self.flagThreshold}")
         if self.param["debugDone"] == 1:
             if self.debug == self.param["K"]:
                 print(f"   OHM DEBUG DONE")
