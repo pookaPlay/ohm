@@ -30,18 +30,8 @@ class OHM():
         
         #print(f"Flag thresh: {self.flagThreshold}")
         
-        self.pbf = PTF(self.d2)
+        self.pbf = PTF(param)
         
-        # Some presets for debugging
-        if param["ptf"] == "min":
-            self.pbf.SetMin()
-        elif param["ptf"] == "max":          
-            self.pbf.SetMax()
-        elif param["ptf"] == "medmax":          
-            self.pbf.SetMedMax()                           
-        else:       
-            self.pbf.SetMedian()
-
         self.msb2lsb = msb2lsb()
         self.done = 0          
         
@@ -148,6 +138,8 @@ class OHM():
         self.msb2lsb.Step(self.pbf.Output())               
         #self.msb2lsb.Print("M2L")        
         self.wasSumFlags = self.sumFlags
+
+        self.pbf.Step()
 
         for i in range(self.d):
             self.lsb2msb[i].Step(self.addp[i].Output(), self.flags[i])             

@@ -14,7 +14,8 @@ def test_NODE():
     max_value = 2 ** (K - 1)
 
     param = {
-        "debugDone" : 0,
+        "debugDone" : 1,
+        "debugTree" : 1,
         "flagThresh" : -1,
         "ptf" : "max",
         "nsteps" : K*4,        
@@ -53,14 +54,14 @@ def test_NODE():
 
     #wZero = SerializeLSBOffset(0, K)
     #wOne = SerializeLSBOffset(1, K)
-    wZero = SerializeLSBTwos(0, K)
-    wOne = SerializeLSBTwos(1, K)
+    bZero = SerializeLSBTwos(0, K)
+    bOne = SerializeLSBTwos(1, K)
 
-    print(f"Defaults in offset code: {wZero} and {wOne}")
+    print(f"Defaults in offset code: {bZero} and {bOne}")
     
-    wp = [lsbSource(K, wZero) for _ in range(D)]        
-    wn = [lsbSource(K, wOne) for _ in range(D)]        
-    
+    bp = [lsbSource(K, bZero) for _ in range(D)]        
+    bn = [lsbSource(K, bOne) for _ in range(D)]        
+
     ohm = OHM(param)         
 
     output = DataWriter()    
@@ -68,14 +69,14 @@ def test_NODE():
     data.Reset()        
     ohm.Reset()        
     output.Reset()
-    [wpi.Reset() for wpi in wp]
-    [wni.Reset() for wni in wn]
+    [bpi.Reset() for bpi in bp]
+    [bni.Reset() for bni in bn]
 
     print(f"== {0} ============================")
     data.Print()
 
-    wpin = [wpi.Output() for wpi in wp]
-    wnin = [wni.Output() for wni in wn]
+    wpin = [bpi.Output() for bpi in bp]
+    wnin = [bni.Output() for bni in bn]
 
     #print(f"Going into adders")
     #[wpi.Print() for wpi in wp]
@@ -94,17 +95,17 @@ def test_NODE():
         data.Step()
         #data.Print()
                 
-        [wpi.Step() for wpi in wp]
-        [wni.Step() for wni in wn]
+        [bpi.Step() for bpi in bp]
+        [bni.Step() for bni in bn]
 
-        wpin = [wpi.Output() for wpi in wp]
-        wnin = [wni.Output() for wni in wn]
+        bpin = [bpi.Output() for bpi in bp]
+        bnin = [bni.Output() for bni in bn]
 
         #print(f"Going into adders")
         #[wpi.Print() for wpi in wp]
         #[wni.Print() for wni in wn]
 
-        ohm.Calc(data.Output(), wpin, wnin, data.lsbIn())        
+        ohm.Calc(data.Output(), bpin, bnin, data.lsbIn())        
         #ohm.Print("   ", 1)                
         output.Step(ohm.Output(), ohm.lsbOut(), ohm.debugTicksTaken)            
                 
@@ -113,6 +114,9 @@ def test_NODE():
     output.Print()
     output.BatchProcess()
     output.PrintFinal()
+    
+    #Data Writer: [-1, 3, -1, -1, -13, -1, -1, 51]
+    #Data Length: [3, 7, 6, 3, 7, 6, 3, 7]    
     
     return output.Output()
 
