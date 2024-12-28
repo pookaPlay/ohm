@@ -1,5 +1,7 @@
 from bls.DataIO import DeserializeLSBTwos, DeserializeLSBOffset
 
+PTF_DELAY = 1
+
 class msb2lsb:    
     
     def __init__(self) -> None:             
@@ -11,6 +13,7 @@ class msb2lsb:
         self.onSwitchStep = 0
         self.switchNext = 0
         self.lastVal = 0
+        self.ptfCount = 0
 
     def SwitchStep(self):
         return self.onSwitchStep 
@@ -24,6 +27,7 @@ class msb2lsb:
         self.mode = 1 - self.mode        
         self.onSwitchStep = 1        
         self.switchNext = 0
+        self.ptfCount = 0
         # clear the write mem
         #self.state[self.mode].clear()
 
@@ -54,13 +58,20 @@ class msb2lsb:
         return firstVal
     
     def Step(self, input) -> None:        
-                               
+        
+        self.ptfCount = self.ptfCount + 1
+
         if self.onSwitchStep == 1:
-            self.onSwitchStep = 0
-            self.state[self.mode].append(1-input)
+            self.onSwitchStep = 0            
+            self.inputValue = 1-input                                   
         else:
-            self.state[self.mode].append(input)
-                    
+            self.inputValue = input                       
+        
+        self.state[self.mode].append(self.inputValue)
+
+        if self.ptfCount == PTF_DELAY:
+            pass
+
         if len(self.state[1 - self.mode]) > 1:  # hold last one
             self.state[1 - self.mode].pop()                    
 
