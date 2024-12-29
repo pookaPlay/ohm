@@ -18,7 +18,7 @@ class PTF:
         self.wp = [lsbSource(self.K, bOne) for _ in range(param["D"])]        
         self.wn = [lsbSource(self.K, bOne) for _ in range(param["D"])]
                 
-        self.local_threshold = 0
+        self.local_threshold = -1
         bZero = SerializeLSBTwos(self.local_threshold, self.K*2)
         self.wt = lsbSource(self.K*2, bZero)
 
@@ -46,12 +46,11 @@ class PTF:
                     
         self.tree.append([ADD()])   # top of binary tree 
         self.tree.append([ADD()])   # threshold            
-        self.PrintTree("PTF Init: ")
-
+        #self.PrintTree("PTF Init: ")
         self.ptfCount = 0
             
     def Output(self) -> int:
-        self.y = self.tree[-1][0].Output()    
+        self.y = 1-self.tree[-1][0].Output()    
         return self.y
 
     def Calc(self, x, lsb) -> None:
@@ -81,7 +80,7 @@ class PTF:
                             self.tree[ti][ai].Calc(self.tree[ti-1][ai*2].Output(), self.tree[ti-1][ai*2+1].Output(), lsb)                        
 
                 
-            self.y = self.tree[-1][0].Output()    
+            self.y = 1-self.tree[-1][0].Output()    
 
     def Step(self) -> None:
 
@@ -121,11 +120,11 @@ class PTF:
         self.local_threshold = -(self.D2-1)
         bT = SerializeLSBTwos(self.local_threshold, self.K*2)
         self.wt = lsbSource(self.K*2, bT)
-        print(f"SetMin: {self.local_threshold}")
+        #print(f"SetMin: {self.local_threshold}")
 
     def SetMax(self) -> None:
         self.local_weights = list(self.D2 * [1])
-        self.local_threshold = 0
+        self.local_threshold = -1
         bT = SerializeLSBTwos(self.local_threshold, self.K*2)
         self.wt = lsbSource(self.K*2, bT)
 

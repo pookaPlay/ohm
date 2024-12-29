@@ -7,18 +7,18 @@ import random
 import math
 
 random.seed(0)
+K = 16
+D = 4
 
-def test_PBF():
+def test_PBF(x, ptf):
         
-    K = 16
-    D = 4
     max_value = 2 ** (K - 1)
     ptfBits = int(math.log2(D)+2)
     param = {
         "debugDone" : 1,
         "debugTree" : 0,
         "flagThresh" : -1,
-        "ptf" : "med",
+        "ptf" : ptf,
         "nsteps" : 2*D,        
         "K" : K,
         "D" : D,
@@ -26,10 +26,8 @@ def test_PBF():
 
     ptf = PTF(param)
 
-    x = D * [1] + [1] + (D-1) * [0]
-    x = D * [1] + D * [0]
-    print(x)
-    print(f"PTF BITS: {ptfBits}")
+    #print(x)
+    #print(f"PTF BITS: {ptfBits}")
     
     ptf.Calc(x, 1)
     #ptf.Print()
@@ -45,7 +43,28 @@ def test_PBF():
         out = ptf.Output()
         #print(f"Step {bi+1}: {out}")
 
-    print(f"FinalOut: {out}")
+    #print(f"FinalOut: {out}")
+    
+    return out
 
 
-test_PBF()
+x = D * [0] + D * [0]
+expected = 0
+r = test_PBF(x, "min")
+assert r == expected, f"Expected {expected}, got {r}"
+
+x = D * [0] + D * [0]
+expected = 0
+r = test_PBF(x, "max")
+assert r == expected, f"Expected {expected}, got {r}"
+
+x = D * [0] + D * [1]
+expected = 0
+r = test_PBF(x, "min")
+assert r == expected, f"Expected {expected}, got {r}"
+
+x = D * [0] + D * [1]
+expected = 1
+r = test_PBF(x, "max")
+assert r == expected, f"Expected {expected}, got {r}"
+
