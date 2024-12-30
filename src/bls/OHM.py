@@ -98,7 +98,7 @@ class OHM():
         #print(f" PBF inputs: {inputs}")
 
         # Calc PBF
-        self.pbf.Calc(inputs)        
+        self.pbf.Calc(inputs, 1)        
         
         for i in range(self.d2):
             if self.flags[i] == 0:

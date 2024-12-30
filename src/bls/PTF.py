@@ -49,14 +49,13 @@ class PTF:
         #self.PrintTree("PTF Init: ")
         self.ptfCount = 0
             
-    def Output(self) -> int:
-        self.y = 1-self.tree[-1][0].Output()    
+    def Output(self) -> int:        
         return self.y
 
     def Calc(self, x, lsb) -> None:
         if self.param["debugTree"] == 1:        
-            temp = sum([self.local_weights[i] for i in range(self.D2) if x[i] == 1]) + self.local_threshold
-            self.y = 1 if temp > 0 else 0        
+            self.local_sum = sum([self.local_weights[i] for i in range(self.D2) if x[i] == 1]) + self.local_threshold
+            self.y = 1 if self.local_sum >= 0 else 0        
             self.x = x
         else:
             #intParam = memParam.GetLSBInts Hack()
