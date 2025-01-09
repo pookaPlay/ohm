@@ -1,8 +1,6 @@
 from bls.DataIO import SerializeMSBTwos, SerializeLSBTwos
 from bls.DataIO import DeserializeLSBTwos, DeserializeLSBOffset
 
-PTF_DELAY = 1
-
 class lsb2msb:    
     
     def __init__(self) -> None:             

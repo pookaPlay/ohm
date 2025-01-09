@@ -19,7 +19,7 @@ def RUN_EXPERIMENT_test():
         'inputDim': 10,
         'numInputs': 3,
         'numLayers': 1,
-        'numIterations' : 2,        
+        'numIterations' : 1,        
         'numPermutations' : 0,
         'adaptWeights': 0, 
         'adaptThresh' : 0,     

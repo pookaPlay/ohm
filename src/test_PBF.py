@@ -16,7 +16,7 @@ def test_PBF(x, ptf):
     ptfBits = int(math.log2(D)+2)
     param = {
         "debugDone" : 1,
-        "debugTree" : 0,
+        "debugTree" : 1,
         "flagThresh" : -1,
         "ptf" : ptf,
         "nsteps" : 2*D,        

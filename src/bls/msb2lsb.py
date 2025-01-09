@@ -57,7 +57,7 @@ class msb2lsb:
 
         return firstVal
     
-    def Step(self, input) -> None:        
+    def Step(self, input, validOut) -> None:        
         
         self.ptfCount = self.ptfCount + 1
 
@@ -67,10 +67,8 @@ class msb2lsb:
         else:
             self.inputValue = input                       
         
-        self.state[self.mode].append(self.inputValue)
-
-        if self.ptfCount == PTF_DELAY:
-            pass
+        if validOut == 1:
+            self.state[self.mode].append(self.inputValue)
 
         if len(self.state[1 - self.mode]) > 1:  # hold last one
             self.state[1 - self.mode].pop()                    

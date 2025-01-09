@@ -12,6 +12,7 @@ class PTF:
         self.D2 = 2 * self.D
         
         self.K = math.ceil(math.log2(self.D2))
+        self.ptfBits = self.K + 1
         
         self.local_weights = list(self.D2 * [1])
         bOne = SerializeLSBTwos(1, self.K)
@@ -52,11 +53,21 @@ class PTF:
     def Output(self) -> int:        
         return self.y
 
+    def OutputStep(self) -> int:        
+        if self.param["debugTree"] == 1:
+            return 1
+        
+        if self.ptfCount == self.ptfBits:
+            return 1
+        else:
+            return 0
+
     def Calc(self, x, lsb) -> None:
         if self.param["debugTree"] == 1:        
             self.local_sum = sum([self.local_weights[i] for i in range(self.D2) if x[i] == 1]) + self.local_threshold
             self.y = 1 if self.local_sum >= 0 else 0        
             self.x = x
+            print(f"PTF@{self.ptfCount}: {self.x} -> {self.y} (sum: {self.local_sum}) (thresh: {self.local_threshold})")
         else:
             #intParam = memParam.GetLSBInts Hack()
             #threshParam = memThresh.GetLSBIntsHack()                
@@ -94,7 +105,7 @@ class PTF:
 
 
     def Print(self, prefix=""):
-        print(f"{prefix} PTF@{self.ptfCount}: {self.x} -> {self.y}")
+        print(f"{prefix}: {self.x} -> {self.y}")
 
     def PrintTree(self, prefix=""):        
         for ti in range(len(self.tree)):
@@ -116,7 +127,7 @@ class PTF:
 
     def SetMin(self) -> None:
         self.local_weights = list(self.D2 * [1])
-        self.local_threshold = -(self.D2-1)
+        self.local_threshold = -(self.D2)        
         bT = SerializeLSBTwos(self.local_threshold, self.K*2)
         self.wt = lsbSource(self.K*2, bT)
         #print(f"SetMin: {self.local_threshold}")
@@ -130,14 +141,19 @@ class PTF:
 
     def SetMedMax(self, val=1) -> None:
         self.local_weights = list(self.D2 * [1])
-        self.local_threshold = -(self.D2/2 - val)
+        self.local_threshold = int(-(self.D2/2 - val))
         bT = SerializeLSBTwos(self.local_threshold, self.K*2)
         self.wt = lsbSource(self.K*2, bT)
 
 
     def SetMedian(self) -> None:
         self.local_weights = list(self.D2 * [1])
-        self.local_threshold = -int(self.D2/2-1)
+        self.local_threshold = -int(self.D2/2)
         bT = SerializeLSBTwos(self.local_threshold, self.K*2)
         self.wt = lsbSource(self.K*2, bT)
 
+    def SetOneLeft(self) -> None:
+        self.local_weights = list(self.D2 * [1])
+        self.local_threshold = -int(self.D2-1)
+        bT = SerializeLSBTwos(self.local_threshold, self.K*2)
+        self.wt = lsbSource(self.K*2, bT)

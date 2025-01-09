@@ -1,13 +1,14 @@
 from bls.DataReader import DataReader
 from bls.DataWriter import DataWriter
-from bls.OHM import OHM
+#from bls.OHM import OHM
+from bls.OHM_BLOB import OHM
 from bls.lsbSource import lsbSource
 from bls.DataIO import SerializeLSBTwos, SerializeMSBTwos, SerializeMSBOffset, SerializeLSBOffset
 import random
 
 random.seed(0)
 
-def test_NODE():
+def test_NODE(ptf):
         
     K = 16
     D = 16
@@ -17,7 +18,7 @@ def test_NODE():
         "debugDone" : 1,
         "debugTree" : 1,
         "flagThresh" : -1,
-        "ptf" : "max",
+        "ptf" : ptf,
         "nsteps" : K*4,        
         "K" : K,
         "D" : D,
@@ -25,23 +26,7 @@ def test_NODE():
 
         
     input = [random.randint(1, max_value) for _ in range(D)]
-    #input = [6, 7, 5]     
-    #input = [1, 2, 4]  
-    #input = [25248, 27563, 2654, 16969, 31846, 26538, 19878, 31235, 23466, 14316, 9128, 18471, 9159, 6215, 16418, 9632, 20326, 6473, 4833, 21640, 30943, 6600, 23187, 28454, 20723, 13401, 31262, 29013, 17072, 4082, 921, 6113]   
-    # K=16 D=32
-    # MAX
-    #Data Writer: [-1, 15, -1, 15, -1]
-    #Data Length: [5, 11, 5, 11, 5]
-    # MIN
-    #Data Writer: [0, -16, 0, -16, 0]
-    #Data Length: [5, 11, 5, 11, 5]    
-    # MED
-    #Data Writer: [16, -6, 16, -6, 16]
-    #Data Length: [8, 8, 8, 8, 8]
-    # MEDMAX
-    #Data Writer: [34, -2, 34, -2, 34]
-    #Data Length: [8, 8, 8, 8, 8]
-
+    
     print(f"Input: {input}")
     
     input = [input.copy() for _ in range(10)]
@@ -52,8 +37,6 @@ def test_NODE():
 
     data = DataReader(input, K, K)    
 
-    #wZero = SerializeLSBOffset(0, K)
-    #wOne = SerializeLSBOffset(1, K)
     bZero = SerializeLSBTwos(0, K)
     bOne = SerializeLSBTwos(1, K)
 
@@ -77,33 +60,24 @@ def test_NODE():
 
     wpin = [bpi.Output() for bpi in bp]
     wnin = [bni.Output() for bni in bn]
-
-    #print(f"Going into adders")
-    #[wpi.Print() for wpi in wp]
-    #[wni.Print() for wni in wn]
     
     ohm.Calc(data.Output(), wpin, wnin, data.lsbIn())    
-    #ohm.Print("", 1)
 
     output.Step(ohm.Output(), ohm.lsbOut(), ohm.debugTicksTaken)        
     
     ohm.Step()                        
 
     for bi in range(param["nsteps"]):
-        print(f"======================================")
-        print(f"== {bi+1} ============================")
+        #print(f"======================================")
+        #print(f"== {bi+1} ============================")
         data.Step()
-        #data.Print()
                 
         [bpi.Step() for bpi in bp]
         [bni.Step() for bni in bn]
 
         bpin = [bpi.Output() for bpi in bp]
         bnin = [bni.Output() for bni in bn]
-
-        #print(f"Going into adders")
-        #[wpi.Print() for wpi in wp]
-        #[wni.Print() for wni in wn]
+  
 
         ohm.Calc(data.Output(), bpin, bnin, data.lsbIn())        
         #ohm.Print("   ", 1)                
@@ -114,10 +88,16 @@ def test_NODE():
     output.Print()
     output.BatchProcess()
     output.PrintFinal()
-    
-    #Data Writer: [-1, 3, -1, -1, -13, -1, -1, 51]
-    #Data Length: [3, 7, 6, 3, 7, 6, 3, 7]    
-    
+        
     return output.Output()
 
-test_NODE()
+#out = test_NODE("min")
+#expected = [0, -31846, -31846]
+#assert out == expected, f"Expected {expected}, got {out}"
+
+out = test_NODE("max")
+expected = [0, 31262, 31262]
+# or 
+expected = [0, 31846, 31846]
+assert out == expected, f"Expected {expected}, got {out}"
+
