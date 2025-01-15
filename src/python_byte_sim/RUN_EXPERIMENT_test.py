@@ -16,13 +16,13 @@ def RUN_EXPERIMENT_test():
 
     param = {
         'numPoints': 1,
-        'inputDim': 10,
+        'inputDim': 64,
         'numInputs': 3,
-        'numLayers': 1,
+        'numLayers': 16,
         'numIterations' : 1,        
-        'numPermutations' : 0,
-        'adaptWeights': 0, 
-        'adaptThresh' : 0,     
+        'numPermutations' : 1,
+        'adaptWeights': 1, 
+        'adaptThresh' : 1,     
         'adaptBias': 0,
         'adaptThreshType': 'ss',        # 'pc' or 'ss'
         'scaleTo': 127,
