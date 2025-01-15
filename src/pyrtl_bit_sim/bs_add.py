@@ -13,19 +13,4 @@ def bs_add(a, b):
     carry_in.next <<= carry_out
     return sum
 
-# def bs_adder_tree(inputs):
-#     D = len(inputs)            
-#     numStart = D
-#     tree = list()        
-    
-#     if numStart > 1:
-#         tree.append([bs_add() for _ in range(numStart)])
-#         numStart = int(numStart / 2)
-#         while numStart > 1:
-#             tree.append([bs_add() for _ in range(numStart)])
-#             numStart = int(numStart / 2)            
-                    
-#         tree.append([bs_add()])   # top of binary tree 
-        
-#     tree.append([bs_add()])   # threshold       
 
