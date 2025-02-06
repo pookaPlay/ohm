@@ -1,7 +1,7 @@
 from bls.DataReader import DataReader
 from bls.DataWriter import DataWriter
-#from bls.OHM import OHM
-from bls.OHM_BLOB import OHM
+from bls.OHM_POS import OHM_POS
+#from bls.OHM_BLOB import OHM
 from bls.lsbSource import lsbSource
 from bls.DataIO import SerializeLSBTwos, SerializeMSBTwos, SerializeMSBOffset, SerializeLSBOffset
 import random
@@ -42,10 +42,9 @@ def test_NODE(ptf):
 
     print(f"Defaults in offset code: {bZero} and {bOne}")
     
-    bp = [lsbSource(K, bZero) for _ in range(D)]        
-    bn = [lsbSource(K, bOne) for _ in range(D)]        
+    bp = [lsbSource(K, bZero) for _ in range(D)]            
 
-    ohm = OHM(param)         
+    ohm = OHM_POS(param)         
 
     output = DataWriter()    
     
@@ -53,15 +52,14 @@ def test_NODE(ptf):
     ohm.Reset()        
     output.Reset()
     [bpi.Reset() for bpi in bp]
-    [bni.Reset() for bni in bn]
+    
 
     print(f"== {0} ============================")
     data.Print()
 
-    wpin = [bpi.Output() for bpi in bp]
-    wnin = [bni.Output() for bni in bn]
+    wpin = [bpi.Output() for bpi in bp]    
     
-    ohm.Calc(data.Output(), wpin, wnin, data.lsbIn())    
+    ohm.Calc(data.Output(), wpin, data.lsbIn())    
 
     output.Step(ohm.Output(), ohm.lsbOut(), ohm.debugTicksTaken)        
     
@@ -72,14 +70,11 @@ def test_NODE(ptf):
         #print(f"== {bi+1} ============================")
         data.Step()
                 
-        [bpi.Step() for bpi in bp]
-        [bni.Step() for bni in bn]
+        [bpi.Step() for bpi in bp]        
 
-        bpin = [bpi.Output() for bpi in bp]
-        bnin = [bni.Output() for bni in bn]
-  
+        bpin = [bpi.Output() for bpi in bp]          
 
-        ohm.Calc(data.Output(), bpin, bnin, data.lsbIn())        
+        ohm.Calc(data.Output(), bpin, data.lsbIn())        
         #ohm.Print("   ", 1)                
         output.Step(ohm.Output(), ohm.lsbOut(), ohm.debugTicksTaken)            
                 

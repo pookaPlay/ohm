@@ -1,0 +1,1 @@
+dot -Tpng adder_tree.dot -o adder_tree.png

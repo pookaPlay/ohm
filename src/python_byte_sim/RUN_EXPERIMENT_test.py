@@ -15,14 +15,14 @@ torch.backends.cudnn.benchmark = False
 def RUN_EXPERIMENT_test():
 
     param = {
-        'numPoints': 1,
-        'inputDim': 64,
-        'numInputs': 3,
-        'numLayers': 16,
+        'numPoints': 4,
+        'inputDim': 2,
+        'numInputs': 2,
+        'numLayers': 2,
         'numIterations' : 1,        
         'numPermutations' : 1,
-        'adaptWeights': 1, 
-        'adaptThresh' : 1,     
+        'adaptWeights': 0, 
+        'adaptThresh' : 0,     
         'adaptBias': 0,
         'adaptThreshType': 'ss',        # 'pc' or 'ss'
         'scaleTo': 127,
@@ -36,10 +36,11 @@ def RUN_EXPERIMENT_test():
         'runMovie': 0,
         'doneClip' : 0,
         'doneClipValue' : 0,   
-        'networkVersion': 1,            
+        'networkVersion': 1,
+        'expType' : 'xor',      # linear, xor, or sort
         }
 
-    nx, param = SetupExperiment(param)
+    nx, ny, param = SetupExperiment(param)
     
     config1 = {
         'expId': 0,                
@@ -48,7 +49,7 @@ def RUN_EXPERIMENT_test():
         'adaptBias': 0,
     }
     param1 = UpdateParam(param, config1)    
-    RunNetwork(nx, param1)
+    RunNetwork(nx, ny, param1)
     
     if param['runMovie'] == 1:
         print("Press 'q' to quit...")

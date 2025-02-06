@@ -2,6 +2,7 @@ from ml.TorchSynData import LoadXor, LoadGaussian
 from ml.TorchSynData import LoadLinear
 from ml.TorchSynData import PlotMap
 from ml.SortRunner import SortRunner
+from ml.MLRunner import MLRunner
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,8 +12,16 @@ def SetupExperiment(param):
 
     assert 'numPoints' in param
     assert 'inputDim' in param
+    assert 'expType' in param
 
-    nx = torch.randn(param['numPoints'], param['inputDim'])
+    if param['expType'] == 'sort':
+        nx = torch.randn(param['numPoints'], param['inputDim'])
+        ny = torch.zeros(param['numPoints'], 1)
+    
+    elif param['expType'] == 'xor':
+        #param['numPoints']
+        nx, ny, vx, vy, mapx = LoadXor(1, 'uniform', 1)
+    
     assert(nx.shape[0] == param['numPoints'])
 
     if 'numLayers' not in param:
@@ -79,7 +88,7 @@ def SetupExperiment(param):
         for ni in range(param['numInputs']):
             param['biasWeights'][i][param['numInputs'] + ni] = 1        
     
-    return nx, param
+    return nx, ny, param
 
 def UpdateParam(param, config):
     for key, value in config.items():
@@ -97,7 +106,7 @@ def UpdateParam(param, config):
     return param
 
 
-def RunNetwork(nx, param):
+def RunNetwork(nx, ny, param):
 
     print(f"Input  : {param['memD']} dimension (D) -> {param['memK']} precision (K)")
     print(f"Network: {param['numStack']} wide (W) -> {param['numLayers']} long (L)")
@@ -115,7 +124,10 @@ def RunNetwork(nx, param):
     
     print("##################################################")
     print("##################################################")
-    runner = SortRunner(nx, param)                    
+    if param['expType'] == 'sort':
+        runner = SortRunner(nx, param)                    
+    elif param['expType'] == 'xor':
+        runner = MLRunner(nx, ny, param)
     
     for iter in range(param['numIterations']):
         print("##################################################")
@@ -123,7 +135,7 @@ def RunNetwork(nx, param):
         
         runner.Run(param)
         
-        #runner.ohm.PrintParameters()
+        runner.ohm.PrintParameters()
         
 
 ####################################################################################################

@@ -15,6 +15,7 @@ torch.backends.cudnn.benchmark = False
 def RUN_EXPERIMENT_test():
 
     param = {
+        'expType': 'sort',
         'numPoints': 1,
         'inputDim': 10,
         'numInputs': 3,
@@ -38,7 +39,7 @@ def RUN_EXPERIMENT_test():
         'doneClipValue' : 0,               
         }
 
-    nx, param = SetupExperiment(param)
+    nx, ny, param = SetupExperiment(param)
     
     config1 = {
         'expId': 0,                
@@ -47,7 +48,7 @@ def RUN_EXPERIMENT_test():
         'adaptBias': 0,
     }
     param1 = UpdateParam(param, config1)    
-    RunNetwork(nx, param1)
+    RunNetwork(nx, ny, param1)
     
     config2 = {        
         'expId': 1,                
@@ -56,7 +57,7 @@ def RUN_EXPERIMENT_test():
         'adaptBias': 1,
     }
     param2 = UpdateParam(param, config2)    
-    RunNetwork(nx, param2)
+    RunNetwork(nx, ny, param2)
     
     print("Press 'q' to quit...")
     while True:

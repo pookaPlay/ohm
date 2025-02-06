@@ -1,17 +1,11 @@
 from math import log2
 import pyrtl
-from bs_masked_adder_tree import bs_masked_adder_tree
+from bs_adder_tree import bs_adder_tree
+from bs_util import int_to_twos_complement_list, twos_complement_list_to_int
 
-def int_to_twos_complement_list(value, bit_width):
-    if value < 0:
-        value = (1 << bit_width) + value
-    return [(value >> i) & 1 for i in range(bit_width)]
-
-def twos_complement_list_to_int(bits):
-    value = sum(bit << i for i, bit in enumerate(bits))
-    if bits[-1] == 1:
-        value -= (1 << len(bits))
-    return value
+def generate_dot_file(filename='adder_tree.dot'):
+    with open(filename, 'w') as f:
+        pyrtl.output_to_graphviz(file=f)
 
 def main():
     D = 4  # Number of inputs, must be a power of 2
@@ -19,37 +13,35 @@ def main():
     latency = int(log2(D))  # Latency of the adder tree
     
     # Test data
-    inputs = [63, 32, -122, 127]
-    masks = [1, 1, 0, 1]
+    inputs = [127, 127, -122, 127]
     expected = sum(inputs)
 
     serialized_inputs = [int_to_twos_complement_list(x, bit_width) for x in inputs]
 
     # Initialize PyRTL inputs
     pyrtl_inputs = [pyrtl.Input(bitwidth=1, name=f'in{i}') for i in range(D)]
-    pyrtl_masks = [pyrtl.Input(bitwidth=1, name=f'ma{i}') for i in range(D)]
 
     # Create the adder tree
-    sum_out = bs_masked_adder_tree(pyrtl_inputs, pyrtl_masks)
+    sum_out = bs_adder_tree(pyrtl_inputs)
 
     # Connect sum_out to an output
     sum_output = pyrtl.Output(name='sum_out')
     sum_output <<= sum_out
+
+    # Generate the DOT file
+    generate_dot_file()
 
     # Simulate the design
     sim_trace = pyrtl.SimulationTrace()
     sim = pyrtl.Simulation(tracer=sim_trace)
 
     # Feed serialized data through the adder tree
-    for i in range(bit_width+latency):
+    for i in range(bit_width+latency+latency):
         if i < bit_width:
             input_bits = {f'in{j}': serialized_inputs[j][i] for j in range(D)}
-            input_bits.update({f'ma{j}': masks[j] for j in range(D)})
         else:
             # sign extend
             input_bits = {f'in{j}': serialized_inputs[j][bit_width-1] for j in range(D)}
-            input_bits.update({f'ma{j}': masks[j] for j in range(D)})
-
         sim.step(input_bits)
 
     # Collect the output bit-stream

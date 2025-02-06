@@ -20,17 +20,21 @@ def main():
     
     # Test data
     inputs = [63, 32, -122, 127]
-    masks = [1, 1, 0, 1]
+    masks = [1, 1, 1, 1]
+    threshold = 0
     expected = sum(inputs)
 
     serialized_inputs = [int_to_twos_complement_list(x, bit_width) for x in inputs]
+    serialized_threshold = int_to_twos_complement_list(threshold, bit_width)
 
     # Initialize PyRTL inputs
     pyrtl_inputs = [pyrtl.Input(bitwidth=1, name=f'in{i}') for i in range(D)]
-    pyrtl_masks = [pyrtl.Input(bitwidth=1, name=f'ma{i}') for i in range(D)]
+    pyrtl_masks = [pyrtl.Input(bitwidth=1, name=f'ma{i}') for i in range(D)]    
+    pyrtl_lsbs = [pyrtl.Input(bitwidth=1, name=f'lsb{i}') for i in range(D)]
+    pyrtl_threshold = pyrtl.Input(bitwidth=1, name=f'thresh')
 
     # Create the adder tree
-    sum_out = bs_masked_adder_tree(pyrtl_inputs, pyrtl_masks)
+    sum_out = bs_masked_adder_tree(pyrtl_inputs, pyrtl_masks, pyrtl_lsbs, pyrtl_threshold)
 
     # Connect sum_out to an output
     sum_output = pyrtl.Output(name='sum_out')
@@ -45,10 +49,19 @@ def main():
         if i < bit_width:
             input_bits = {f'in{j}': serialized_inputs[j][i] for j in range(D)}
             input_bits.update({f'ma{j}': masks[j] for j in range(D)})
+            input_bits.update({f'thresh': serialized_threshold[i]})
         else:
             # sign extend
             input_bits = {f'in{j}': serialized_inputs[j][bit_width-1] for j in range(D)}
             input_bits.update({f'ma{j}': masks[j] for j in range(D)})
+            input_bits.update({f'thresh': serialized_threshold[bit_width-1]})
+
+        if i == 0:
+            input_bits.update({f'lsb{j}': 1 for j in range(D)})
+        else:
+            input_bits.update({f'lsb{j}': 0 for j in range(D)})
+        
+        print(input_bits)
 
         sim.step(input_bits)
 
