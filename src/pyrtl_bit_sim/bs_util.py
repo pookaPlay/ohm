@@ -8,3 +8,10 @@ def twos_complement_list_to_int(bits):
     if bits[-1] == 1:
         value -= (1 << len(bits))
     return value
+
+def serialize_int(value, bitwidth):
+    return [(value >> i) & 1 for i in range(bitwidth)]
+
+def deserialize_int(bits):
+    return sum([bit << i for i, bit in enumerate(bits)])
+

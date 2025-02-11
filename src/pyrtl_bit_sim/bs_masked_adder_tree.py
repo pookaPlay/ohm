@@ -12,13 +12,11 @@ def bs_masked_adder_tree(inputs, masks, lsbs, threshold):
     # Apply logical AND between inputs and masks
     inputs = [inp & mask for inp, mask in zip(inputs, masks)]
     
-    # Set reset as the logical OR of the lsbs
-    #reset = lsbs[0] | lsbs[1] | lsbs[2]
-    #reset = pyrtl.WireVector(bitwidth=1, name='reset')
-    #reset = reduce(operator.or_, lsbs)
-    #for i in range(1, len(lsbs)):
-    #    reset <= reset | lsbs[i]
-    reset = lsbs[0]
+    # Set reset as the logical OR of the lsbs    
+    reset = pyrtl.WireVector(bitwidth=1, name='reset')
+    reset <<= reduce(operator.or_, lsbs)
+
+    #reset = lsbs[0]
 
     while len(inputs) > 1:
         next_level = []
