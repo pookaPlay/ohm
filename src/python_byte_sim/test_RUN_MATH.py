@@ -2,8 +2,7 @@ from ml.TorchSynData import LoadXor, LoadGaussian
 from ml.TorchSynData import LoadLinear
 from ml.TorchSynData import PlotMap
 from ml.ScaleData import ScaleData
-from bls.OHM_NETWORK import OHM_NETWORK
-from bls.OHM_PROBE import OHM_PROBE
+from bls.RunNetworkMath import RunNetworkMath
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,8 +17,9 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
 
-def test_RUN_NETWORK(first, config):
+def test_RUN_NETWORK():
 
+    first = [1, 2, 3]
     numIterations = 1
     numPoints = 1
     numPermutations = 1
@@ -49,7 +49,7 @@ def test_RUN_NETWORK(first, config):
     'numStack': numStack,
     'biasWeights': numStack * [ numInputs * [0] ],
     'ptfWeights': numStack * [(numInputs*2) * [1]],
-    'ptfThresh': numStack * [ [ numInputs ] ],         
+    'ptfThresh': numStack * [ [ (numInputs*2) ] ],         
     'adaptBias': 0,
     'adaptWeights': 0,
     'adaptThresh': 0,
@@ -71,38 +71,22 @@ def test_RUN_NETWORK(first, config):
     'doneClip' : 0,
     'doneClipValue' : 0,
     }    
-
-    for i in range(numStack):
-        #param['ptfThresh'][i] = [((i)%(numInputs*2))+1]        
-        for ni in range(numInputs):
-            param['biasWeights'][i][numInputs + ni] = 1        
-            #pass
+    
+    config = {
+        'expId': 0,                
+        'adaptWeights': 0, 
+        'adaptThresh' : 0,     
+        'adaptBias': 0,
+    }
 
     param = UpdateParam(param, config)  
 
-    ohm = OHM_NETWORK(first, param)
-    probe = OHM_PROBE(param, ohm)
+    net = RunNetworkMath(param)
 
     print(f"IN : {first}")
-    ohm.PrintParameters()
-    results = ohm.Run(first, ni, param)
-    print(f"OUT: {results}")
-    ohm.PrintParameters()
     
-    #probe.AnalyzeRun(0, 0)    
-                
-
-def test_RUN_ALL():
-    first = [1, 2, 3]
-    config = {
-        'expId': 0,                
-        'adaptWeights': 1, 
-        'adaptThresh' : 1,     
-        'adaptBias': 1,
-    }
-
-    test_RUN_NETWORK(first, config)
+    results = net.Run(first, 0, param)
+    print(f"OUT: {results}")    
 
 
-
-test_RUN_ALL()
+test_RUN_NETWORK()

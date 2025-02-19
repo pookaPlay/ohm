@@ -1,17 +1,7 @@
 from math import log2
 import pyrtl
 from bs_masked_adder_tree import bs_masked_adder_tree
-
-def int_to_twos_complement_list(value, bit_width):
-    if value < 0:
-        value = (1 << bit_width) + value
-    return [(value >> i) & 1 for i in range(bit_width)]
-
-def twos_complement_list_to_int(bits):
-    value = sum(bit << i for i, bit in enumerate(bits))
-    if bits[-1] == 1:
-        value -= (1 << len(bits))
-    return value
+from bs_util import int_to_twos_complement_list, twos_complement_list_to_int
 
 def main():
     D = 4  # Number of inputs, must be a power of 2
@@ -35,15 +25,12 @@ def main():
 
     # Create the adder tree
     sum_out = bs_masked_adder_tree(pyrtl_inputs, pyrtl_masks, pyrtl_lsbs, pyrtl_threshold)
-
-    # Connect sum_out to an output
-    sum_output = pyrtl.Output(name='sum_out')
-    sum_output <<= sum_out
-
+    
     # Simulate the design
     sim_trace = pyrtl.SimulationTrace()
     sim = pyrtl.Simulation(tracer=sim_trace)
 
+    output_bits = []
     # Feed serialized data through the adder tree
     for i in range(bit_width+latency):
         if i < bit_width:
@@ -61,12 +48,12 @@ def main():
         else:
             input_bits.update({f'lsb{j}': 0 for j in range(D)})
         
-        print(input_bits)
-
+        #print(input_bits)
         sim.step(input_bits)
+        output_bits.append(sim.inspect(sum_out))
 
     # Collect the output bit-stream
-    output_bits = [sim_trace.trace['sum_out'][i] for i in range(bit_width+latency)]
+    other_bits = [sim_trace.trace['sum_out'][i] for i in range(bit_width+latency)]
 
     # Deserialize output
     result = twos_complement_list_to_int(output_bits)

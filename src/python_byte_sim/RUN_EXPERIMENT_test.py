@@ -15,16 +15,16 @@ torch.backends.cudnn.benchmark = False
 def RUN_EXPERIMENT_test():
 
     param = {
-        'numPoints': 4,
-        'inputDim': 2,
-        'numInputs': 2,
-        'numLayers': 2,
+        'numPoints': 1,
+        'inputDim': 100,
+        'numInputs': 10,
+        'numLayers': 20,
         'numIterations' : 1,        
         'numPermutations' : 1,
-        'adaptWeights': 0, 
-        'adaptThresh' : 0,     
+        'adaptWeights': 1, 
+        'adaptThresh' : 1,     
         'adaptBias': 0,
-        'adaptThreshType': 'ss',        # 'pc' or 'ss'
+        'adaptThreshType': 'pc',        # 'pc' or 'ss'
         'scaleTo': 127,
         'clipAt': 127,    
         'printSample': 1,
@@ -37,7 +37,7 @@ def RUN_EXPERIMENT_test():
         'doneClip' : 0,
         'doneClipValue' : 0,   
         'networkVersion': 1,
-        'expType' : 'xor',      # linear, xor, or sort
+        'expType' : 'sort',      # linear, xor, or sort
         }
 
     nx, ny, param = SetupExperiment(param)

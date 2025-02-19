@@ -17,9 +17,9 @@ def RUN_EXPERIMENT_test():
     param = {
         'expType': 'sort',
         'numPoints': 1,
-        'inputDim': 10,
+        'inputDim': 100,
         'numInputs': 3,
-        'numLayers': 1,
+        'numLayers': 25,
         'numIterations' : 1,        
         'numPermutations' : 0,
         'adaptWeights': 0, 
@@ -52,9 +52,10 @@ def RUN_EXPERIMENT_test():
     
     config2 = {        
         'expId': 1,                
-        'adaptWeights': 0, 
-        'adaptThresh' : 0,     
-        'adaptBias': 1,
+        'adaptWeights': 1,
+        'adaptThresh' : 1,     
+        'adaptThreshType': 'pc',        # 'pc' or 'ss'
+        'adaptBias': 0,
     }
     param2 = UpdateParam(param, config2)    
     RunNetwork(nx, ny, param2)

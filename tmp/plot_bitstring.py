@@ -8,7 +8,6 @@ def sliding_window_average(data, window_width=3):
 x = list(range(256))  # X axis: index of an 8-bit binary bit string
 y = [bin(i).count('1') for i in x]  # Y axis: number of bits in the bitstring
 
-
 # Calculate sliding window average
 window_width = 21
 y_avg = sliding_window_average(y, window_width)
@@ -23,8 +22,15 @@ fig, ax1 = plt.subplots(figsize=(10, 6))
 # Plot original data
 ax1.plot(x, y, marker='o', linestyle='-', color='b', label='Original')
 
-# Plot averaged data
-# ax1.plot(x_avg, y_avg, marker='o', linestyle='-', color='r', label='Averaged')
+# Highlight consecutive points where the number of ones is the same
+start_idx = 0
+while start_idx < len(y):
+    end_idx = start_idx
+    while end_idx < len(y) - 1 and y[end_idx] == y[end_idx + 1] and y[end_idx] == 4:
+        end_idx += 1
+    if end_idx > start_idx:
+        ax1.axvspan(start_idx, end_idx, color='yellow', alpha=0.3)
+    start_idx = end_idx + 1
 
 # Add labels and title
 ax1.set_xlabel('Index of 8-bit Binary Bit String')
