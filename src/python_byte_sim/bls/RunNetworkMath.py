@@ -23,13 +23,15 @@ class RunNetworkMath:
         self.biasMem = [[[0] * self.numInputs for _ in range(self.numStack)] for _ in range(self.numLayers)]
 
         self.paramBias = [[[0] * self.numInputs for _ in range(self.numStack)] for _ in range(self.numLayers)]
+        self.paramMasks = [[[0] * self.numInputs for _ in range(self.numStack)] for _ in range(self.numLayers)]
         self.paramWeights = [[[0] * (self.numInputs * 2) for _ in range(self.numStack)] for _ in range(self.numLayers)]
         self.paramThresh = [[0 for _ in range(self.numStack)] for _ in range(self.numLayers)]
                              
         
     def Run(self, input, sampleIndex, param) -> None:      
                 
-        assert(len(input) > 0)
+        D = len(input)
+        assert(D > 0)
         
         self.input = input
         self.dataMem = self.input
@@ -42,8 +44,8 @@ class RunNetworkMath:
                 inputMem = self.stackMem[layerIndex-1]
             
             print(f"   >> LSB PASS ")
-            for si in range(self.numStack):
-                self.biasMem[layerIndex][si] = [inputMem[si] + self.paramBias[layerIndex][si][j] for j in range(self.numInputs)]
+            for bi in range(D):
+                self.biasMem[layerIndex][bi] = inputMem[bi] + self.paramBias[layerIndex][bi]
 
             print(f"   >> MSB PASS ")
             for si in range(self.numStack):

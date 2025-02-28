@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 #import SynGraph as syn
 #from PIL import Image
 from skimage.util import img_as_float
-from skimage.color import rgb2grey
+from skimage.color import rgb2gray
 from skimage.io import imread
 from scipy.io import loadmat
 #import os

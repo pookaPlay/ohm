@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
-from wos import WOS
-from wos import ClipNegatives
+from wosK import WOSK
 import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx

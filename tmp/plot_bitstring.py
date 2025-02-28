@@ -26,7 +26,7 @@ ax1.plot(x, y, marker='o', linestyle='-', color='b', label='Original')
 start_idx = 0
 while start_idx < len(y):
     end_idx = start_idx
-    while end_idx < len(y) - 1 and y[end_idx] == y[end_idx + 1] and y[end_idx] == 4:
+    while end_idx < len(y) - 1 and y[end_idx] == y[end_idx + 1]: # and y[end_idx] == 4:
         end_idx += 1
     if end_idx > start_idx:
         ax1.axvspan(start_idx, end_idx, color='yellow', alpha=0.3)

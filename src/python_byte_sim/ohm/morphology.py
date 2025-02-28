@@ -91,3 +91,4 @@ if __name__ == '__main__':
     x=torch.randn(2,3,16,16)
     e=Erosion2d(3, 4, 3, soft_max=False)
     y=e(x)
+    print(f"Success")
