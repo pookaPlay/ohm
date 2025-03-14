@@ -3,9 +3,8 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import matplotlib.pyplot as plt
-from chat_data import generate_xor_data, generate_linear_data
 from torch.utils.data import DataLoader, TensorDataset
-from DataIO import SerializeMSBOffset, DeserializeMSBOffset
+from DataIO import SerializeMSBOffset, DeserializeMSBOffset, generate_xor_data, generate_linear_data
 
 import random
 
@@ -15,6 +14,8 @@ torch.manual_seed(seed)
 np.random.seed(seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
+
+DATA_MAX = 128
 
 # Define a custom autograd function for a linear classifier
 class CustomLinear(torch.autograd.Function):
@@ -42,146 +43,7 @@ class LinearClassifier(nn.Module):
 
     def forward(self, x):        
         return CustomLinear.apply(x, self.weights, self.bias)        
-
-# Define a custom autograd function
-class CustomMorph(torch.autograd.Function):
-    @staticmethod
-    def forward(ctx, x, biases):
-        lsb_result = x + biases
-        msb_result, msb_index = torch.max(lsb_result, dim=1)
-        ctx.save_for_backward(x, biases, msb_index)
-        return msb_result
-
-    @staticmethod
-    def backward(ctx, grad_output):
-        x, biases, msb_index = ctx.saved_tensors
-        
-        grad_input = torch.zeros(x.shape[0], x.shape[1])
-        for n in range(grad_output.shape[0]):
-            grad_input[n, msb_index[n]] = grad_output[n]
-        
-        grad_biases = torch.zeros(biases.shape[0], dtype=grad_output.dtype)
-        for n in range(grad_output.shape[0]):            
-            grad_biases[msb_index[n]] += grad_output[n]
-        #print(f'Grad biases: {grad_biases}')
-        return grad_input, grad_biases
-
-STACK_BITS = 8
-DATA_MAX = 128
-
-class CustomWOS(torch.autograd.Function):
-
-    @staticmethod
-    def forward(ctx, x, weights, threshold):
-        
-        N = x.shape[0]
-        D = x.shape[1]
-        
-        input_bits = torch.zeros(N, D, STACK_BITS)
-        sticky_bits = torch.zeros(N, D)
-        output_bits = torch.zeros(N, STACK_BITS)
-        output = torch.zeros(N)
-        outputIndex = torch.zeros(N, dtype=torch.int32)
-        posCount = torch.zeros(N)        
-        
-        #print('##########################################')
-        #print(f' Start of call: {weights} -> {threshold}')
-        for ni in range(N):  
-            for di in range(D):  
-                val = SerializeMSBOffset(x[ni,di].item(), STACK_BITS)
-                input_bits[ni,di,:] = torch.tensor(val, dtype=torch.float32)
-                
-            input_values = input_bits[ni,:,0]
-            for k in range(STACK_BITS):        
-                for di in range(D):            
-                    if sticky_bits[ni,di] == 0:
-                        input_values[di] = input_bits[ni,di,k]
-                                
-                weighted_sum = sum(w for i, w in zip(input_values, weights) if i > 0)
-                if weighted_sum >= threshold:     
-                    output_bits[ni,k] = 1    
-                else: 
-                    output_bits[ni,k] = 0                
-
-                for di in range(D):            
-                    if sticky_bits[ni,di] == 0:
-                        if output_bits[ni,k] != input_bits[ni,di,k]:
-                            sticky_bits[ni,di] = k + 1
-            
-            out_index = (sticky_bits[ni, :] == 0).nonzero(as_tuple=True)[0]
-            assert len(out_index) > 0, f"Expected at least 1 zero sticky index, got {len(out_index)}"
-            oi = out_index[0]
-            outputIndex[ni] = oi
-            output[ni] = DeserializeMSBOffset(output_bits[ni,:].tolist())
-
-            if 0:
-                posCount[ni] = torch.sum(output_bits[ni,:]) / STACK_BITS
-                MAX_THRESH = torch.sum(weights)
-                if posCount[ni] < 0.5:
-                    # decrease threshold
-                    threshold = threshold - 1.
-                    if threshold < 1:
-                        threshold = torch.tensor([1.])
-                        # bump weight
-                        weights[oi] = weights[oi] + 1.
-                else: 
-                    # increase threshold
-                    threshold = threshold + 1.
-                    if threshold > MAX_THRESH:
-                        threshold = torch.tensor([MAX_THRESH])
-                        # bump weight
-                        weights[oi] = weights[oi] + 1.
-                
-        #print(f' After {N}: {weights} -> {threshold}')
-        if 0:
-            if torch.min(weights) > threshold:
-                adj = torch.min(weights) - threshold            
-                weights = weights - adj       
-                print(f'ADJ: {weights} -> {threshold}')                 
-
-        ctx.save_for_backward(outputIndex, x, weights, threshold)        
-        
-        return(output)
-
-    @staticmethod
-    def backward(ctx, grad_output):
-                
-        outputIndex, x, weights, threshold = ctx.saved_tensors
-        N = x.shape[0]
-        D = x.shape[1]
-                
-        grad_x = torch.zeros([x.shape[0], x.shape[1]])
-        grad_weights = torch.zeros([weights.shape[0]])
-        grad_threshold = torch.zeros([threshold.shape[0]])
-        
-        for ni in range(N):
-            grad_x[ni, outputIndex[ni]] = grad_output[ni] * 100.0
-                
-        return grad_x, grad_weights, grad_threshold
-
-
-class MorphClassifier(nn.Module):
-
-    def __init__(self):
-        super(MorphClassifier, self).__init__()
-        D = 2
-        D2 = D*2
-        
-        biasInit = torch.tensor([-64., -64., -64., -64.])        
-        threshInit = torch.tensor([2.])
-
-        self.biases = nn.Parameter(biasInit)        
-        self.threshold = nn.Parameter(threshInit)
-        self.weights = nn.Parameter(torch.ones(D2))
-        
-    def forward(self, x):
-        concatenated_result = torch.cat((x, -x), dim=1)
-        
-        lsb_result = concatenated_result + self.biases
-                
-        msb_result = CustomWOS.apply(lsb_result, self.weights, self.threshold)
-        
-        return msb_result        
+    
 
 class CustomHinge(nn.Module):
     def __init__(self):

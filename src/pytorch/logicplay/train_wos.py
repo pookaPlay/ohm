@@ -3,9 +3,8 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import matplotlib.pyplot as plt
-from chat_data import generate_xor_data, generate_linear_data
 from torch.utils.data import DataLoader, TensorDataset
-from DataIO import SerializeMSBOffset, DeserializeMSBOffset
+from DataIO import SerializeMSBOffset, DeserializeMSBOffset, generate_xor_data, generate_linear_data
 
 import random
 
@@ -15,56 +14,6 @@ torch.manual_seed(seed)
 np.random.seed(seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
-
-# Define a custom autograd function for a linear classifier
-class CustomLinear(torch.autograd.Function):
-    @staticmethod
-    def forward(ctx, x, weights, bias):
-        ctx.save_for_backward(x, weights, bias)
-        return torch.matmul(x, weights) + bias
-
-    @staticmethod
-    def backward(ctx, grad_output):        
-        x, weights, bias = ctx.saved_tensors
-        grad_x = torch.matmul(grad_output, weights.t())
-        grad_weights = torch.matmul(x.t(), grad_output)
-        grad_bias = grad_output.sum(0)
-        return grad_x, grad_weights, grad_bias
-    
-# Define a simple linear classifier without using nn.Linear
-class LinearClassifier(nn.Module):
-    def __init__(self):
-        super(LinearClassifier, self).__init__()
-        self.inD = 2
-        self.outD = 1
-        self.weights = nn.Parameter(torch.randn(self.inD, self.outD))  # Initialize weights
-        self.bias = nn.Parameter(torch.randn(self.outD))  # Initialize bias        
-
-    def forward(self, x):        
-        return CustomLinear.apply(x, self.weights, self.bias)        
-
-# Define a custom autograd function
-class CustomMorph(torch.autograd.Function):
-    @staticmethod
-    def forward(ctx, x, biases):
-        lsb_result = x + biases
-        msb_result, msb_index = torch.max(lsb_result, dim=1)
-        ctx.save_for_backward(x, biases, msb_index)
-        return msb_result
-
-    @staticmethod
-    def backward(ctx, grad_output):
-        x, biases, msb_index = ctx.saved_tensors
-        
-        grad_input = torch.zeros(x.shape[0], x.shape[1])
-        for n in range(grad_output.shape[0]):
-            grad_input[n, msb_index[n]] = grad_output[n]
-        
-        grad_biases = torch.zeros(biases.shape[0], dtype=grad_output.dtype)
-        for n in range(grad_output.shape[0]):            
-            grad_biases[msb_index[n]] += grad_output[n]
-        #print(f'Grad biases: {grad_biases}')
-        return grad_input, grad_biases
 
 STACK_BITS = 8
 DATA_MAX = 128
@@ -285,9 +234,8 @@ if __name__ == "__main__":
     # Create a TensorDataset and DataLoader
     dataset = TensorDataset(data, labels)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    
-    model = LinearClassifier()
-    #model = MorphClassifier()
+        
+    model = MorphClassifier()
     model.eval()
 
     if 0:

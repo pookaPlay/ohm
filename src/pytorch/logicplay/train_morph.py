@@ -3,9 +3,8 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import matplotlib.pyplot as plt
-from chat_data import generate_xor_data, generate_linear_data
 from torch.utils.data import DataLoader, TensorDataset
-from DataIO import SerializeMSBOffset, DeserializeMSBOffset
+from DataIO import SerializeMSBOffset, DeserializeMSBOffset, generate_xor_data, generate_linear_data
 
 import random
 
