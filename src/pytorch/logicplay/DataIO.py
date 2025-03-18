@@ -1,8 +1,6 @@
 import torch
 import numpy as np
 
-import numpy as np
-
 # Generate synthetic XOR data using four different Gaussians
 def generate_xor_data(n_samples):
     n_samples_per_quadrant = n_samples // 4
@@ -23,6 +21,25 @@ def generate_xor_data(n_samples):
         np.ones(n_samples_per_quadrant),  # Top-left
         np.ones(n_samples_per_quadrant)  # Bottom-right
     ])
+
+    return torch.tensor(X, dtype=torch.int8), torch.tensor(y, dtype=torch.float32)
+
+# Generate synthetic 3NOR data using four different Gaussians
+def generate_3nor_data(n_samples, yind=0):
+    n_samples_per_quadrant = n_samples // 4
+    var = 16
+    offset = 64
+    clip = 127
+    X = np.vstack([
+        var * np.random.randn(n_samples_per_quadrant, 2) + [offset, offset],  # Top-right
+        var * np.random.randn(n_samples_per_quadrant, 2) + [-offset, -offset],  # Bottom-left
+        var * np.random.randn(n_samples_per_quadrant, 2) + [-offset, offset],  # Top-left
+        var * np.random.randn(n_samples_per_quadrant, 2) + [offset, -offset]  # Bottom-right
+    ])
+    X = np.clip(X, -clip, clip)
+
+    y = np.ones(n_samples_per_quadrant * 4)
+    y[yind * n_samples_per_quadrant:(yind + 1) * n_samples_per_quadrant] = -1
 
     return torch.tensor(X, dtype=torch.int8), torch.tensor(y, dtype=torch.float32)
 

@@ -1,24 +1,14 @@
 import torch
 import numpy as np
-from functional import bin_op_s, get_unique_connections, GradFactor
+from functional_pbf import bin_op_s, get_unique_connections, GradFactor
 
 #######################################################################################################################
 DL_FUNCTIONS = [
     "zero",
     "and",
-    "not_implies",
     "a",
-    "not_implied_by",
     "b",
-    "xor",
     "or",
-    "not_or",
-    "not_xor",
-    "not_b",
-    "implied_by",
-    "not_a",
-    "implies",
-    "not_and",
     "one",
 ]
 
@@ -44,7 +34,7 @@ class LogicLayer(torch.nn.Module):
         :param connections: method for initializing the connectivity of the logic gate net
         """
         super().__init__()
-        self.weights = torch.nn.parameter.Parameter(torch.randn(out_dim, 16, device=device))
+        self.weights = torch.nn.parameter.Parameter(torch.randn(out_dim, 6, device=device))
         self.in_dim = in_dim
         self.out_dim = out_dim
         self.device = device

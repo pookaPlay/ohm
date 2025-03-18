@@ -5,57 +5,58 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, TensorDataset
 from DataIO import generate_xor_data, generate_linear_data, generate_3nor_data
-from DiffLogicClassifier import DiffLogicClassifier
+#from difflogic_pbf_mirrored import LogicLayer, GroupSum, DL_FUNCTIONS
+from difflogic_ptf import LogicLayer, GroupSum, DL_FUNCTIONS
+#from difflogic import LogicLayer, GroupSum, DL_FUNCTIONS
 import random
 
-  
-class MLPClassifier(nn.Module):
-    def __init__(self, input_dim=2, hidden_dim=10, output_dim=2, num_layers=3):
-        super(MLPClassifier, self).__init__()
-        layers = []
-        layers.append(nn.Linear(input_dim, hidden_dim))
-        layers.append(nn.ReLU())
-        for _ in range(num_layers - 1):
-            layers.append(nn.Linear(hidden_dim + input_dim, hidden_dim))
-            layers.append(nn.ReLU())
-        
-        layers.append(nn.Linear(hidden_dim + input_dim, output_dim))
+class PTFLogicClassifier(nn.Module):
 
-        self.model = nn.Sequential(*layers)
+    def __init__(self, num_neurons=4, num_layers=2, connections = 'random'):
+
+        super(PTFLogicClassifier, self).__init__()
+        
+        in_dim = 2 
+        class_count = 2
+        tau = 1.
+        grad_factor = 1.0
+        
+        llkw = dict(grad_factor=grad_factor, connections=connections)
+
+        logic_layers = []
+        k = num_neurons
+        l = num_layers
+
+        logic_layers.append(torch.nn.Flatten())
+        logic_layers.append(LogicLayer(in_dim=in_dim, out_dim=k, **llkw))
+        for _ in range(l - 1):
+            logic_layers.append(LogicLayer(in_dim=k, out_dim=k, **llkw))
+
+        self.model = torch.nn.Sequential(
+            *logic_layers,
+            GroupSum(class_count, tau)
+        )
+                
+        total_num_neurons = sum(map(lambda x: x.num_neurons, logic_layers[1:-1]))
+        print(f'total_num_neurons={total_num_neurons}')
+        total_num_weights = sum(map(lambda x: x.num_weights, logic_layers[1:-1]))
+        print(f'total_num_weights={total_num_weights}')        
 
     def forward(self, x):
-        return self.model(x)
+        return self.model(x)    
+    
+    def extra_repr(self):
+        lfns = ''
+        for i, layer in enumerate(self.model):
+            if isinstance(layer, LogicLayer):
+                
+                tweights = torch.nn.functional.one_hot(layer.weights.argmax(-1), 16).to(torch.float32)
+                indices = tweights.argmax(dim=1).tolist()
+                functions = [DL_FUNCTIONS[index] for index in indices]
+                lfns += f'Layer {i}: {functions}\n'
 
-################################    
-# MLP with residual connections
-################################    
-# class MLPClassifier(nn.Module):
-#     def __init__(self, input_dim=2, hidden_dim=10, output_dim=2, num_layers=3):
-#         super(MLPClassifier, self).__init__()
-#         self.num_layers = num_layers
-#         self.input_layer = nn.Linear(input_dim, hidden_dim)
-#         self.hidden_layers = nn.ModuleList()
-        
-#         for _ in range(num_layers - 1):
-#             self.hidden_layers.append(nn.Linear(hidden_dim + input_dim, hidden_dim))
-        
-#         self.output_layer = nn.Linear(hidden_dim + input_dim, output_dim)
-#         self.relu = nn.ReLU()
+        return lfns        
 
-#     def forward(self, x):
-#         initial_input = x
-#         x = self.input_layer(x)
-#         x = self.relu(x)
-        
-#         for i in range(self.num_layers - 1):
-#             x = torch.cat((x, initial_input), dim=1)
-#             x = self.hidden_layers[i](x)
-#             x = self.relu(x)
-        
-#         x = torch.cat((x, initial_input), dim=1)
-#         x = self.output_layer(x)
-#         return x
-            
 # Train the model
 def train_model(model, dataloader, num_epochs, viz_epoch):
 
@@ -123,7 +124,8 @@ def visualize_decision_surface(model, data, labels, ax):
     plt.draw()
 
 
-seed = 1
+
+seed = 2
 random.seed(seed)
 torch.manual_seed(seed)
 np.random.seed(seed)
@@ -134,7 +136,7 @@ torch.set_num_threads(1)
 DATA_MAX = 128
 
 if __name__ == "__main__":
-    # Hyperparameters
+    # Hyperparameters    
     num_samples = 100
     batch_size = 10
     num_epochs = 10   
@@ -167,8 +169,7 @@ if __name__ == "__main__":
     dataset = TensorDataset(data, labels)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     
-    model = DiffLogicClassifier(**dlopt)
-    #model = MLPClassifier(input_dim=2, hidden_dim=dlopt['num_neurons'], output_dim=2, num_layers=dlopt['num_layers'])
+    model = PTFLogicClassifier(**dlopt)    
     
     model.eval()
     print(model)
