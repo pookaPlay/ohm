@@ -5,43 +5,40 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, TensorDataset
 from DataIO import generate_xor_data, generate_linear_data, generate_3nor_data
-#from difflogic_pbf_mirrored import LogicLayer, GroupSum, DL_FUNCTIONS
 from difflogic_ptf import LogicLayer, GroupSum, DL_FUNCTIONS
-#from difflogic import LogicLayer, GroupSum, DL_FUNCTIONS
 import random
 
 class PTFLogicClassifier(nn.Module):
 
-    def __init__(self, num_neurons=4, num_layers=2, connections = 'random'):
+    def __init__(self, param):
 
         super(PTFLogicClassifier, self).__init__()
         
         in_dim = 2 
-        class_count = 2
+        class_count = 2        
         tau = 1.
-        grad_factor = 1.0
-        
-        llkw = dict(grad_factor=grad_factor, connections=connections)
+        grad_factor = 1.0                
 
         logic_layers = []
-        k = num_neurons
-        l = num_layers
+        k = param['num_neurons']
+        l = param['num_layers']
+        
+        lparam = dict(
+            grad_factor=grad_factor,
+            connections=param['connections'],
+            fan_in=param['fan_in'],
+            )
 
         logic_layers.append(torch.nn.Flatten())
-        logic_layers.append(LogicLayer(in_dim=in_dim, out_dim=k, **llkw))
+        logic_layers.append(LogicLayer(in_dim=in_dim, out_dim=k, **lparam))
         for _ in range(l - 1):
-            logic_layers.append(LogicLayer(in_dim=k, out_dim=k, **llkw))
+            logic_layers.append(LogicLayer(in_dim=k, out_dim=k, **lparam))
 
         self.model = torch.nn.Sequential(
             *logic_layers,
             GroupSum(class_count, tau)
         )
                 
-        total_num_neurons = sum(map(lambda x: x.num_neurons, logic_layers[1:-1]))
-        print(f'total_num_neurons={total_num_neurons}')
-        total_num_weights = sum(map(lambda x: x.num_weights, logic_layers[1:-1]))
-        print(f'total_num_weights={total_num_weights}')        
-
     def forward(self, x):
         return self.model(x)    
     
@@ -145,7 +142,8 @@ if __name__ == "__main__":
     dlopt = dict(
         num_neurons = 4, 
         num_layers = 2, 
-        connections = 'random'
+        connections = 'random',
+        fan_in = 2,
         #connections = 'unique'
         )
     print(dlopt)
@@ -169,7 +167,7 @@ if __name__ == "__main__":
     dataset = TensorDataset(data, labels)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     
-    model = PTFLogicClassifier(**dlopt)    
+    model = PTFLogicClassifier(dlopt)    
     
     model.eval()
     print(model)

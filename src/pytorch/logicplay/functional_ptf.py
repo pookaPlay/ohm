@@ -1,9 +1,20 @@
 import torch
 import numpy as np
+ 
+DL_FUNCTIONS = [
+    "zero",
+    "and",
+    "a",
+    "b",
+    "or",
+    "one",
+]
+NUM_DL_FUNCTIONS = len(DL_FUNCTIONS)
 
-BITS_TO_NP_DTYPE = {8: np.int8, 16: np.int16, 32: np.int32, 64: np.int64}
-    
-def bin_op(a, b, i):
+def multi_op(ab, i):
+    a = ab[0]
+    b = ab[1]
+
     assert a[0].shape == b[0].shape, (a[0].shape, b[0].shape)
     if a.shape[0] > 1:
         assert a[1].shape == b[1].shape, (a[1].shape, b[1].shape)
@@ -20,6 +31,27 @@ def bin_op(a, b, i):
         return a + b - a * b
     elif i == 5:
         return torch.ones_like(a)
+
+#######################################################################################################################
+# DL_FUNCTIONS = [
+#     "zero",
+#     "and",
+#     "not_implies",
+#     "a",
+#     "not_implied_by",
+#     "b",
+#     "xor",
+#     "or",
+#     "not_or",
+#     "not_xor",
+#     "not_b",
+#     "implied_by",
+#     "not_a",
+#     "implies",
+#     "not_and",
+#     "one",
+# ]
+
 
 # | id | Operator             | AB=00 | AB=01 | AB=10 | AB=11 |
 # |----|----------------------|-------|-------|-------|-------|
@@ -78,10 +110,10 @@ def bin_op(a, b, i):
 #     elif i == 15:
 #         return torch.ones_like(a)
 
-def bin_op_s(a, b, i_s):
-    r = torch.zeros_like(a)
-    for i in range(6):
-        u = bin_op(a, b, i)
+def multi_op_s(ab, i_s):
+    r = torch.zeros_like(ab[0])
+    for i in range(NUM_DL_FUNCTIONS):
+        u = multi_op(ab, i)
         r = r + i_s[..., i] * u
     return r
 
@@ -157,4 +189,5 @@ class GradFactor(torch.autograd.Function):
 ########################################################################################################################
 
 
+BITS_TO_NP_DTYPE = {8: np.int8, 16: np.int16, 32: np.int32, 64: np.int64}
 

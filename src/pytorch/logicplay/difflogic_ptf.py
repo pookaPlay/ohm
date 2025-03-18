@@ -1,34 +1,7 @@
 import torch
 import numpy as np
-from functional_ptf import bin_op_s, get_unique_connections, GradFactor
+from functional_ptf import multi_op_s, get_unique_connections, GradFactor, DL_FUNCTIONS, NUM_DL_FUNCTIONS
 
-#######################################################################################################################
-DL_FUNCTIONS = [
-    "zero",
-    "and",
-    "a",
-    "b",
-    "or",
-    "one",
-]
-# DL_FUNCTIONS = [
-#     "zero",
-#     "and",
-#     "not_implies",
-#     "a",
-#     "not_implied_by",
-#     "b",
-#     "xor",
-#     "or",
-#     "not_or",
-#     "not_xor",
-#     "not_b",
-#     "implied_by",
-#     "not_a",
-#     "implies",
-#     "not_and",
-#     "one",
-# ]
 
 class LogicLayer(torch.nn.Module):
     """
@@ -38,6 +11,7 @@ class LogicLayer(torch.nn.Module):
             self,
             in_dim: int,
             out_dim: int,
+            fan_in: int = 2,
             device: str = 'cpu',
             grad_factor: float = 1.,
             implementation: str = None,
@@ -52,11 +26,12 @@ class LogicLayer(torch.nn.Module):
         :param connections: method for initializing the connectivity of the logic gate net
         """
         super().__init__()
-        self.weights = torch.nn.parameter.Parameter(torch.randn(out_dim, 6, device=device))
+        self.weights = torch.nn.parameter.Parameter(torch.randn(out_dim, NUM_DL_FUNCTIONS, device=device))
         self.in_dim = in_dim
         self.out_dim = out_dim
         self.device = device
         self.grad_factor = grad_factor
+        self.fan_in = fan_in
 
         """
         The CUDA implementation is the fast implementation. As the name implies, the cuda implementation is only 
@@ -73,8 +48,7 @@ class LogicLayer(torch.nn.Module):
 
         self.connections = connections
         assert self.connections in ['random', 'unique'], self.connections
-        self.indices = self.get_connections(self.connections, device)
-
+        self.indices = self.get_connections(self.connections, self.fan_in, device)
         self.num_neurons = out_dim
         self.num_weights = out_dim
 
@@ -93,24 +67,31 @@ class LogicLayer(torch.nn.Module):
             #print(self.indices[0].dtype, self.indices[1].dtype)
 
         a, b = x[..., self.indices[0]], x[..., self.indices[1]]
-        if self.training:            
-            x = bin_op_s(a, b, torch.nn.functional.softmax(self.weights, dim=-1))
+        inputs = [a,b]                 
+
+        if self.training:               
+            x = multi_op_s(inputs, torch.nn.functional.softmax(self.weights, dim=-1))
         else:            
-            weights = torch.nn.functional.one_hot(self.weights.argmax(-1), 16).to(torch.float32)
-            x = bin_op_s(a, b, weights)
+            weights = torch.nn.functional.one_hot(self.weights.argmax(-1), NUM_DL_FUNCTIONS).to(torch.float32)
+            x = multi_op_s(inputs, weights)
         return x
 
     def extra_repr(self):
         return '{}, {}, {}'.format(self.in_dim, self.out_dim, 'train' if self.training else 'eval')
 
-    def get_connections(self, connections, device='cuda'):
+    def get_connections(self, connections, fan_in=2, device='cuda'):
         assert self.out_dim * 2 >= self.in_dim, 'The number of neurons ({}) must not be smaller than half of the ' \
                                                 'number of inputs ({}) because otherwise not all inputs could be ' \
                                                 'used or considered.'.format(self.out_dim, self.in_dim)
+        if self.fan_in > self.in_dim:
+            fan_in = self.in_dim
+        else:
+            fan_in = self.fan_in
+                
         if connections == 'random':
-            c = torch.randperm(2 * self.out_dim) % self.in_dim
+            c = torch.randperm(fan_in * self.out_dim) % self.in_dim
             c = torch.randperm(self.in_dim)[c]
-            c = c.reshape(2, self.out_dim)
+            c = c.reshape(fan_in, self.out_dim)
             a, b = c[0], c[1]
             a, b = a.to(torch.int64), b.to(torch.int64)
             a, b = a.to(device), b.to(device)
