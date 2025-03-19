@@ -5,54 +5,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, TensorDataset
 from DataIO import generate_xor_data, generate_linear_data, generate_3nor_data
-from difflogic_ptf import LogicLayer, GroupSum, DL_FUNCTIONS
 import random
 
-class PTFLogicClassifier(nn.Module):
-
-    def __init__(self, param):
-
-        super(PTFLogicClassifier, self).__init__()
-        
-        in_dim = 2 
-        class_count = 2        
-        tau = 1.
-        grad_factor = 1.0                
-
-        logic_layers = []
-        k = param['num_neurons']
-        l = param['num_layers']
-        
-        lparam = dict(
-            grad_factor=grad_factor,
-            connections=param['connections'],
-            fan_in=param['fan_in'],
-            )
-
-        logic_layers.append(torch.nn.Flatten())
-        logic_layers.append(LogicLayer(in_dim=in_dim, out_dim=k, **lparam))
-        for _ in range(l - 1):
-            logic_layers.append(LogicLayer(in_dim=k, out_dim=k, **lparam))
-
-        self.model = torch.nn.Sequential(
-            *logic_layers,
-            GroupSum(class_count, tau)
-        )
-                
-    def forward(self, x):
-        return self.model(x)    
-    
-    def extra_repr(self):
-        lfns = ''
-        for i, layer in enumerate(self.model):
-            if isinstance(layer, LogicLayer):
-                
-                tweights = torch.nn.functional.one_hot(layer.weights.argmax(-1), 16).to(torch.float32)
-                indices = tweights.argmax(dim=1).tolist()
-                functions = [DL_FUNCTIONS[index] for index in indices]
-                lfns += f'Layer {i}: {functions}\n'
-
-        return lfns        
+from PTFLogicClassifier import PTFLogicClassifier
+from DiffLogicClassifier import DiffLogicClassifier
 
 # Train the model
 def train_model(model, dataloader, num_epochs, viz_epoch):
@@ -121,7 +77,6 @@ def visualize_decision_surface(model, data, labels, ax):
     plt.draw()
 
 
-
 seed = 2
 random.seed(seed)
 torch.manual_seed(seed)
@@ -140,10 +95,11 @@ if __name__ == "__main__":
     viz_epoch = 1
     
     dlopt = dict(
-        num_neurons = 4, 
+        num_neurons = 8, 
         num_layers = 2, 
         connections = 'random',
-        fan_in = 2,
+        fan_in = 4,
+        grad_factor = 1.0,       
         #connections = 'unique'
         )
     print(dlopt)
@@ -166,8 +122,9 @@ if __name__ == "__main__":
     # Create a TensorDataset and DataLoader
     dataset = TensorDataset(data, labels)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    
-    model = PTFLogicClassifier(dlopt)    
+        
+    #model = DiffLogicClassifier(dlopt)    
+    model = PTFLogicClassifier(dlopt)
     
     model.eval()
     print(model)

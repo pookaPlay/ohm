@@ -1,36 +1,74 @@
 import torch
 import numpy as np
- 
-DL_FUNCTIONS = [
-    "zero",
-    "and",
-    "a",
-    "b",
-    "or",
-    "one",
-]
-NUM_DL_FUNCTIONS = len(DL_FUNCTIONS)
 
-def multi_op(ab, i):
-    a = ab[0]
-    b = ab[1]
+def GetFunctionText(D, i):
+    if i < D:
+        ret =f'In-{i}'
+    elif i == D:
+        ret = 'zero'
+    elif i == D+1:
+        ret = 'one'
+    elif i == D+2:
+        ret = 'prod'
+    elif i == D+3:
+        ret = 'sum-prod'
+    elif i == D+4:
+        ret = 'sum'
+    elif i == D+5:
+        ret = 'max' 
+    elif i == D+6:
+        ret = 'min'
+    return ret
 
-    assert a[0].shape == b[0].shape, (a[0].shape, b[0].shape)
-    if a.shape[0] > 1:
-        assert a[1].shape == b[1].shape, (a[1].shape, b[1].shape)
+def GetNumFunctions(D):
+    return D + 7
 
-    if i == 0:
-        return torch.zeros_like(a)
-    elif i == 1:
-        return a * b
-    elif i == 2:
-        return a
-    elif i == 3:
-        return b
-    elif i == 4:
-        return a + b - a * b
-    elif i == 5:
-        return torch.ones_like(a)
+def multi_op_s(inputs, i_s):        
+    numFuncs = GetNumFunctions(len(inputs))
+    
+    r = torch.zeros_like(inputs[0])
+    for i in range(numFuncs):
+        u = multi_op(inputs, i)
+        r = r + i_s[..., i] * u
+    
+    return r
+
+def multi_op(inputs, index):    
+    D = len(inputs)
+
+    inputs_tensor = torch.stack(inputs, dim=0)
+    prodval = torch.prod(inputs_tensor, dim=0)
+    sumval = torch.sum(inputs_tensor, dim=0)
+    maxval = torch.max(inputs_tensor, dim=0).values
+    minval = torch.min(inputs_tensor, dim=0).values
+
+    #prodval = 1.0
+    #sumval = 0.0
+    #maxval = 0.0
+    #minval = 0.0
+
+    #for i in range(D):
+    ##    prodval = prodval * inputs[i]
+    #    sumval = sumval + inputs[i]
+    #    maxval = torch.max(maxval, inputs[i])
+    #    minval = torch.min(minval, inputs[i])   
+    
+    if index < D:
+        return inputs[index]
+    elif index == D: 
+        return torch.zeros_like(inputs[0])
+    elif index == D+1:
+        return torch.ones_like(inputs[0])    
+    elif index == D+2:        
+        return prodval
+    elif index == D+3:        
+        return sumval-prodval
+    elif index == D+4:    
+        return sumval
+    elif index == D+5:        
+        return maxval
+    elif index == D+6:
+        return minval
 
 #######################################################################################################################
 # DL_FUNCTIONS = [
@@ -109,13 +147,6 @@ def multi_op(ab, i):
 #         return 1 - a * b
 #     elif i == 15:
 #         return torch.ones_like(a)
-
-def multi_op_s(ab, i_s):
-    r = torch.zeros_like(ab[0])
-    for i in range(NUM_DL_FUNCTIONS):
-        u = multi_op(ab, i)
-        r = r + i_s[..., i] * u
-    return r
 
 
 ########################################################################################################################

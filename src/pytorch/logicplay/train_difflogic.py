@@ -141,7 +141,7 @@ if __name__ == "__main__":
     viz_epoch = 1
     
     dlopt = dict(
-        num_neurons = 4, 
+        num_neurons = 10, 
         num_layers = 2, 
         connections = 'random'
         #connections = 'unique'
