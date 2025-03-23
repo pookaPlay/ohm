@@ -1,132 +1,27 @@
 import torch
 import numpy as np
 
-# DL_FUNCTIONS = [
-#     "zero",
-#     "and",
-#     "not_implies",
-#     "a",
-#     "not_implied_by",
-#     "b",
-#     "xor",
-#     "or",
-#     "not_or",
-#     "not_xor",
-#     "not_b",
-#     "implied_by",
-#     "not_a",
-#     "implies",
-#     "not_and",
-#     "one",
-# ]
-# def GetFunctionText(D, i):   
-#     return DL_FUNCTIONS[i]
-
-# def GetNumFunctions(D):
-#     return 16
-
-# def multi_op(inputs, i):
-#     D = len(inputs)
-#     assert D == 2
-#     a = inputs[0]
-#     b = inputs[1]
-
-#     if i == 0:
-#         return torch.zeros_like(a)
-#     elif i == 1:
-#         return a * b
-#     elif i == 2:
-#         return a - a * b
-#     elif i == 3:
-#         return a
-#     elif i == 4:
-#         return b - a * b
-#     elif i == 5:
-#         return b
-#     elif i == 6:
-#         return a + b - 2 * a * b
-#     elif i == 7:
-#         return a + b - a * b
-#     elif i == 8:
-#         return 1 - (a + b - a * b)
-#     elif i == 9:
-#         return 1 - (a + b - 2 * a * b)
-#     elif i == 10:
-#         return 1 - b
-#     elif i == 11:
-#         return 1 - b + a * b
-#     elif i == 12:
-#         return 1 - a
-#     elif i == 13:
-#         return 1 - a + a * b
-#     elif i == 14:
-#         return 1 - a * b
-#     elif i == 15:
-#         return torch.ones_like(a)
-
-
-# def multi_op_s(inputs, i_s):        
-#     numFuncs = GetNumFunctions(len(inputs))
-
-#     r = torch.zeros_like(inputs[0])
-#     for i in range(numFuncs):
-#         u = multi_op(inputs, i)
-#         r = r + i_s[..., i] * u
-
-#     return r
-
-def GetFunctionText(D, i):   
-    D2 = 2*D
+def GetFunctionText(D, i):
     if i < D:
-        ret =f'In{i}'
-    elif i < D2:
-        ret = f'-In{i-D}'
-    elif i == D2:
+        ret =f'In-{i}'
+    elif i == D:
         ret = 'zero'
-    elif i == D2+1:
+    elif i == D+1:
         ret = 'one'
-    elif i == D2+2:
+    elif i == D+2:
         ret = 'prod'
-    elif i == D2+3:
+    elif i == D+3:
         ret = 'sum-prod'
-    elif i == D2+4:
-        ret = '1-prod'
-    elif i == D2+5:
-        ret = '1-(sum-prod)'
+    elif i == D+4:
+        ret = 'sum'
+    elif i == D+5:
+        ret = 'max' 
+    elif i == D+6:
+        ret = 'min'
     return ret
 
 def GetNumFunctions(D):
-    return 2*D+6
-
-def multi_op(inputs, index):    
-    D = len(inputs)
-    D2 = 2*D
-    inputs_tensor = torch.stack(inputs, dim=0)
-    #print(f'inputs_tensor: {inputs_tensor.shape}')
-    prodval = torch.prod(inputs_tensor, dim=0)
-    sumval = torch.sum(inputs_tensor, dim=0)
-    maxval = torch.max(inputs_tensor, dim=0).values
-    minval = torch.min(inputs_tensor, dim=0).values
-    #print(f'From {D}, prodval: {prodval}, sumval: {sumval}, maxval: {maxval}, minval: {minval}')
-
-    if index < D:
-        return inputs[index]
-    elif index < D2:
-        return 1 - inputs[index-D]
-    elif index == D2: 
-        return torch.zeros_like(inputs[0])
-    elif index == D2+1:
-        return torch.ones_like(inputs[0])    
-    elif index == D2+2:        
-        return prodval
-    elif index == D2+3:        
-        return sumval-prodval
-    elif index == D2+4:        
-        return 1-prodval
-    elif index == D2+5:        
-        return 1-(sumval-prodval)
-    
-    
+    return D + 7
 
 def multi_op_s(inputs, i_s):        
     numFuncs = GetNumFunctions(len(inputs))
@@ -138,6 +33,32 @@ def multi_op_s(inputs, i_s):
     
     return r
 
+def multi_op(inputs, index):    
+    D = len(inputs)
+
+    inputs_tensor = torch.stack(inputs, dim=0)
+    prodval = torch.prod(inputs_tensor, dim=0)
+    sumval = torch.sum(inputs_tensor, dim=0)
+    maxval = torch.max(inputs_tensor, dim=0).values
+    minval = torch.min(inputs_tensor, dim=0).values
+    #print(f'From {D}, prodval: {prodval}, sumval: {sumval}, maxval: {maxval}, minval: {minval}')
+
+    if index < D:
+        return inputs[index]
+    elif index == D: 
+        return torch.zeros_like(inputs[0])
+    elif index == D+1:
+        return torch.ones_like(inputs[0])    
+    elif index == D+2:        
+        return prodval
+    elif index == D+3:        
+        return sumval-prodval
+    elif index == D+4:    
+        return sumval
+    elif index == D+5:        
+        return maxval
+    elif index == D+6:
+        return minval
 
 #######################################################################################################################
 # DL_FUNCTIONS = [

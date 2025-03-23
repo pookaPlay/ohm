@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from DataIO import generate_xor_data, generate_xxor_data, generate_linear_data, generate_3nor_data
 import random
 
-from PTFLogicClassifier import PTFLogicClassifier
+from StackLogicClassifier import StackLogicClassifier
 from DiffLogicClassifier import DiffLogicClassifier
 
 # Train the model
@@ -74,10 +74,16 @@ def visualize_decision_surface(model, data, labels, ax):
     
     #Z = torch.where(Z >= 0, 1, 0)  # Threshold Z at 0
     #Z = Z.reshape(xx.shape)
-    Z = Z.argmax(dim=1).reshape(xx.shape)        
-    
+    print(f'Z: {Z.shape} min: {torch.min(Z)}, max: {torch.max(Z)}')
+    #print(Z)    
+    IZ = Z.argmax(dim=1).reshape(xx.shape)        
+    # get the max value of Z
+
+    # put a square of zeros in the range -DATA_MAX/4 to DATA_MAX/4
+    print(f'IZ: {IZ.shape} min: {torch.min(IZ)}, max: {torch.max(IZ)}')
+
     ax.clear()
-    ax.contourf(xx, yy, Z, alpha=0.8)
+    ax.contourf(xx, yy, IZ, alpha=0.8) #, cmap='coolwarm')
     ax.scatter(data[:, 0], data[:, 1], c=labels, edgecolors='k', marker='o')
     plt.draw()
 
@@ -113,7 +119,7 @@ if __name__ == "__main__":
     data = data.float()
     # print the data min and max 
     print(f'data min: {torch.min(data)}, data max: {torch.max(data)}')
-
+    
     # move from +-1 to 0,1
     #dataOrig = (data + DATA_MAX) / (2. * DATA_MAX)
     #data = dataOrig
@@ -125,7 +131,7 @@ if __name__ == "__main__":
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
         
     #model = DiffLogicClassifier(dlopt)    
-    model = PTFLogicClassifier(dlopt)
+    model = StackLogicClassifier(dlopt)
     
     model.eval()
     print(model)

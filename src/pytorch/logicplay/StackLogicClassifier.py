@@ -7,11 +7,11 @@ from torch.utils.data import DataLoader, TensorDataset
 from difflogic_ptf import LogicLayer, GroupSum, GetFunctionText, GetNumFunctions
 import random
 
-class PTFLogicClassifier(nn.Module):
+class StackLogicClassifier(nn.Module):
 
     def __init__(self, param):
 
-        super(PTFLogicClassifier, self).__init__()
+        super(StackLogicClassifier, self).__init__()
         
         in_dim = 2 
         class_count = 2        

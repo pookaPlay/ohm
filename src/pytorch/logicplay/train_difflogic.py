@@ -101,9 +101,13 @@ def visualize_decision_surface(model, data, labels, ax):
     DATA_MAX = 1
     GRID_SPACE = 0.1
     
-    x_min = -DATA_MAX
+    #x_min = -DATA_MAX
+    #x_max = DATA_MAX
+    #y_min = -DATA_MAX
+    #y_max = DATA_MAX
+    x_min = 0
     x_max = DATA_MAX
-    y_min = -DATA_MAX
+    y_min = 0
     y_max = DATA_MAX
 
     
@@ -137,19 +141,18 @@ if __name__ == "__main__":
     # Hyperparameters
     num_samples = 100
     batch_size = 10
-    num_epochs = 10   
+    num_epochs = 100   
     viz_epoch = 1
     
     dlopt = dict(
-        num_neurons = 10, 
-        num_layers = 2, 
-        connections = 'random'
-        #connections = 'unique'
+        num_neurons = 4, 
+        num_layers = 4, 
+        connections = 'random'        
         )
     print(dlopt)
     # linear 
     #learning_rate = 0.0001
-    learning_rate = 0.1
+    learning_rate = 0.01
         
     # Generate data
     #data, labels = generate_linear_data(num_samples)
@@ -160,7 +163,8 @@ if __name__ == "__main__":
     labels = (labels + 1) / 2
     
     data = data.float()
-    data = data / DATA_MAX
+    # data = data / DATA_MAX
+    data = (data + DATA_MAX) / (2. * DATA_MAX)
     labels = labels.long()    
 
     # Create a TensorDataset and DataLoader

@@ -84,31 +84,27 @@ class LogicLayer(torch.nn.Module):
                                                 'number of inputs ({}) because otherwise not all inputs could be ' \
                                                 'used or considered.'.format(self.out_dim, self.in_dim)
         
-        if connections == 'bogus':
+        if connections == 'random':
+            
             c = torch.zeros((self.fan_in, self.out_dim), dtype=torch.int64, device=device)
-            used_indices = set()
-            
+
             for j in range(self.out_dim):
-                for i in range(self.fan_in):
-                    while True:
-                        index = torch.randint(0, self.in_dim, (1,)).item()
-                        if index not in used_indices:
-                            used_indices.add(index)
-                            c[i, j] = index
-                            break
+                # i want c[:,j] to be a permutation of the in_dim
+                c[:, j] = torch.randperm(self.in_dim)[:self.fan_in]
             
+            print(f'c: {c}')    
             return c
         
-        if connections == 'random':
+        if connections == 'random2':
             c = torch.randperm(self.fan_in * self.out_dim) % self.in_dim
             c = torch.randperm(self.in_dim)[c]
-            c = c.reshape(self.fan_in, self.out_dim)
-            
-            print(f'c: {c}')
+            c = c.reshape(self.fan_in, self.out_dim)                    
 
             for i in range(self.fan_in):
                 c[i] = c[i].to(torch.int64)            
                 c[i] = c[i].to(device)
+
+            print(f'c: {c}')                
             return c
         
         elif connections == 'unique':
