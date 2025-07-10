@@ -85,14 +85,14 @@ if __name__ == "__main__":
     # Hyperparameters    
     num_samples = 100
     batch_size = 10
-    num_epochs = 50
+    num_epochs = 100
     viz_epoch = 1
     
     dlopt = dict(
-        num_neurons = 2, 
-        num_layers = 1, 
+        num_neurons = 4, 
+        num_layers = 4, 
         connections = 'random',
-        fan_in = 2,
+        fan_in = 4,
         grad_factor = 1.0,       
         #connections = 'unique'
         )
@@ -102,23 +102,24 @@ if __name__ == "__main__":
     learning_rate = 0.01
         
     # Generate data
-    data, labels = generate_linear_data(num_samples)
+    #data, labels = generate_linear_data(num_samples)
     #data, labels = generate_xxor_data(num_samples)
-    #data, labels = generate_xor_data(num_samples)
+    data, labels = generate_xor_data(num_samples)
     #data, labels = generate_3nor_data(num_samples, 3)
     
     # move from +-1 to 0,1
     labels = (labels + 1) / 2
     
     data = data.float()
+    labels = labels.long()        
+    
     # print the data min and max 
     print(f'data min: {torch.min(data)}, data max: {torch.max(data)}')
 
     # move from +-1 to 0,1
     #dataOrig = (data + DATA_MAX) / (2. * DATA_MAX)
     #data = dataOrig
-    
-    labels = labels.long()    
+        
 
     # Create a TensorDataset and DataLoader
     dataset = TensorDataset(data, labels)

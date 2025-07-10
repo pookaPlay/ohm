@@ -4,8 +4,9 @@ import torch.optim as optim
 import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, TensorDataset
-from DataIO import generate_xor_data, generate_linear_data, generate_3nor_data
+from DataIO import generate_xor_data, generate_linear_data, generate_3nor_data, generate_xxor_data
 from DiffLogicClassifier import DiffLogicClassifier
+from StackLogicClassifier import StackLogicClassifier
 import random
 
   
@@ -94,26 +95,19 @@ def train_model(model, dataloader, num_epochs, viz_epoch):
 
 # Visualize the decision surface
 def visualize_decision_surface(model, data, labels, ax):
-    #x_min, x_max = data[:, 0].min() - 1, data[:, 0].max() + 1
-    #y_min, y_max = data[:, 1].min() - 1, data[:, 1].max() + 1
-    #DATA_MAX = 128
-    #GRID_SPACE = 10
     DATA_MAX = 1
-    GRID_SPACE = 0.1
-    
-    #x_min = -DATA_MAX
-    #x_max = DATA_MAX
-    #y_min = -DATA_MAX
-    #y_max = DATA_MAX
-    x_min = 0
+    x_min = -DATA_MAX
     x_max = DATA_MAX
-    y_min = 0
-    y_max = DATA_MAX
+    y_min = -DATA_MAX
+    y_max = DATA_MAX    
+    step = 0.1
+    #dmin = torch.min(data)
+    #dmax = torch.max(data)
+    #print(f'dmin: {dmin}, dmax: {dmax} ans step: {step}')
 
-    
-    xx, yy = np.meshgrid(np.arange(x_min, x_max, GRID_SPACE),
-                         np.arange(y_min, y_max, GRID_SPACE))
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, step), np.arange(y_min, y_max, step))
     grid = torch.tensor(np.c_[xx.ravel(), yy.ravel()], dtype=torch.float32)
+
     with torch.no_grad():
         Z = model(grid)
     
@@ -135,18 +129,16 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 torch.set_num_threads(1)
 
-DATA_MAX = 128
-
 if __name__ == "__main__":
     # Hyperparameters
     num_samples = 100
-    batch_size = 10
-    num_epochs = 100   
+    batch_size = 2
+    num_epochs = 50
     viz_epoch = 1
     
     dlopt = dict(
-        num_neurons = 4, 
-        num_layers = 4, 
+        num_neurons = 8, 
+        num_layers = 2, 
         connections = 'random'        
         )
     print(dlopt)
@@ -156,22 +148,25 @@ if __name__ == "__main__":
         
     # Generate data
     #data, labels = generate_linear_data(num_samples)
-    data, labels = generate_xor_data(num_samples)
-    # data, labels = generate_3nor_data(num_samples, 3)
-    
+    data, labels = generate_xxor_data(num_samples)
+    #data, labels = generate_xor_data(num_samples)
+    #data, labels = generate_3nor_data(num_samples, 3)    
     # move from +-1 to 0,1
     labels = (labels + 1) / 2
     
     data = data.float()
-    # data = data / DATA_MAX
-    data = (data + DATA_MAX) / (2. * DATA_MAX)
-    labels = labels.long()    
+    labels = labels.long()        
+    print(f'data min: {torch.min(data)}, data max: {torch.max(data)}')
+
+    # data from -1/+1 -> 0/1
+    #data = (data + 1.) / 2.    
 
     # Create a TensorDataset and DataLoader
     dataset = TensorDataset(data, labels)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     
     model = DiffLogicClassifier(**dlopt)
+    #model = StackLogicClassifier(**dlopt)
     #model = MLPClassifier(input_dim=2, hidden_dim=dlopt['num_neurons'], output_dim=2, num_layers=dlopt['num_layers'])
     
     model.eval()

@@ -1,7 +1,22 @@
 import torch
 import numpy as np
-from functional_ptf import multi_op_s, get_unique_connections, GradFactor, GetFunctionText, GetNumFunctions
+from pfunctional import bin_op_s, get_unique_connections, GradFactor
 
+#######################################################################################################################
+DL_FUNCTIONS = [    
+    "and",
+    "a",
+    "b",
+    "or",
+    "one",
+    "zero",
+]
+
+def GetFunctionText(D, i):   
+    return DL_FUNCTIONS[i]    
+
+def GetNumFunctions(D):
+    return 6    
 
 class LogicLayer(torch.nn.Module):
     """
@@ -11,7 +26,6 @@ class LogicLayer(torch.nn.Module):
             self,
             in_dim: int,
             out_dim: int,
-            fan_in: int = 2,
             device: str = 'cpu',
             grad_factor: float = 1.,
             implementation: str = None,
@@ -25,20 +39,15 @@ class LogicLayer(torch.nn.Module):
         :param implementation: implementation to use (options: 'cuda' / 'python'). cuda is around 100x faster than python
         :param connections: method for initializing the connectivity of the logic gate net
         """
-        super().__init__()                
+        super().__init__()
+        #weightInit = torch.zeros(out_dim, 6, device=device)
+        #weightInit[:,0:4] = torch.randn(out_dim, 4, device=device)        
+        #self.weights = torch.nn.parameter.Parameter(weightInit)
+        self.weights = torch.nn.parameter.Parameter(torch.randn(out_dim, 6, device=device))
         self.in_dim = in_dim
-        self.fan_in = fan_in
-        if self.fan_in > self.in_dim:
-            self.fan_in = self.in_dim
         self.out_dim = out_dim
         self.device = device
         self.grad_factor = grad_factor
-        
-        #paramInit = torch.randn(out_dim, GetNumFunctions(self.fan_in), device=device)
-        paramInit = torch.zeros(out_dim, GetNumFunctions(self.fan_in), device=device)
-        for oi in range(out_dim):
-            paramInit[oi][oi] = 1.0
-        self.weights = torch.nn.parameter.Parameter(paramInit)
 
         """
         The CUDA implementation is the fast implementation. As the name implies, the cuda implementation is only 
@@ -46,11 +55,17 @@ class LogicLayer(torch.nn.Module):
         1. To provide an easy-to-understand implementation of differentiable logic gate networks 
         2. To provide a CPU implementation of differentiable logic gate networks 
         """
-        self.implementation = 'python'
-        self.connections = connections        
-        assert self.connections in ['random', 'unique'], self.connections
+        self.implementation = implementation
+        if self.implementation is None and device == 'cuda':
+            self.implementation = 'cuda'
+        elif self.implementation is None and device == 'cpu':
+            self.implementation = 'python'
+        assert self.implementation in ['cuda', 'python'], self.implementation
 
-        self.indices = self.get_connections(self.connections, self.fan_in, device)
+        self.connections = connections
+        assert self.connections in ['random', 'unique'], self.connections
+        self.indices = self.get_connections(self.connections, device)
+
         self.num_neurons = out_dim
         self.num_weights = out_dim
 
@@ -63,54 +78,34 @@ class LogicLayer(torch.nn.Module):
     def forward_python(self, x):
         assert x.shape[-1] == self.in_dim, (x[0].shape[-1], self.in_dim)
 
-        inputs = []
-        for i in range(len(self.indices)):      
-            
-            #if self.indices[i].dtype == torch.int64:
-            #    self.indices[i] = self.indices[i].long()
-            a = x[..., self.indices[i]]
-            inputs.append(a)
-        
-        numFunctions = GetNumFunctions(self.fan_in)
+        if self.indices[0].dtype == torch.int64 or self.indices[1].dtype == torch.int64:
+            #print(self.indices[0].dtype, self.indices[1].dtype)
+            self.indices = self.indices[0].long(), self.indices[1].long()
+            #print(self.indices[0].dtype, self.indices[1].dtype)
 
-        if self.training:               
-            x = multi_op_s(inputs, torch.nn.functional.softmax(self.weights, dim=-1))
+        a, b = x[..., self.indices[0]], x[..., self.indices[1]]
+        if self.training:            
+            x = bin_op_s(a, b, torch.nn.functional.softmax(self.weights, dim=-1))
         else:            
-            weights = torch.nn.functional.one_hot(self.weights.argmax(-1), numFunctions).to(torch.float32)
-            x = multi_op_s(inputs, weights)
+            weights = torch.nn.functional.one_hot(self.weights.argmax(-1), 6).to(torch.float32)
+            x = bin_op_s(a, b, weights)
         return x
 
     def extra_repr(self):
         return '{}, {}, {}'.format(self.in_dim, self.out_dim, 'train' if self.training else 'eval')
 
-    def get_connections(self, connections, fan_in=2, device='cuda'):
+    def get_connections(self, connections, device='cuda'):
         assert self.out_dim * 2 >= self.in_dim, 'The number of neurons ({}) must not be smaller than half of the ' \
                                                 'number of inputs ({}) because otherwise not all inputs could be ' \
                                                 'used or considered.'.format(self.out_dim, self.in_dim)
-        
         if connections == 'random':
-            
-            c = torch.zeros((self.fan_in, self.out_dim), dtype=torch.int64, device=device)
-
-            for j in range(self.out_dim):
-                # i want c[:,j] to be a permutation of the in_dim
-                c[:, j] = torch.randperm(self.in_dim)[:self.fan_in]
-            
-            print(f'c: {c}')    
-            return c
-        
-        if connections == 'random2':
-            c = torch.randperm(self.fan_in * self.out_dim) % self.in_dim
+            c = torch.randperm(2 * self.out_dim) % self.in_dim
             c = torch.randperm(self.in_dim)[c]
-            c = c.reshape(self.fan_in, self.out_dim)                    
-
-            for i in range(self.fan_in):
-                c[i] = c[i].to(torch.int64)            
-                c[i] = c[i].to(device)
-
-            print(f'c: {c}')                
-            return c
-        
+            c = c.reshape(2, self.out_dim)
+            a, b = c[0], c[1]
+            a, b = a.to(torch.int64), b.to(torch.int64)
+            a, b = a.to(device), b.to(device)
+            return a, b
         elif connections == 'unique':
             return get_unique_connections(self.in_dim, self.out_dim, device)
         else:

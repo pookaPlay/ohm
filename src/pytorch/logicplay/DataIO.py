@@ -10,17 +10,19 @@ def generate_xxor_data(n_samples):
     cls = 1
     allx = []
     ally = []
+    cl = cls
     for yi in range(4):
-        cl = cls
-        cls = cls * -1
+        #cl = cls  
+        cl = cl * -1      
         xt = -0.75
         for xi in range(4):
             xm = var * np.random.randn(nper, 2) + [xt, yt]
-            
-            if (yi < 2 and xi < 2) or (yi >= 2 and xi >= 2):
-                cl = 1
-            else:
-                cl = -1
+
+            if 0:   
+                if (yi < 2 and xi < 2) or (yi >= 2 and xi >= 2):
+                    cl = 1
+                else:
+                    cl = -1
 
             ym = cl*np.ones(nper) 
             allx.append(xm)

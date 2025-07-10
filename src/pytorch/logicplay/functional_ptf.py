@@ -76,7 +76,31 @@ import numpy as np
 #     return r
 
 def GetFunctionText(D, i):   
-    D2 = 2*D
+    return GetFunctionTextPos(D, i)
+    #return GetFunctionTextNeg(D, i)
+
+def GetNumFunctions(D):
+    return GetNumFunctionsPos(D)
+    #return GetNumFunctionsNeg(D)
+
+def GetNumFunctionsPos(D):
+    return D+4
+
+def GetFunctionTextPos(D, i):       
+    if i < D:
+        ret =f'In{i}'
+    elif i == D:
+        ret = 'zero'
+    elif i == D+1:
+        ret = 'one'
+    elif i == D+2:
+        ret = 'prod'
+    elif i == D+3:
+        ret = 'sum-prod'
+    return ret
+
+def GetFunctionTextNeg(D, i):   
+    D2 = 2*D    
     if i < D:
         ret =f'In{i}'
     elif i < D2:
@@ -95,10 +119,35 @@ def GetFunctionText(D, i):
         ret = '1-(sum-prod)'
     return ret
 
-def GetNumFunctions(D):
+def GetNumFunctionsNeg(D):
     return 2*D+6
 
-def multi_op(inputs, index):    
+def multi_op(inputs, index):   
+    return multi_op_pos(inputs, index)
+    #return multi_op_neg(inputs, index)
+
+def multi_op_pos(inputs, index): 
+    D = len(inputs)    
+    inputs_tensor = torch.stack(inputs, dim=0)
+    #print(f'inputs_tensor: {inputs_tensor.shape}')
+    prodval = torch.prod(inputs_tensor, dim=0)
+    sumval = torch.sum(inputs_tensor, dim=0)
+    maxval = torch.max(inputs_tensor, dim=0).values
+    minval = torch.min(inputs_tensor, dim=0).values
+    #print(f'From {D}, prodval: {prodval}, sumval: {sumval}, maxval: {maxval}, minval: {minval}')
+
+    if index < D:
+        return inputs[index]
+    elif index == D: 
+        return torch.zeros_like(inputs[0])
+    elif index == D+1:
+        return torch.ones_like(inputs[0])    
+    elif index == D+2:        
+        return prodval
+    elif index == D+3:        
+        return sumval-prodval
+    
+def multi_op_neg(inputs, index): 
     D = len(inputs)
     D2 = 2*D
     inputs_tensor = torch.stack(inputs, dim=0)
@@ -124,9 +173,7 @@ def multi_op(inputs, index):
     elif index == D2+4:        
         return 1-prodval
     elif index == D2+5:        
-        return 1-(sumval-prodval)
-    
-    
+        return 1-(sumval-prodval)    
 
 def multi_op_s(inputs, i_s):        
     numFuncs = GetNumFunctions(len(inputs))

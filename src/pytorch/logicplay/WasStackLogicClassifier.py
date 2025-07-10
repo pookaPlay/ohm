@@ -4,16 +4,17 @@ import torch.optim as optim
 import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, TensorDataset
-from difflogic_ptf import LogicLayer, GroupSum, GetFunctionText, GetNumFunctions
+#from difflogic_ptf import LogicLayer, GroupSum, GetFunctionText, GetNumFunctions
+from difflogic import LogicLayer, GroupSum, GetFunctionText, GetNumFunctions
 import random
 
-class PTFLogicClassifier(nn.Module):
+class StackLogicClassifier(nn.Module):
 
     def __init__(self, param):
 
-        super(PTFLogicClassifier, self).__init__()
+        super(StackLogicClassifier, self).__init__()
         
-        in_dim = 2 
+        in_dim = 2*2 
         class_count = 2        
         tau = 1.        
 
@@ -36,12 +37,46 @@ class PTFLogicClassifier(nn.Module):
             *logic_layers,
             GroupSum(class_count, tau)
         )
-                
-    def forward(self, x):        
-        tx = (x > 0.0).to(torch.float32)        
-        ret  = self.model(tx)
 
-        return ret
+                
+    def forward(self, x):
+        N = x.shape[0]
+        D = x.shape[1]
+        D2 = 2*D
+
+        outD = 2        
+        numThresh = 2
+
+        flags = torch.zeros([N, D2, outD])        
+        results = torch.zeros([N, numThresh, outD, numThresh])
+         
+        mx = torch.cat([x, -x], dim=1)        
+        input_values = torch.zeros_like(mx)
+        #print(f'mx: {mx.shape}')
+        thresh = 0.0
+        for ti in range(numThresh):
+                                    
+            tx = (mx > thresh).to(torch.float32)
+
+            for ni in range(N):            
+                for oi in range(outD):
+                    for di in range(D2):            
+                        if flags[ni, di, oi] == 0:
+                            input_values[ni, di] = tx[ni,di]
+            
+            rt = self.model(input_values)
+            assert rt.shape[1] == outD
+
+            results[:,ti,:] = rt
+            
+            for ni in range(N):            
+                for oi in range(outD):
+                    for di in range(D2):
+                        if flags[ni, di, oi] == 0:
+                            if input_values[ni,di] != results[ni,ti, oi]:
+                                flags[ni, di, oi] = 1
+        
+        return results
     
     def extra_repr(self):
         lfns = ''

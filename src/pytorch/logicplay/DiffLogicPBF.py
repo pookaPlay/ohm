@@ -6,11 +6,11 @@ import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, TensorDataset
 from difflogic import LogicLayer, GroupSum, DL_FUNCTIONS
 
-class DiffLogicClassifier(nn.Module):
+class DiffLogicPBF(nn.Module):
 
     def __init__(self, num_neurons=4, num_layers=2, connections = 'random'):
 
-        super(DiffLogicClassifier, self).__init__()
+        super(DiffLogicPBF, self).__init__()
         
         in_dim = 2 
         class_count = 2
@@ -39,9 +39,9 @@ class DiffLogicClassifier(nn.Module):
         #print(f'total_num_weights={total_num_weights}')        
 
     def forward(self, x):
-        #tx = (x > 0.0).to(torch.float32)        
-        #ret  = self.model(tx)
-        ret  = self.model(x)
+        tx = (x > 0.0).to(torch.float32)        
+        ret  = self.model(tx)
+        #ret  = self.model(x)
         return ret
     
     def extra_repr(self):

@@ -74,13 +74,13 @@ def visualize_decision_surface(model, data, labels, ax):
     
     #Z = torch.where(Z >= 0, 1, 0)  # Threshold Z at 0
     #Z = Z.reshape(xx.shape)
-    print(f'Z: {Z.shape} min: {torch.min(Z)}, max: {torch.max(Z)}')
+    # print(f'Z: {Z.shape} min: {torch.min(Z)}, max: {torch.max(Z)}')
     #print(Z)    
     IZ = Z.argmax(dim=1).reshape(xx.shape)        
     # get the max value of Z
 
     # put a square of zeros in the range -DATA_MAX/4 to DATA_MAX/4
-    print(f'IZ: {IZ.shape} min: {torch.min(IZ)}, max: {torch.max(IZ)}')
+    # print(f'IZ: {IZ.shape} min: {torch.min(IZ)}, max: {torch.max(IZ)}')
 
     ax.clear()
     ax.contourf(xx, yy, IZ, alpha=0.8) #, cmap='coolwarm')
@@ -91,12 +91,12 @@ if __name__ == "__main__":
     # Hyperparameters    
     num_samples = 100
     batch_size = 10
-    num_epochs = 50
+    num_epochs = 200
     viz_epoch = 1
     
     dlopt = dict(
-        num_neurons = 2, 
-        num_layers = 1, 
+        num_neurons = 4, 
+        num_layers = 4, 
         connections = 'random',
         fan_in = 2,
         grad_factor = 1.0,       
@@ -106,25 +106,19 @@ if __name__ == "__main__":
     # linear 
     #learning_rate = 0.0001
     learning_rate = 0.01
-        
     # Generate data
-    data, labels = generate_linear_data(num_samples)
-    #data, labels = generate_xxor_data(num_samples)
+    #data, labels = generate_linear_data(num_samples)
+    data, labels = generate_xxor_data(num_samples)
     #data, labels = generate_xor_data(num_samples)
     #data, labels = generate_3nor_data(num_samples, 3)
     
     # move from +-1 to 0,1
     labels = (labels + 1) / 2
-    
+    labels = labels.long()    
+
     data = data.float()
     # print the data min and max 
-    print(f'data min: {torch.min(data)}, data max: {torch.max(data)}')
-    
-    # move from +-1 to 0,1
-    #dataOrig = (data + DATA_MAX) / (2. * DATA_MAX)
-    #data = dataOrig
-    
-    labels = labels.long()    
+    print(f'data min: {torch.min(data)}, data max: {torch.max(data)}')    
 
     # Create a TensorDataset and DataLoader
     dataset = TensorDataset(data, labels)

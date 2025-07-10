@@ -22,6 +22,12 @@ DL_FUNCTIONS = [
     "one",
 ]
 
+def GetFunctionText(D, i):   
+    return DL_FUNCTIONS[i]    
+
+def GetNumFunctions(D):
+    return 16    
+
 class LogicLayer(torch.nn.Module):
     """
     The core module for differentiable logic gate networks. Provides a differentiable logic gate layer.
