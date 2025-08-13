@@ -22,9 +22,9 @@ def main():
     pyrtl_masks = [pyrtl.Input(bitwidth=1, name=f'ma{i}') for i in range(D)]    
     pyrtl_lsbs = [pyrtl.Input(bitwidth=1, name=f'lsb{i}') for i in range(D)]
     pyrtl_threshold = pyrtl.Input(bitwidth=1, name=f'thresh')
-
+    pyrtl_sum = pyrtl.Output(bitwidth=1, name='sum')
     # Create the adder tree
-    sum_out = bs_masked_adder_tree(pyrtl_inputs, pyrtl_masks, pyrtl_lsbs, pyrtl_threshold)
+    pyrtl_sum <<= bs_masked_adder_tree(pyrtl_inputs, pyrtl_masks, pyrtl_lsbs, pyrtl_threshold)
     
     # Simulate the design
     sim_trace = pyrtl.SimulationTrace()
@@ -50,10 +50,10 @@ def main():
         
         #print(input_bits)
         sim.step(input_bits)
-        output_bits.append(sim.inspect(sum_out))
+        output_bits.append(sim.inspect(pyrtl_sum))
 
     # Collect the output bit-stream
-    other_bits = [sim_trace.trace['sum_out'][i] for i in range(bit_width+latency)]
+    #other_bits = [sim_trace.trace['sum'][i] for i in range(bit_width+latency)]
 
     # Deserialize output
     result = twos_complement_list_to_int(output_bits)

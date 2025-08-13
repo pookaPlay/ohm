@@ -8,7 +8,7 @@ def bs_masked_adder_tree(inputs, masks, lsbs, threshold):
     # Set reset as the logical OR of the lsbs    
     reset = pyrtl.WireVector(bitwidth=1, name='reset')
     reset <<= reduce(operator.or_, lsbs)
-    sum_output = pyrtl.Output(name='sum_out')    
+    #sum_output = pyrtl.Output(name='sum_out')    
 
     D = len(inputs)
     assert (D & (D - 1)) == 0, "Number of inputs must be a power of 2"
@@ -21,10 +21,10 @@ def bs_masked_adder_tree(inputs, masks, lsbs, threshold):
     while len(inputs) > 1:
         next_level = []
         for i in range(0, len(inputs), 2):
-            sum = bs_add(inputs[i], inputs[i + 1], reset)
+            sum  = bs_add(inputs[i], inputs[i + 1], reset)
             next_level.append(sum)
         inputs = next_level
 
-    sum_output <<= bs_add(inputs[0], threshold, reset)
+    sum_output = bs_add(inputs[0], threshold, reset)
 
     return sum_output
