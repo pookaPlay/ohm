@@ -38,7 +38,7 @@ def RUN_EXPERIMENT_test():
         'doneClip' : 0,
         'doneClipValue' : 0,               
         }
-
+    
     nx, ny, param = SetupExperiment(param)
     
     config1 = {

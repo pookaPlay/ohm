@@ -1,7 +1,7 @@
 from bls.DataReader import DataReader
 from bls.DataWriter import DataWriter
-from bls.OHM_POS import OHM_POS
-#from bls.OHM_BLOB import OHM
+#from bls.OHM_POS import OHM_POS
+from bls.OHM_BLOB import OHM
 from bls.lsbSource import lsbSource
 from bls.DataIO import SerializeLSBTwos, SerializeMSBTwos, SerializeMSBOffset, SerializeLSBOffset
 import random
@@ -44,7 +44,7 @@ def test_NODE(ptf):
     
     bp = [lsbSource(K, bZero) for _ in range(D)]            
 
-    ohm = OHM_POS(param)         
+    ohm = OHM(param)         
 
     output = DataWriter()    
     

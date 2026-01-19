@@ -14,9 +14,10 @@ def main():
     # Define the input and output wires
     input = pyrtl.Input(bitwidth=1, name='input')
     switch = pyrtl.Input(bitwidth=1, name='switch')
-
+    output = pyrtl.Output(bitwidth=1, name='output')
+    
     # Instantiate the switching_filo component
-    output  = bs_switching_filo(input, switch, STACK_DEPTH=STACK_DEPTH)
+    output <<= bs_switching_filo(input, switch, STACK_DEPTH=STACK_DEPTH)
 
     # Generate the DOT file
     generate_dot_file('filo.dot')

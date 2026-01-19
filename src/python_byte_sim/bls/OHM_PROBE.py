@@ -76,11 +76,11 @@ class OHM_PROBE:
         if fignum == 0:
             fig = plt.figure(1)
             fig.set_size_inches(4, 4)        
-            fig.canvas.manager.window.move(0, 600)
+            #fig.canvas.manager.window.move(0, 600)
         else:
             fig = plt.figure(10)    
             fig.set_size_inches(4, 4)        
-            fig.canvas.manager.window.move(950, 600)        
+            #fig.canvas.manager.window.move(950, 600)        
 
         ax1 = fig.add_subplot(311)
         ax2 = fig.add_subplot(312)
@@ -108,11 +108,11 @@ class OHM_PROBE:
         if fignum == 0:
             fig = plt.figure(2)
             fig.set_size_inches(10, 10)
-            fig.canvas.manager.window.move(0, 0)
+            #fig.canvas.manager.window.move(0, 0)
         else:
             fig = plt.figure(12)    
             fig.set_size_inches(10, 10)        
-            fig.canvas.manager.window.move(950, 0)        
+            #fig.canvas.manager.window.move(950, 0)        
 
                 
         K = self.param['memK']

@@ -174,8 +174,10 @@ class OHM_NETWORK:
 
                 if posUpdate == 1:
                     thresh[0] = thresh[0] + 1
+                    print(f"Pos thresh update")
                 else:
                     thresh[0] = thresh[0] - 1
+                    print(f"Neg  thresh update")
 
                 if thresh[0] < 1:
                     thresh[0] = 1
@@ -184,7 +186,7 @@ class OHM_NETWORK:
                             assert(di >= 0)
                             #dii = GetNegativeIndex(di, len(weights))                
                             weights[di] = weights[di] + 1                
-                            #print(f"{li}:{si}: MAX (lower) at index {di}")                                
+                            print(f"{li}:{si}: MAX (lower) at index {di}")                                
                             self.stats['maxWeightIncrease'] = self.stats['maxWeightIncrease'] + 1
                                     
 
@@ -195,7 +197,7 @@ class OHM_NETWORK:
                             assert(di >= 0)
                             #dii = GetNegativeIndex(di, len(weights))
                             weights[di] = weights[di] + 1
-                            #print(f"{li}:{si}: MIN (upper) at index {di}")
+                            print(f"{li}:{si}: MIN (upper) at index {di}")
                             self.stats['minWeightIncrease'] = self.stats['minWeightIncrease'] + 1
 
                 if li < (self.numLayers - 1):

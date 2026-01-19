@@ -11,6 +11,7 @@ def test_RunNode():
     
     input = [6, 1, 2]  # produces alternating 2 bit outputs
     input = [6, 7, 5]  # works with max    
+    #input = [6, -7, 5]  # works with max    
     input = [input.copy() for _ in range(rep)]
     
     ret = RunNode(input, ptf, NBitsIn, NBitsOut, NSteps)    

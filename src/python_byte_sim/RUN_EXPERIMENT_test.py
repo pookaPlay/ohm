@@ -15,10 +15,10 @@ torch.backends.cudnn.benchmark = False
 def RUN_EXPERIMENT_test():
 
     param = {
-        'numPoints': 1,
-        'inputDim': 100,
-        'numInputs': 10,
-        'numLayers': 20,
+        'numPoints': 2,
+        'inputDim': 2,
+        'numInputs': 1,
+        'numLayers': 1,
         'numIterations' : 1,        
         'numPermutations' : 1,
         'adaptWeights': 1, 
@@ -29,7 +29,7 @@ def RUN_EXPERIMENT_test():
         'clipAt': 127,    
         'printSample': 1,
         'printSampleLayer': 1,
-        'printIteration': 0,                
+        'printIteration': 1,                
         'printParameters': 0,            
         'printTicks' : 0,
         'applyToMap': 0,

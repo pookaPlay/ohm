@@ -18,7 +18,7 @@ def test_V0_V1():
         'numPoints': 1,
         'inputDim': 10,
         'numInputs': 3,
-        'numLayers': 1,
+        'numLayers': 10,
         'numIterations' : 1,        
         'numPermutations' : 0,
         'adaptWeights': 0, 
@@ -35,10 +35,11 @@ def test_V0_V1():
         'applyToMap': 0,
         'runMovie': 0,
         'doneClip' : 0,
-        'doneClipValue' : 0,               
+        'doneClipValue' : 0,      
+        'expType' : 'sort'         
         }
 
-    nx, param = SetupExperiment(param)
+    nx, ny, param = SetupExperiment(param)
     
     config1 = {
         'expId': 0,                
@@ -47,7 +48,7 @@ def test_V0_V1():
         'adaptBias': 0,
     }
     param1 = UpdateParam(param, config1)    
-    RunNetwork(nx, param1)
+    RunNetwork(nx, ny, param1)
     
     print("Press 'q' to quit...")
     while True:

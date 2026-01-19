@@ -3,8 +3,8 @@ import pyrtl
 
 def bs_switching_filo(input, switch, STACK_DEPTH=8):
     # This will switch mode the step after switch goes high
-    mode = pyrtl.Register(1, 'mode', 0)    
-    output = pyrtl.Output(bitwidth=1, name='output')
+    mode = pyrtl.Register(1, 'bs_mode', 0)    
+    output = pyrtl.WireVector(bitwidth=1, name='bs_out')
 
     with pyrtl.conditional_assignment:
         with switch:
