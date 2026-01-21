@@ -11,9 +11,11 @@ class msb2lsb:
         self.mode = 0                
         self.onSwitchStep = 1
         self.switchNext = 0
+        #self.transitionState = self.GetReadState()
 
     def InitState(self, input, K) -> None:
         self.state[1-self.mode] = SerializeMSBTwos(input, K)        
+        self.transitionState = self.GetReadState()
 
     def SwitchStep(self):
         return self.onSwitchStep 
@@ -39,20 +41,25 @@ class msb2lsb:
 
         return firstVal
     
-    def Step(self, input) -> None:        
-        readMode = 1 - self.mode
-        self.state[self.mode].append(input)
-        
-        if self.onSwitchStep == 1:
+    def Step(self, input) -> None:                
+        if self.onSwitchStep == 1:            
             self.onSwitchStep = 0                    
             self.switchNext = 0
-            
-        if len(self.state[readMode]) > 0:  # hold last one
+            # update current state estimate
+            self.transitionState = self.GetReadState()
+        
+        self.state[self.mode].append(input)
+        
+        readMode = 1 - self.mode            
+        if len(self.state[readMode]) > 0:  
             self.state[readMode].pop()
 
         if self.switchNext == 1:
             self.Switch()
         
+    def GetTransitionState(self):
+        return self.transitionState
+
     def GetReadState(self):
         readMode = 1 - self.mode
         state = DeserializeMSBTwos(self.state[readMode])

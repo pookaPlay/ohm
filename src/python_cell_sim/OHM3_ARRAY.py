@@ -7,7 +7,9 @@ class OHM3_ARRAY:
         self.D = 3
         self.K = K
         self.N = N        
-        self.ohmArray = [OHM3(ptf=ptf, debugDone=K, debugIndex=i) for i in range(self.N)]        
+        debugDone = K
+        
+        self.ohmArray = [OHM3(ptf=ptf, debugDone=debugDone, debugIndex=i) for i in range(self.N)]        
         self.weights = [0] * self.D
 
     def InitState(self, input) -> None:        
@@ -55,24 +57,20 @@ class OHM3_ARRAY:
             print(f"==================================================")
 
             self.Calc(bi) 
-
-            lsbIns = [ohmArray.lsbOut() for ohmArray in self.ohmArray]
-            for i, ohm in enumerate(self.ohmArray):
-                #ohm.Print(f"Cell {i} lsb({ohm.lsbOut()})")
-                if ohm.lsbOut() ==1:                      
-                    newstate = ohm.GetState()
-                    states[i] = newstate                    
+            
+            states = [ohmArray.GetState() for ohmArray in self.ohmArray]
             
             self.Step()            
 
 
 
-if __name__ == "__main__":
-    N = 4
+if __name__ == "__main__":    
     K = 4
-    state0 = [5, 2, -1, 7]
-    print(f"State0: {state0}")
-    ohm = OHM3_ARRAY(N, K, ptf="min")
+    state0 = [6, 3, 2, 5]
+    N = len(state0)
+        
+    print(f"State0({N}): {state0}")
+    ohm = OHM3_ARRAY(N, K, ptf="med")
     ohm.InitState(state0)
     ohm.Run(16)
 

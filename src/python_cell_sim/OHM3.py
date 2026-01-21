@@ -36,7 +36,7 @@ class OHM3:
         self.msb2lsb.InitState(input[1], K)
     
     def GetState(self):
-        state = self.msb2lsb.GetReadState()
+        state = self.msb2lsb.GetTransitionState()
         return state
 
 
