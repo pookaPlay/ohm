@@ -45,22 +45,23 @@ class OHM3_ARRAY:
         [ohmArray.Reset() for ohmArray in self.ohmArray] 
         
     def Run(self, NSteps) -> None:      
-
         # self.ohmArray[1].Print()
 
         states = [ohmArray.GetState() for ohmArray in self.ohmArray]
 
         for bi in range(NSteps):
-            print(f"========================================")            
-            print(f"={bi}:  {states}")                        
+            print(f"= STEP {bi} ======================================")            
+            print(f"= {states}")                        
+            print(f"==================================================")
+
             self.Calc(bi) 
 
             lsbIns = [ohmArray.lsbOut() for ohmArray in self.ohmArray]
-            for i, ohm in enumerate(self.ohmArray):                
-                if ohm.lsbOut() ==1:                    
+            for i, ohm in enumerate(self.ohmArray):
+                #ohm.Print(f"Cell {i} lsb({ohm.lsbOut()})")
+                if ohm.lsbOut() ==1:                      
                     newstate = ohm.GetState()
-                    states[i] = newstate
-                    #ohm.Print(f"Cell {i}")            
+                    states[i] = newstate                    
             
             self.Step()            
 
@@ -69,7 +70,7 @@ class OHM3_ARRAY:
 if __name__ == "__main__":
     N = 4
     K = 4
-    state0 = [6, 2, 9, 1]
+    state0 = [-6, -2, 5, 1]
     print(f"State0: {state0}")
     ohm = OHM3_ARRAY(N, K, ptf="med")
     ohm.InitState(state0)

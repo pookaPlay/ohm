@@ -76,17 +76,18 @@ class OHM3:
             if lsb[i] == 1:
                 self.lsb2msbs[i].Switch()                                            
                 self.flags[i] = 0                
-
-        # Get the inputs for the PBF
-        inputs = [self.lsb2msbs[i].Output() for i in range(self.d)]
+                self.latchInput[i] = self.lsb2msbs[i].Output()                
+            else:
+                if self.flags[i] == 0:
+                    self.latchInput[i] = self.lsb2msbs[i].Output()
 
         # Calc PBF
-        self.pbf.Calc(inputs)
+        self.pbf.Calc(self.latchInput)
         #self.pbf.Print(" ")
         
         for i in range(self.d):
             if self.flags[i] == 0:
-                if inputs[i] != self.pbf.Output():
+                if self.latchInput[i] != self.pbf.Output():
                     self.flags[i] = 1                    
 
         if self.debugDone <= 0:
@@ -122,12 +123,13 @@ class OHM3:
             self.msb2lsb.Step(self.pbf.Output())
 
         for i in range(self.d):
-            self.lsb2msbs[i].Step(self.addp[i].Output(), self.flags[i])                                     
+            self.lsb2msbs[i].Step(self.addp[i].Output())                                     
             self.addp[i].Step()  
             
 
     def Print(self, prefix="", showInput=1) -> None:
-        print(f"{prefix} ==============================")        
+        print(f"{prefix}")
+        print(f"------------------------------------")
         if showInput:            
             for i in range(self.d):                
                 inputPrefix = f"   x{i}-"
@@ -135,8 +137,8 @@ class OHM3:
                 #self.addp[i].Print(prefix)
                 self.lsb2msbs[i].Print()                        
         
-        print(f"{prefix} =Output =====")
+        print(f"- Output ---------")
         self.pbf.Print(" ")
         self.msb2lsb.Print()        
-        print(f"==================================")        
+        print(f"------------------------------------")
 
