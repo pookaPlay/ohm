@@ -28,7 +28,7 @@ class lsb2msb:
 
         if self.onSwitchStep == 1:
             # negate msb
-            print(f"  - Negating MSB")
+            #print(f"  - Negating MSB")
             firstVal = 1 - firstVal
 
         return firstVal

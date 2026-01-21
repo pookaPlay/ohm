@@ -34,7 +34,12 @@ class OHM3:
         self.lsb2msbs[1].InitState(input[1], K)
         self.lsb2msbs[2].InitState(input[2], K)
         self.msb2lsb.InitState(input[1], K)
-        
+    
+    def GetState(self):
+        state = self.msb2lsb.GetReadState()
+        return state
+
+
     def Reset(self) -> None:
         self.flags = list(self.d * [0])                        
         self.latchInput = list(self.d * [0])
@@ -46,7 +51,10 @@ class OHM3:
         for i in range(self.d):
             self.addp[i].Reset()            
             self.lsb2msbs[i].Reset()            
-                    
+
+    def doneOut(self) -> int:
+        return self.done
+
                     
     def lsbOut(self) -> int:
         return self.msb2lsb.SwitchStep()
@@ -81,33 +89,37 @@ class OHM3:
                 if inputs[i] != self.pbf.Output():
                     self.flags[i] = 1                    
 
-        if self.debugDone == 0:
+        if self.debugDone <= 0:
             if self.done == 0:
                 if (sum(self.flags) == (self.d-1)):                
                     self.done = 1
                     self.msb2lsb.SetSwitchNext()
             else:
                 self.done = 0                   
+            if self.done == 1:
+                print(f"-- DONE --")
+                print(f" FLG: {self.flags} -> {self.done}")
         else:
             if self.debugTicks > 0:                     
-                if (self.debugTicks % self.debugDone) == 0:
+                if ((self.debugTicks+1) % self.debugDone) == 0:
                     self.done = 1
                     self.msb2lsb.SetSwitchNext()
-        if self.done == 1:
-            print(f"-- DONE --")
-            print(f" FLG: {self.flags} -> {self.done}")
+            if self.done == 1:
+                print(f"-- DEBUG DONE --")                
         
         
     # State stuff goes here
     def Step(self) -> None:        
         self.debugTicks += 1
+        #if self.done:
 
-        #print(f"OHM STEP t={self.debugTicks}")
-        if self.done == 1:
+        # Reset done
+        self.done = 0
+        #print(f"OHM STEP t={self.debugTicks}")        
+        if self.msb2lsb.SwitchStep() == 1:
             self.msb2lsb.Step(1 - self.pbf.Output())               
         else:
             self.msb2lsb.Step(self.pbf.Output())
-
 
         for i in range(self.d):
             self.lsb2msbs[i].Step(self.addp[i].Output(), self.flags[i])                                     
@@ -115,16 +127,16 @@ class OHM3:
             
 
     def Print(self, prefix="", showInput=1) -> None:
-        print(f"==============================")
+        print(f"{prefix} ==============================")        
         if showInput:            
             for i in range(self.d):                
-                prefix = f"   x{i}-"
+                inputPrefix = f"   x{i}-"
                 #self.wp[i].Print(prefix)
                 #self.addp[i].Print(prefix)
-                self.lsb2msbs[i].Print(prefix)                        
-
-        prefix = "  "
-        print(f" =Output =====")
+                self.lsb2msbs[i].Print()                        
+        
+        print(f"{prefix} =Output =====")
         self.pbf.Print(" ")
-        self.msb2lsb.Print(prefix)        
+        self.msb2lsb.Print()        
+        print(f"==================================")        
 

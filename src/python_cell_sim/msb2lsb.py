@@ -19,7 +19,7 @@ class msb2lsb:
         return self.onSwitchStep 
 
     def Switch(self):
-        print(f"M2L: Switching mem")
+        #print(f"M2L: Switching mem")
         self.mode = 1 - self.mode
         self.onSwitchStep = 1        
         self.switchNext = 0
@@ -40,18 +40,24 @@ class msb2lsb:
         return firstVal
     
     def Step(self, input) -> None:        
-        
+        readMode = 1 - self.mode
         self.state[self.mode].append(input)
         
         if self.onSwitchStep == 1:
             self.onSwitchStep = 0                    
+            self.switchNext = 0
             
-        if len(self.state[1 - self.mode]) > 0:  # hold last one
-            self.state[1 - self.mode].pop()                    
+        if len(self.state[readMode]) > 0:  # hold last one
+            self.state[readMode].pop()
 
         if self.switchNext == 1:
             self.Switch()
         
+    def GetReadState(self):
+        readMode = 1 - self.mode
+        state = DeserializeMSBTwos(self.state[readMode])
+        return state
+
     def Print(self, prefix="") -> None:                
         if (len(self.state[0]) > 2):
             #mem0off = DeserializeMSBOffset(self.state[0])
