@@ -70,9 +70,9 @@ class OHM3_ARRAY:
 if __name__ == "__main__":
     N = 4
     K = 4
-    state0 = [-6, -2, 5, 1]
+    state0 = [5, 2, -1, 7]
     print(f"State0: {state0}")
-    ohm = OHM3_ARRAY(N, K, ptf="med")
+    ohm = OHM3_ARRAY(N, K, ptf="min")
     ohm.InitState(state0)
     ohm.Run(16)
 
