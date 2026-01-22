@@ -36,8 +36,11 @@ class OHM3:
         self.msb2lsb.InitState(input[1], K)
     
     def GetState(self):
-        state = self.msb2lsb.GetTransitionState()
-        return state
+        #state, lenn = self.msb2lsb.GetTransitionState()
+        state, lenn = self.msb2lsb.GetReadState()
+        ss = self.msb2lsb.onSwitchStep
+
+        return state, lenn, ss
 
 
     def Reset(self) -> None:
@@ -76,10 +79,12 @@ class OHM3:
             if lsb[i] == 1:
                 self.lsb2msbs[i].Switch()                                            
                 self.flags[i] = 0                
-                self.latchInput[i] = self.lsb2msbs[i].Output()                
+                if self.lsb2msbs[i].GotOutput() == 1:
+                    self.latchInput[i] = self.lsb2msbs[i].Output()                
             else:
                 if self.flags[i] == 0:
-                    self.latchInput[i] = self.lsb2msbs[i].Output()
+                    if self.lsb2msbs[i].GotOutput() == 1:
+                        self.latchInput[i] = self.lsb2msbs[i].Output()
 
         # Calc PBF
         self.pbf.Calc(self.latchInput)
@@ -95,18 +100,21 @@ class OHM3:
                 if (sum(self.flags) == (self.d-1)):                
                     self.done = 1
                     self.msb2lsb.SetSwitchNext()
-            else:
-                self.done = 0                   
-            if self.done == 1:
-                print(f"-- DONE --")
-                print(f" FLG: {self.flags} -> {self.done}")
         else:
             if self.debugTicks > 0:                     
                 if ((self.debugTicks+1) % self.debugDone) == 0:
                     self.done = 1
                     self.msb2lsb.SetSwitchNext()
-            if self.done == 1:
-                print(f"-- DEBUG DONE --")                
+        
+        # check if have anything to output
+        if self.done == 0:
+            if self.msb2lsb.GotOutput() == 0:
+                self.done = 1
+                self.msb2lsb.SetSwitchNext()
+        
+        if self.done == 2:
+            print(f"-- {self.debugIndex} DONE on tick {self.debugTicks}")
+            print(f"-- FLG: {self.flags} -> {self.done}")
         
         
     # State stuff goes here
@@ -115,30 +123,32 @@ class OHM3:
         #if self.done:
 
         # Reset done
-        self.done = 0
+                
         #print(f"OHM STEP t={self.debugTicks}")        
         if self.msb2lsb.SwitchStep() == 1:
             self.msb2lsb.Step(1 - self.pbf.Output())               
+            self.done = 0
         else:
             self.msb2lsb.Step(self.pbf.Output())
+            #self.done = 0
 
         for i in range(self.d):
             self.lsb2msbs[i].Step(self.addp[i].Output())                                     
             self.addp[i].Step()  
             
 
-    def Print(self, prefix="", showInput=1) -> None:
-        print(f"{prefix}")
-        print(f"------------------------------------")
+    def Print(self, prefix="", showInput=1, showOutput=1) -> None:
+        
+        print(f"{prefix} - Node {self.debugIndex} -- Done {self.done}---------------------------")
         if showInput:            
             for i in range(self.d):                
                 inputPrefix = f"   x{i}-"
                 #self.wp[i].Print(prefix)
                 #self.addp[i].Print(prefix)
                 self.lsb2msbs[i].Print()                        
-        
-        print(f"- Output ---------")
-        self.pbf.Print(" ")
-        self.msb2lsb.Print()        
-        print(f"------------------------------------")
+        if showOutput:            
+            #print(f"- Output ---------")
+            #self.pbf.Print(" ")
+            self.msb2lsb.Print()        
+            print(f"------------------------------------")
 

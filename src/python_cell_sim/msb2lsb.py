@@ -14,8 +14,9 @@ class msb2lsb:
         #self.transitionState = self.GetReadState()
 
     def InitState(self, input, K) -> None:
-        self.state[1-self.mode] = SerializeMSBTwos(input, K)        
-        self.transitionState = self.GetReadState()
+        readMode = 1 - self.mode
+        self.state[readMode] = SerializeMSBTwos(input, K)        
+        self.transitionState, self.transitionLenn = self.GetReadState()
 
     def SwitchStep(self):
         return self.onSwitchStep 
@@ -23,6 +24,10 @@ class msb2lsb:
     def Switch(self):
         #print(f"M2L: Switching mem")
         self.mode = 1 - self.mode
+
+        # Whatever is left unread is discarded from new write mem
+        self.state[self.mode] = list()
+
         self.onSwitchStep = 1        
         self.switchNext = 0
                 
@@ -30,13 +35,20 @@ class msb2lsb:
         self.onSwitchStep = 0
         self.switchNext = 1
 
+    def GotOutput(self) -> int:        
+        readMode = 1 - self.mode    
+        if len(self.state[readMode]) > 0:
+            return 1
+        else:
+            return 0
+
     def Output(self) -> int:
         readMode = 1 - self.mode    
         #print(f"Reading with mode {readMode} of length {len(self.state[readMode])}")
         if len(self.state[readMode]) > 0:
             firstVal = self.state[readMode][-1]
         else:
-            print(f"WARNING: M2L out of POP!")
+            #print(f"WARNING: M2L out of POP!")
             firstVal = 0
 
         return firstVal
@@ -46,8 +58,9 @@ class msb2lsb:
             self.onSwitchStep = 0                    
             self.switchNext = 0
             # update current state estimate
-            self.transitionState = self.GetReadState()
+            self.transitionState, self.transitionLenn = self.GetReadState()
         
+        # Whatever is left unread is discarded from new write mem        
         self.state[self.mode].append(input)
         
         readMode = 1 - self.mode            
@@ -58,12 +71,17 @@ class msb2lsb:
             self.Switch()
         
     def GetTransitionState(self):
-        return self.transitionState
+        return self.transitionState, self.transitionLenn
 
     def GetReadState(self):
         readMode = 1 - self.mode
-        state = DeserializeMSBTwos(self.state[readMode])
-        return state
+        if len(self.state[readMode]) > 0:            
+            state = DeserializeMSBTwos(self.state[readMode])
+            lenn = len(self.state[readMode])
+        else:
+            state = 0
+            lenn = 0        
+        return state, lenn
 
     def Print(self, prefix="") -> None:                
         if (len(self.state[0]) > 2):

@@ -1,16 +1,19 @@
+import argparse
 import numpy as np
 from OHM3 import OHM3
 
 class OHM3_ARRAY:
 
-    def __init__(self, N, K, ptf="max"):
+    def __init__(self, N, K, ptf="max", debugDone=0):
         self.D = 3
         self.K = K
-        self.N = N        
-        debugDone = K
+        self.N = N                
         
         self.ohmArray = [OHM3(ptf=ptf, debugDone=debugDone, debugIndex=i) for i in range(self.N)]        
         self.weights = [0] * self.D
+
+    def Reset(self) -> None:                
+        [ohmArray.Reset() for ohmArray in self.ohmArray] 
 
     def InitState(self, input) -> None:        
         assert(len(input) == self.N)
@@ -21,11 +24,18 @@ class OHM3_ARRAY:
             
             nodeInputs = [leftInput, input[ni], rightInput]
             self.ohmArray[ni].InitState(nodeInputs, self.K)                        
+        
+        self.lastinputs = [ohmArray.Output() for ohmArray in self.ohmArray]            
 
     def Calc(self, bi) -> None:
 
+        #hasOutput = [ohmArray.msb2lsb.GotOutput() for ohmArray in self.ohmArray]
         inputs = [ohmArray.Output() for ohmArray in self.ohmArray]
         lsbIns = [ohmArray.lsbOut() for ohmArray in self.ohmArray]
+
+        #for i in range(len(hasOutput)):
+        #    if hasOutput[i] == 1:
+        #        inputs[i] = self.ohmArray[i].Output()
 
         for ni in range(self.N):
             leftInput = inputs[ni-1] if ni > 0 else inputs[self.N-1]
@@ -43,34 +53,46 @@ class OHM3_ARRAY:
         for ohmArray in self.ohmArray:            
             ohmArray.Step()
 
-    def Reset(self) -> None:                
-        [ohmArray.Reset() for ohmArray in self.ohmArray] 
-        
-    def Run(self, NSteps) -> None:      
+    def Print(self, prefix="", showInput=1, showOutput=1) -> None:
+        for ohmArray in self.ohmArray:
+            ohmArray.Print(prefix, showInput=showInput, showOutput=showOutput)
+
+    def Run(self, NSteps, verbose=0) -> None:      
         # self.ohmArray[1].Print()
 
-        states = [ohmArray.GetState() for ohmArray in self.ohmArray]
-
+        history = list() 
+        states, lenn, switchStep = zip(*[ohmArray.GetState() for ohmArray in self.ohmArray])
+        
+        
         for bi in range(NSteps):
-            print(f"= STEP {bi} ======================================")            
-            print(f"= {states}")                        
-            print(f"==================================================")
+            history.append(states)
+            #print(f"= STEP {bi} ======================================")            
+            print(f"{bi}: {states} from {lenn} on switch {switchStep}")                                
+            self.Calc(bi)             
+            if verbose > 0:
+                self.Print(f"{bi}:", showInput=0, showOutput=1)
 
-            self.Calc(bi) 
-            
-            states = [ohmArray.GetState() for ohmArray in self.ohmArray]
-            
+            states, lenn, switchStep = zip(*[ohmArray.GetState() for ohmArray in self.ohmArray])
             self.Step()            
 
-
+        print(f"History Length: {len(history)}")
+        
 
 if __name__ == "__main__":    
-    K = 4
-    state0 = [6, 3, 2, 5]
+    parser = argparse.ArgumentParser(description="OHM3 Array Simulation")
+    parser.add_argument("--K", type=int, default=4, help="Number of bits (K)")
+    parser.add_argument("--state0", type=int, nargs='+', default=[7, 1, 5, 2], help="Initial state list")
+    parser.add_argument("--ptf", type=str, default="max", help="PTF function (min, max, median)")
+    parser.add_argument("--debugDone", type=int, default=0, help="Debug done flag")
+    parser.add_argument("--steps", type=int, default=3, help="Number of steps to run")
+    parser.add_argument("--v", type=int, default=0, help="Print the node")
+    args = parser.parse_args()
+    
+    K = args.K
+    state0 = args.state0
     N = len(state0)
         
     print(f"State0({N}): {state0}")
-    ohm = OHM3_ARRAY(N, K, ptf="med")
+    ohm = OHM3_ARRAY(N, K, ptf=args.ptf, debugDone=args.debugDone)
     ohm.InitState(state0)
-    ohm.Run(16)
-
+    ohm.Run(args.steps, args.v)

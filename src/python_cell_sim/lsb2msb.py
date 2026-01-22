@@ -16,14 +16,21 @@ class lsb2msb:
     def InitState(self, input, K) -> None:
         self.state[self.mode] = SerializeLSBTwos(input, K)
         #self.state[1] = SerializeLSBTwos(input, K)
+    
+    def GotOutput(self) -> int:
+        readMode = 1 - self.mode    
+        if len(self.state[readMode]) > 0:
+            return 1
+        else:
+            return 0
 
     def Output(self) -> int:
         readMode = 1 - self.mode    
         
         if len(self.state[readMode]) > 0:
             firstVal = self.state[readMode][-1]
-        else:
-            #print(f"WARNING: L2M out of POP!")
+        else:            
+            #print(f"WARNING: L2M out of POP!")            
             firstVal = 0
 
         if self.onSwitchStep == 1:
@@ -37,6 +44,8 @@ class lsb2msb:
         self.mode = 1 - self.mode
         self.onSwitchStep = 1
         self.switchNext = 0
+        # Whatever is left unread is discarded from new write mem
+        self.state[self.mode] = list()
 
     def SetSwitchNext(self):        
         self.onSwitchStep = 0
