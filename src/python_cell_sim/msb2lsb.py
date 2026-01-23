@@ -16,6 +16,9 @@ class msb2lsb:
     def InitState(self, input, K) -> None:
         readMode = 1 - self.mode
         self.state[readMode] = SerializeMSBTwos(input, K)        
+        #self.state[self.mode] = SerializeMSBTwos(input, K)
+        #self.state[1 - self.mode] = SerializeMSBTwos(input, K)
+
         self.transitionState, self.transitionLenn = self.GetReadState()
 
     def SwitchStep(self):

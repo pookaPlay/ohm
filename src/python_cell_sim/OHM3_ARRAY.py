@@ -62,17 +62,27 @@ class OHM3_ARRAY:
 
         history = list() 
         states, lenn, switchStep = zip(*[ohmArray.GetState() for ohmArray in self.ohmArray])
-        
-        
+        switchStates = list(states)
+        switchLength = list(lenn)
+
         for bi in range(NSteps):
             history.append(states)
             #print(f"= STEP {bi} ======================================")            
-            print(f"{bi}: {states} from {lenn} on switch {switchStep}")                                
             self.Calc(bi)             
-            if verbose > 0:
+            if verbose > 1:
+                self.Print(f"{bi}:", showInput=1, showOutput=1)
+            elif verbose > 0:
                 self.Print(f"{bi}:", showInput=0, showOutput=1)
 
-            states, lenn, switchStep = zip(*[ohmArray.GetState() for ohmArray in self.ohmArray])
+
+            states, lenn, switchStep = zip(*[ohmArray.GetState() for ohmArray in self.ohmArray])            
+            #print(f"{bi}: {states} from {lenn} on switch {switchStep}")                                
+            for ni in range(self.N):
+                if switchStep[ni] == 1:
+                    switchStates[ni] = states[ni]
+                    switchLength[ni] = lenn[ni]            
+            print(f"{bi}: {switchStates} from {switchLength}")                                
+
             self.Step()            
 
         print(f"History Length: {len(history)}")
@@ -90,8 +100,8 @@ if __name__ == "__main__":
     
     K = args.K
     state0 = args.state0
-    N = len(state0)
-        
+    N = len(state0)    
+
     print(f"State0({N}): {state0}")
     ohm = OHM3_ARRAY(N, K, ptf=args.ptf, debugDone=args.debugDone)
     ohm.InitState(state0)

@@ -20,7 +20,9 @@ class OHM3:
         self.pbf = PTF(self.d)
         
         # Some presets for debugging
-        if ptf == "min":
+        if ptf == "sort":
+            self.pbf.SetSort(debugIndex, self.d)
+        elif ptf == "min":
             self.pbf.SetMin()
         elif ptf == "max":          
             self.pbf.SetMax()                           
@@ -57,7 +59,6 @@ class OHM3:
 
     def doneOut(self) -> int:
         return self.done
-
                     
     def lsbOut(self) -> int:
         return self.msb2lsb.SwitchStep()
@@ -106,7 +107,7 @@ class OHM3:
                     self.done = 1
                     self.msb2lsb.SetSwitchNext()
         
-        # check if have anything to output
+        # switch is we have anything to output?
         if self.done == 0:
             if self.msb2lsb.GotOutput() == 0:
                 self.done = 1
@@ -123,11 +124,12 @@ class OHM3:
         #if self.done:
 
         # Reset done
-                
+        self.done = 0
+
         #print(f"OHM STEP t={self.debugTicks}")        
         if self.msb2lsb.SwitchStep() == 1:
-            self.msb2lsb.Step(1 - self.pbf.Output())               
-            self.done = 0
+            # back to twos before entry! 
+            self.msb2lsb.Step(1 - self.pbf.Output())                                       
         else:
             self.msb2lsb.Step(self.pbf.Output())
             #self.done = 0
@@ -148,7 +150,7 @@ class OHM3:
                 self.lsb2msbs[i].Print()                        
         if showOutput:            
             #print(f"- Output ---------")
-            #self.pbf.Print(" ")
+            self.pbf.Print(" ")
             self.msb2lsb.Print()        
             print(f"------------------------------------")
 

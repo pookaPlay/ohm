@@ -10,6 +10,13 @@ class PTF:
         self.lastx = list(self.D * [0])
         self.strFunc = "med"
             
+    def SetSort(self, index, outOf) -> None:        
+        self.weights = list(self.D * [1])
+        self.threshold = index+1
+        if self.threshold > self.D:
+            self.threshold = self.D
+        self.strFunc = "sort"
+        print(f"sort init: {self.threshold}")
 
     def SetMin(self) -> None:
         self.weights = list(self.D * [1])
@@ -35,7 +42,8 @@ class PTF:
         self.y = 1 if temp >= self.threshold else 0        
 
     def Print(self, prefix=""):
-        print(f"{prefix} PTF({self.strFunc}): {self.lastx} -> {self.y}")
+        #print(f"{prefix} PTF({self.strFunc}): {self.lastx} -> {self.y}")
+        print(f"{prefix} PTF({self.weights}): {self.threshold}")
 
     def Step(self, x) -> None:
         self.Calc(x)

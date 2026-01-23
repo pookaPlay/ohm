@@ -14,7 +14,9 @@ class lsb2msb:
         self.switchNext = 0
 
     def InitState(self, input, K) -> None:
+        #self.state[1-self.mode] = SerializeLSBTwos(input, K)
         self.state[self.mode] = SerializeLSBTwos(input, K)
+        #self.state[1 - self.mode] = SerializeLSBTwos(input, K)
         #self.state[1] = SerializeLSBTwos(input, K)
     
     def GotOutput(self) -> int:
@@ -33,9 +35,10 @@ class lsb2msb:
             #print(f"WARNING: L2M out of POP!")            
             firstVal = 0
 
+        # Twos complement negation here
         if self.onSwitchStep == 1:
             # negate msb
-            #print(f"  - Negating MSB")
+            # print(f"  - Negating MSB")
             firstVal = 1 - firstVal
 
         return firstVal
