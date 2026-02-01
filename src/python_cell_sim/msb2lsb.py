@@ -1,5 +1,5 @@
 from DataIO import SerializeMSBTwos, SerializeLSBTwos, SerializeMSBOffset, DeserializeLSBTwos, DeserializeMSBTwos, DeserializeLSBOffset, DeserializeMSBOffset
-
+import matplotlib.patches as patches
 
 class msb2lsb:    
     
@@ -11,13 +11,17 @@ class msb2lsb:
         self.mode = 0                
         self.onSwitchStep = 1
         self.switchNext = 0
+        self.lastVal = 0
         #self.transitionState = self.GetReadState()
 
-    def InitState(self, input, K) -> None:
+    def InitState(self, input, K, initMode=1) -> None:
         readMode = 1 - self.mode
-        self.state[readMode] = SerializeMSBTwos(input, K)        
-        #self.state[self.mode] = SerializeMSBTwos(input, K)
-        #self.state[1 - self.mode] = SerializeMSBTwos(input, K)
+        myZero = [0] * K
+
+        if initMode == 0:            
+            self.state[readMode] = myZero 
+        else:
+            self.state[readMode] = SerializeMSBTwos(input, K)                        
 
         self.transitionState, self.transitionLenn = self.GetReadState()
 
@@ -33,6 +37,7 @@ class msb2lsb:
 
         self.onSwitchStep = 1        
         self.switchNext = 0
+        self.lastVal = 0
                 
     def SetSwitchNext(self):        
         self.onSwitchStep = 0
@@ -50,16 +55,18 @@ class msb2lsb:
         #print(f"Reading with mode {readMode} of length {len(self.state[readMode])}")
         if len(self.state[readMode]) > 0:
             firstVal = self.state[readMode][-1]
+            self.lastVal = firstVal
+            #lastVal = self.state[readMode][-1]
         else:
             #print(f"WARNING: M2L out of POP!")
-            firstVal = 0
+            firstVal = self.lastVal
 
         return firstVal
     
     def Step(self, input) -> None:                
         if self.onSwitchStep == 1:            
             self.onSwitchStep = 0                    
-            self.switchNext = 0
+            #self.switchNext = 0
             # update current state estimate
             self.transitionState, self.transitionLenn = self.GetReadState()
         
@@ -109,4 +116,10 @@ class msb2lsb:
             print(f"R:{mem0} ({mem0off})")
             print(f"W:{mem1} ({mem1off})")                        
         
-
+    def Draw(self, ax, x, y, w, h):
+        rect = patches.Rectangle((x, y), w, h, linewidth=1, edgecolor='purple', facecolor='none')
+        ax.add_patch(rect)
+        l0 = len(self.state[0])
+        l1 = len(self.state[1])
+        mode_str = "W:0" if self.mode == 0 else "W:1"
+        ax.text(x + w/2, y + h/2, f"M2L\n{mode_str}\n[{l0}|{l1}]", ha='center', va='center', fontsize=8)

@@ -1,6 +1,8 @@
 ###################
 ## Bit Serial Adder
 
+import matplotlib.patches as patches
+
 class ADD:
     def __init__(self) -> None:        
         self.sum = 0
@@ -33,3 +35,8 @@ class ADD:
     def Step(self) -> None:                
         self.cin = self.cout
         #print(f"  After step ADD : {self.sum} and {self.cin}")
+
+    def Draw(self, ax, x, y, w, h):
+        rect = patches.Rectangle((x, y), w, h, linewidth=1, edgecolor='blue', facecolor='none')
+        ax.add_patch(rect)
+        ax.text(x + w/2, y + h/2, f"ADD\nS:{self.sum}\nC:{self.cout}", ha='center', va='center', fontsize=8)

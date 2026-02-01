@@ -1,4 +1,5 @@
 import math
+import matplotlib.patches as patches
 
 class PTF:
     def __init__(self, D=3) -> None:
@@ -51,3 +52,8 @@ class PTF:
 
     def Reset(self) -> None:
         self.y = 0
+
+    def Draw(self, ax, x, y, w, h):
+        rect = patches.Rectangle((x, y), w, h, linewidth=1, edgecolor='orange', facecolor='none')
+        ax.add_patch(rect)
+        ax.text(x + w/2, y + h/2, f"PTF\n{self.strFunc}\nY:{self.y}", ha='center', va='center', fontsize=8)
