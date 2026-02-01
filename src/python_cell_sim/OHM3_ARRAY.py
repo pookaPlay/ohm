@@ -107,6 +107,11 @@ class OHM3_ARRAY:
 
             if verbose > 2:
                 self.Draw()
+                # wait for key
+                plt.pause(0.1)
+                plt.waitforbuttonpress()
+                
+                
                 self.Print(f"{bi}:", showInput=1, showOutput=1)
             elif verbose > 1:
                 self.Print(f"{bi}:", showInput=1, showOutput=1)

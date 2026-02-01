@@ -204,3 +204,20 @@ class OHM3:
         m2l_y = y + h * 0.2
         m2l_h = h * 0.6
         self.msb2lsb.Draw(ax, m2l_x, m2l_y, comp_w, m2l_h)
+
+
+if  __name__ == "__main__":
+    
+    # test draw method
+    
+    fig, ax = plt.subplots()
+    ax.set_xlim(0, 200)
+    ax.set_ylim(0, 200)
+    ax.set_aspect('equal')
+    ax.axis('off')
+
+    ohm = OHM3()
+    ohm.InitState([7, 5, 2], 4)    
+    ohm.Draw(ax, 0, 0, 200, 200)    
+
+    plt.show()  

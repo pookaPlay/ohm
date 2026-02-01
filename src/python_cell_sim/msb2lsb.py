@@ -117,9 +117,51 @@ class msb2lsb:
             print(f"W:{mem1} ({mem1off})")                        
         
     def Draw(self, ax, x, y, w, h):
-        rect = patches.Rectangle((x, y), w, h, linewidth=1, edgecolor='purple', facecolor='none')
+        print(f"Drawing M2L to canvas {x}, {y}, {w}, {h}")
+
+        box_h = min(h / 10, w / 2.5)
+        gap = box_h * 0.2
+
+        # Calculate column positions
+        x_left = x + (w/2 - box_h)/2
+        x_left = x + gap 
+        x_right = x + 2*gap + box_h
+
+        # Shrink the first green rectangle so that it contains both columns with a small gap on all sides.
+        rect_x = x_left - gap
+        rect_w = (x_right + box_h + gap) - rect_x
+        
+        stack_left = self.state[self.mode]
+        stack_right = self.state[1-self.mode]
+        rect_h = max(len(stack_left), len(stack_right)) * box_h + 3 * gap
+
+        rect = patches.Rectangle((rect_x, y+gap), rect_w, rect_h, linewidth=1, edgecolor='green', facecolor='none')
         ax.add_patch(rect)
-        l0 = len(self.state[0])
-        l1 = len(self.state[1])
-        mode_str = "W:0" if self.mode == 0 else "W:1"
-        ax.text(x + w/2, y + h/2, f"M2L\n{mode_str}\n[{l0}|{l1}]", ha='center', va='center', fontsize=8)
+
+        # Draw status boxes above the columns
+        status_y = y + rect_h + 2 * gap
+        
+        rect_ss = patches.Rectangle((x_left, status_y), box_h, box_h, linewidth=1, edgecolor='black', facecolor='lightgray' if self.mode else 'white')
+        ax.add_patch(rect_ss)
+        ax.text(x_left + box_h/2, status_y + box_h/2, f"{self.mode}", ha='center', va='center', fontsize=8)
+
+        rect_sn = patches.Rectangle((x_right, status_y), box_h, box_h, linewidth=1, edgecolor='black', facecolor='lightgray' if self.onSwitchStep else 'white')
+        ax.add_patch(rect_sn)
+        ax.text(x_right + box_h/2, status_y + box_h/2, f"{self.onSwitchStep}", ha='center', va='center', fontsize=8)
+
+        # Top anchor for top-down drawing (inside the gap)
+        y_top_anchor = y + gap + rect_h - gap
+
+        # Left Stack: self.state[self.mode]
+        for j, val in enumerate(stack_left):
+            fc = 'lightgray' if val == 1 else 'white'
+            r = patches.Rectangle((x_left, y_top_anchor - (j+1)*box_h), box_h, box_h, linewidth=1, edgecolor='black', facecolor=fc)
+            ax.add_patch(r)
+            ax.text(x_left + box_h/2, y_top_anchor - (j+1)*box_h + box_h/2, str(val), ha='center', va='center', fontsize=8)
+
+        # Right Stack: self.state[1-self.mode]
+        for j, val in enumerate(stack_right):
+            fc = 'lightgray' if val == 1 else 'white'
+            r = patches.Rectangle((x_right, y_top_anchor - (j+1)*box_h), box_h, box_h, linewidth=1, edgecolor='black', facecolor=fc)
+            ax.add_patch(r)
+            ax.text(x_right + box_h/2, y_top_anchor - (j+1)*box_h + box_h/2, str(val), ha='center', va='center', fontsize=8)

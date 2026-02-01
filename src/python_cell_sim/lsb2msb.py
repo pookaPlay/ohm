@@ -24,6 +24,8 @@ class lsb2msb:
         elif initMode == 2:
             self.state[self.mode] = SerializeLSBTwos(input, K)
             self.state[1-self.mode] = SerializeLSBTwos(input, K)
+            self.state[1-self.mode].pop()
+            self.state[1-self.mode].pop()
     
     def GotOutput(self) -> int:
         readMode = 1 - self.mode    
@@ -106,11 +108,14 @@ class lsb2msb:
 
         # Calculate column positions
         x_left = x + (w/2 - box_h)/2
-        x_right = x + w/2 + (w/2 - box_h)/2
+        x_left = x + gap 
+        x_right = x + 2*gap + box_h
 
         # Shrink the first green rectangle so that it contains both columns with a small gap on all sides.
         rect_x = x_left - gap
         rect_w = (x_right + box_h + gap) - rect_x
+        print(f"  L: {len(self.state[self.mode])}")
+        print(f"  R: {len(self.state[self.mode])}")
         
         stack_left = self.state[self.mode]
         stack_right = self.state[1-self.mode]
@@ -118,6 +123,17 @@ class lsb2msb:
 
         rect = patches.Rectangle((rect_x, y+gap), rect_w, rect_h, linewidth=1, edgecolor='green', facecolor='none')
         ax.add_patch(rect)
+
+        # Draw status boxes above the columns
+        status_y = y + rect_h + 2 * gap
+        
+        rect_ss = patches.Rectangle((x_left, status_y), box_h, box_h, linewidth=1, edgecolor='black', facecolor='lightgray' if self.mode else 'white')
+        ax.add_patch(rect_ss)
+        ax.text(x_left + box_h/2, status_y + box_h/2, f"{self.mode}", ha='center', va='center', fontsize=8)
+
+        rect_sn = patches.Rectangle((x_right, status_y), box_h, box_h, linewidth=1, edgecolor='black', facecolor='lightgray' if self.onSwitchStep else 'white')
+        ax.add_patch(rect_sn)
+        ax.text(x_right + box_h/2, status_y + box_h/2, f"{self.onSwitchStep}", ha='center', va='center', fontsize=8)
 
         # Top anchor for top-down drawing (inside the gap)
         y_top_anchor = y + gap + rect_h - gap
