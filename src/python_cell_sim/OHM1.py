@@ -1,6 +1,7 @@
 ##################################################
 ## Bit Serial OHM Node with both LSB and MSB paths
 
+from matplotlib.lines import Line2D
 from ADD import ADD
 from PTF import PTF
 from msb2lsb import msb2lsb
@@ -8,19 +9,24 @@ from lsb2msb import lsb2msb
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-class OHM3:
+WINDOW_WIDTH = 200
+
+class OHM1:
     
     def __init__(self, ptf="", debugDone=0, debugIndex=-1) -> None:
         self.d = 3        
         self.debugDone = debugDone        
         self.debugIndex = debugIndex     
 
-        self.addp = [ADD(), ADD(), ADD()] 
-        self.lsb2msbs = [lsb2msb(), lsb2msb(), lsb2msb()]        
-        self.msb2lsb = msb2lsb()
         self.flags = list(self.d * [0])
+        self.latchInput = list(self.d * [0])
+
         self.pbf = PTF(self.d)
-        
+        self.msb2lsb = msb2lsb()
+
+        self.addp = ADD()
+        self.lsb2msb = lsb2msb()
+
         # Some presets for debugging
         if ptf == "sort":
             self.pbf.SetSort(debugIndex, self.d)
@@ -34,15 +40,15 @@ class OHM3:
         self.Reset()
         
     def InitState(self, input, K, initMode=1) -> None:
-        self.lsb2msbs[0].InitState(input[0], K, initMode=initMode)
-        self.lsb2msbs[1].InitState(input[1], K, initMode=initMode)
-        self.lsb2msbs[2].InitState(input[2], K, initMode=initMode)
-        self.msb2lsb.InitState(input[1], K, initMode=initMode)
+        self.lsb2msb.InitState(input, K, initMode=initMode)
+        self.msb2lsb.InitState(input, K, initMode=initMode)
+        self.addp.Reset()
+        self.pbf.Reset()
     
     def GetState(self):
         #state, lenn = self.msb2lsb.GetTransitionState()
         state, lenn = self.msb2lsb.GetReadState()
-        ss = self.msb2lsb.onSwitchStep
+        ss = self.msb2lsb.SwitchStep()
 
         return state, lenn, ss
 
@@ -54,63 +60,70 @@ class OHM3:
         self.done = 0
         self.debugTicks = 0        
 
-        for i in range(self.d):
-            self.addp[i].Reset()            
-            self.lsb2msbs[i].Reset()            
+        self.addp.Reset()            
+        self.lsb2msb.Reset()            
 
     def doneOut(self) -> int:
         return self.done
                     
-    def lsbOut(self) -> int:
-        return self.msb2lsb.SwitchStep()
+    #def lsbOut(self) -> int:
+    #    return self.lsb2msb.SwitchStep()
+
+    def msbOut(self) -> int:
+        return self.lsb2msb.SwitchStep()
 
     def Output(self) -> int:
-        return self.msb2lsb.Output()
+        return self.lsb2msb.Output()
 
     def pbfOut(self):
         return self.pbf.Output()
     
     ## Combinatorial stuff goes here
     #  lsb should be a vec like x
-    def Calc(self, x, wp, lsb) -> None:        
+    def Calc(self, x, lsb, wp) -> None:        
         #print(f"OHM CALC")
+        assert(len(x) == self.d)
+        assert(len(lsb) == self.d)
 
         for i in range(self.d):
-            self.addp[i].Calc(x[i], wp[i], lsb[i])             
-
-            if lsb[i] == 1:
-                self.lsb2msbs[i].Switch()                                            
+            if lsb[i] == 1:                
                 self.flags[i] = 0                
-                self.latchInput[i] = self.lsb2msbs[i].Output()         
+                self.latchInput[i] = x[i]
             else:
                 if self.flags[i] == 0:
-                    self.latchInput[i] = self.lsb2msbs[i].Output()
+                    self.latchInput[i] = x[i]
                             
         # Calc PBF
         self.pbf.Calc(self.latchInput)
-        #self.pbf.Print(" ")
-        
+
         for i in range(self.d):
             if self.flags[i] == 0:
                 if self.latchInput[i] != self.pbf.Output():
                     self.flags[i] = 1                    
+
+        #self.pbf.Print(" ")        
+        self.addp.Calc(self.msb2lsb.Output(), wp, self.msb2lsb.SwitchStep())             
+        #self.lsb2msb.Switch()                                            
 
         if self.debugDone <= 0:
             if self.done == 0:
                 if (sum(self.flags) == (self.d-1)):                
                     self.done = 1
                     self.msb2lsb.SetSwitchNext()
+                    self.lsb2msb.SetSwitchNext()
         else:
             if self.debugTicks > 0:                     
                 if ((self.debugTicks+1) % self.debugDone) == 0:
                     self.done = 1
                     self.msb2lsb.SetSwitchNext()
+                    self.lsb2msb.SetSwitchNext()
         
         # switch is we have anything to output?
         if self.done == 0:
             if self.msb2lsb.GotOutput() == 0:
                 self.done = 1
                 self.msb2lsb.SetSwitchNext()
+                self.lsb2msb.SetSwitchNext()
         
         if self.done == 2:
             print(f"-- {self.debugIndex} DONE on tick {self.debugTicks}")
@@ -132,29 +145,30 @@ class OHM3:
         else:
             self.msb2lsb.Step(self.pbf.Output())
             #self.done = 0
+        
+        self.lsb2msb.Step(self.addp.Output())                                     
 
-        for i in range(self.d):
-            self.lsb2msbs[i].Step(self.addp[i].Output())                                     
-            self.addp[i].Step()                  
+        self.addp.Step()                          
+            
 
     def Print(self, prefix="", showInput=1, showOutput=1) -> None:
         
         print(f"{prefix} - Node {self.debugIndex} -- Done {self.done}---------------------------")
-        if showInput:            
-            for i in range(self.d):                
-                inputPrefix = f"   x{i}-"
-                #self.wp[i].Print(prefix)
-                #self.addp[i].Print(prefix)
-                self.lsb2msbs[i].Print()                        
         if showOutput:            
-            #print(f"- Output ---------")
             self.pbf.Print(" ")
             self.msb2lsb.Print()        
+        if showInput:            
+            self.addp.Print("  - ADD: ")
+            self.lsb2msb.Print()                        
             print(f"------------------------------------")
 
 
-    def Draw(self, ax=None, x=0, y=0, w=10, h=10):
-        
+    def Draw(self, ax=None):        
+        x = 0
+        y = 0
+        w = WINDOW_WIDTH
+        h = WINDOW_WIDTH
+
         if ax is None:
             fig, ax = plt.subplots()
             ax.set_xlim(x, x+w)
@@ -167,69 +181,132 @@ class OHM3:
         ax.add_patch(rect)
         ax.text(x + w*0.05, y + h*0.92, f"OHM3 Node {self.debugIndex} (Done:{self.done})", fontsize=10)
 
+        
+
         # Layout parameters
         margin = w * 0.05
         comp_h = (h * 0.8) / self.d
         
         # Component widths
         add_w = w * 0.08
-        l2m_w = w * 0.25
-        ptf_w = w * 0.08        
-        gap = w * 0.02
+        l2m_w = w * 0.15
+        ptf_w = w * 0.08                
         
-        # Draw Input Paths (ADD + LSB2MSB)
+        # Draw Input Paths (Flags and Latch Inputs)
         for i in range(self.d):
-            cy = y + h - (i + 1) * comp_h - margin * 2
-            
-            # ADD
-            #self.addp[i].Draw(ax, x + margin, cy + comp_h * 0.25, add_w, comp_h * 0.4)
-            self.addp[i].Draw(ax, x, cy + comp_h * 0.25, add_w, comp_h * 0.4)
-            
-            # LSB2MSB
-            self.lsb2msbs[i].Draw(ax, x + margin + add_w + gap, cy, l2m_w, comp_h * 1.5)  #0.95
+            cy = y + h - (i + 1) * comp_h - margin * 2 + 3
             
             # Flags
             flag_color = 'red' if self.flags[i] else 'lightgray'
-            flag_x = x + margin + add_w + gap + l2m_w + gap
+            flag_x = x + 7
             flag_y = cy + comp_h * 0.8
             flag_circle = patches.Circle((flag_x, flag_y), w * 0.01, color=flag_color)
             ax.add_patch(flag_circle)
 
             # Latch Input
-            latch_w = w * 0.03
-            latch_h = comp_h * 0.18
+            latch_w = 8
+            latch_h = 12
 
-            latch_x = flag_x - latch_w / 2
+            latch_x = x + 3 
             latch_y = cy + comp_h * 0.45
             
             rect_latch = patches.Rectangle((latch_x, latch_y), latch_w, latch_h, linewidth=1, edgecolor='black', facecolor='white')
             ax.add_patch(rect_latch)
-            ax.text(latch_x + latch_w/2, latch_y + latch_h/2, str(self.latchInput[i]), ha='center', va='center', fontsize=8)
+            ax.text(latch_x + latch_w/2, latch_y + latch_h/2, str(self.latchInput[i]), ha='center', va='center', fontsize=8)                        
 
-            # Draw a single solid horizontal line from the left offset directly to the latch center        
-            #ax.plot([left_x, latch_center_x], [latch_center_y, latch_center_y], color='black', linewidth=1)
-            
-
-
-        # Flags
+        # Done Flag
         flag_color = 'red' if self.done else 'lightgray'
-        flag_x = x + w * 0.67
+        flag_x = x + w * 0.3
         flag_y = y + h * 0.6
         flag_circle = patches.Circle((flag_x, flag_y), w * 0.01, color=flag_color)
         ax.add_patch(flag_circle)
 
         # PTF
-        ptf_x = x + w * 0.55
-        ptf_y = y + h * 0.4
-        ptf_h = h * 0.4
-        self.pbf.Draw(ax, ptf_x, ptf_y, ptf_w, ptf_h)
+        ptf_x = flag_x - 4
+        ptf_y = flag_y - 20 
+        self.pbf.Draw(ax, ptf_x, ptf_y, 0, 0)
 
         # MSB2LSB
-        m2l_x = x + w * 0.75
-        m2l_y = y + h * 0.35
+        m2l_x = flag_x + w * 0.1
+        m2l_y = y + h * 0.3
         m2l_h = h * 0.5
         m2l_w = w * 0.12
         self.msb2lsb.Draw(ax, m2l_x, m2l_y, m2l_w, m2l_h)
+
+        # ADD on output
+        add_x = flag_x + w * 0.3
+        add_y = y + h * 0.5
+        self.addp.Draw(ax, add_x, add_y, add_w, comp_h * 0.4)
+            
+        # LSB2MSB on output
+        l2m_x = flag_x + w * 0.4
+        l2m_y = m2l_y
+        self.lsb2msb.Draw(ax, l2m_x, l2m_y, m2l_w, m2l_h)
+
+        # Draw some lines for the 3 inputs feeding the PBF
+        x1 = 13
+        y1 = 54         
+        x2 = 40 
+        y2 = 107
+
+        line = Line2D([x1, x2], [y1, y2], color='green', linewidth=1)
+        ax.add_line(line)
+
+        x1 = 13
+        y1 = 107         
+        x2 = 40 
+        y2 = 107
+
+        line = Line2D([x1, x2], [y1, y2], color='green', linewidth=1)
+        ax.add_line(line)
+
+        x1 = 13
+        y1 = 160         
+        x2 = 40 
+        y2 = 107
+
+        line = Line2D([x1, x2], [y1, y2], color='green', linewidth=1)
+        ax.add_line(line)
+
+        x1 = 40
+        y1 = 107         
+        x2 = 55 
+        y2 = 107
+        # connector
+        line = Line2D([x1, x2], [y1, y2], color='green', linewidth=1)
+        ax.add_line(line)
+
+        x1 = 65
+        y1 = 107         
+        x2 = 79 
+        y2 = 107
+        # connector
+        line = Line2D([x1, x2], [y1, y2], color='green', linewidth=1)
+        ax.add_line(line)
+        
+        x1 = 105
+        y1 = 107         
+        x2 = 119
+        y2 = 107
+        # connector
+        line = Line2D([x1, x2], [y1, y2], color='green', linewidth=1)
+        ax.add_line(line)
+
+        x1 = 128
+        y1 = 107         
+        x2 = 139
+        y2 = 107
+        # connector
+        line = Line2D([x1, x2], [y1, y2], color='green', linewidth=1)
+        ax.add_line(line)
+
+        x1 = 165
+        y1 = 107         
+        x2 = 175
+        y2 = 107
+        # connector
+        line = Line2D([x1, x2], [y1, y2], color='green', linewidth=1)
+        ax.add_line(line)
 
 
 if  __name__ == "__main__":
@@ -242,8 +319,8 @@ if  __name__ == "__main__":
     ax.set_aspect('equal')
     ax.axis('off')
 
-    ohm = OHM3()
-    ohm.InitState([7, 5, 2], 4)    
-    ohm.Draw(ax, 0, 0, WINDOW_WIDTH, WINDOW_WIDTH)    
+    ohm = OHM1()
+    ohm.InitState(7, 4)    
+    ohm.Draw(ax) 
 
     plt.show()  

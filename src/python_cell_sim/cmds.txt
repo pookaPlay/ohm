@@ -1,0 +1,5 @@
+            I want 3 horizontal lines that connect the lsb2msb output to the latch. 
+            I will give you the coordinates displayed by matplotlib for the start and end points of each line:            
+            (2.51, 7.91) -> (3.97,7.96)
+            (2.59, 5.36) -> (4.0, 5.12)
+            (2.62, 2.66) -> (4.05, 2.58)

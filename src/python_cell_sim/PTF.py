@@ -54,6 +54,15 @@ class PTF:
         self.y = 0
 
     def Draw(self, ax, x, y, w, h):
-        rect = patches.Rectangle((x, y), w, h, linewidth=1, edgecolor='orange', facecolor='none')
-        ax.add_patch(rect)
-        ax.text(x + w/2, y + h/2, f"PTF\n{self.strFunc}\nY:{self.y}", ha='center', va='center', fontsize=8)
+        #rect = patches.Rectangle((x, y), w, h, linewidth=1, edgecolor='orange', facecolor='none')
+        #ax.add_patch(rect)
+        #ax.text(x + w/2, y + h/2, f"PTF\n{self.strFunc}\nY:{self.y}", ha='center', va='center', fontsize=8)
+
+        state_x = x
+        state_y = y
+        latch_w = 8
+        latch_h = 12
+        rect_latch = patches.Rectangle((state_x, state_y), latch_w, latch_h, linewidth=1, edgecolor='black', facecolor='lightgray' if self.y else 'white')
+        ax.add_patch(rect_latch)
+        ax.text(state_x + latch_w/2, state_y + latch_h/2, str(self.y), ha='center', va='center', fontsize=8)
+

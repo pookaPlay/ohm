@@ -1,5 +1,6 @@
 from DataIO import SerializeMSBTwos, SerializeLSBTwos, SerializeMSBOffset, DeserializeLSBTwos, DeserializeMSBTwos, DeserializeLSBOffset, DeserializeMSBOffset
 import matplotlib.patches as patches
+from matplotlib.lines import Line2D
 
 class msb2lsb:    
     
@@ -133,13 +134,18 @@ class msb2lsb:
         
         stack_left = self.state[self.mode]
         stack_right = self.state[1-self.mode]
-        rect_h = max(len(stack_left), len(stack_right)) * box_h + 3 * gap
+        rect_h = 4 * box_h + 3 * gap + 8
 
         rect = patches.Rectangle((rect_x, y+gap), rect_w, rect_h, linewidth=1, edgecolor='green', facecolor='none')
         ax.add_patch(rect)
 
-        # Draw status boxes above the columns
-        status_y = y + rect_h + 2 * gap
+        # Draw green line between the stacks
+        line_x_mid = x_left + box_h + (x_right - x_left - box_h) / 2
+        line = Line2D([line_x_mid, line_x_mid], [y + gap, y + gap + rect_h], color='green', linewidth=1)
+        ax.add_line(line)
+
+        # Draw status boxes under the columns
+        status_y = y - 12
         
         rect_ss = patches.Rectangle((x_left, status_y), box_h, box_h, linewidth=1, edgecolor='black', facecolor='lightgray' if self.mode else 'white')
         ax.add_patch(rect_ss)
@@ -149,19 +155,20 @@ class msb2lsb:
         ax.add_patch(rect_sn)
         ax.text(x_right + box_h/2, status_y + box_h/2, f"{self.onSwitchStep}", ha='center', va='center', fontsize=8)
 
-        # Top anchor for top-down drawing (inside the gap)
-        y_top_anchor = y + gap + rect_h - gap
+        # Bottom anchor for bottom-up drawing (inside the gap)
+        y_bottom_anchor = y + gap + 2
 
         # Left Stack: self.state[self.mode]
         for j, val in enumerate(stack_left):
             fc = 'lightgray' if val == 1 else 'white'
-            r = patches.Rectangle((x_left, y_top_anchor - (j+1)*box_h), box_h, box_h, linewidth=1, edgecolor='black', facecolor=fc)
+            r = patches.Rectangle((x_left, y_bottom_anchor + j*box_h), box_h, box_h, linewidth=1, edgecolor='black', facecolor=fc)
             ax.add_patch(r)
-            ax.text(x_left + box_h/2, y_top_anchor - (j+1)*box_h + box_h/2, str(val), ha='center', va='center', fontsize=8)
+            ax.text(x_left + box_h/2, y_bottom_anchor + j*box_h + box_h/2, str(val), ha='center', va='center', fontsize=8)
 
         # Right Stack: self.state[1-self.mode]
-        for j, val in enumerate(stack_right):
+        y_top_anchor = y + rect_h + gap - box_h - 2
+        for j, val in enumerate(reversed(stack_right)):
             fc = 'lightgray' if val == 1 else 'white'
-            r = patches.Rectangle((x_right, y_top_anchor - (j+1)*box_h), box_h, box_h, linewidth=1, edgecolor='black', facecolor=fc)
+            r = patches.Rectangle((x_right, y_top_anchor - j*box_h), box_h, box_h, linewidth=1, edgecolor='black', facecolor=fc)
             ax.add_patch(r)
-            ax.text(x_right + box_h/2, y_top_anchor - (j+1)*box_h + box_h/2, str(val), ha='center', va='center', fontsize=8)
+            ax.text(x_right + box_h/2, y_top_anchor - j*box_h + box_h/2, str(val), ha='center', va='center', fontsize=8)

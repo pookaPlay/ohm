@@ -1,10 +1,10 @@
 import argparse
 import numpy as np
-from OHM3 import OHM3
+from OHM1 import OHM1
 from lsbSource  import lsbSource
 import matplotlib.pyplot as plt
 
-class OHM3_ARRAY:
+class OHM1_ARRAY:
 
     def __init__(self, N, K, ptf="max", debugDone=0):
         self.D = 3
@@ -12,7 +12,7 @@ class OHM3_ARRAY:
         self.N = N                
         self.WINDOW_WIDTH = 200        
 
-        self.ohmArray = [OHM3(ptf=ptf, debugDone=debugDone, debugIndex=i) for i in range(self.N)]                
+        self.ohmArray = [OHM1(ptf=ptf, debugDone=debugDone, debugIndex=i) for i in range(self.N)]                
         self.biases = [lsbSource() for i in range(self.N)]
         self.fig = None
         self.ax = None
@@ -26,45 +26,37 @@ class OHM3_ARRAY:
         # initMode 0: State init is zero with data in biases
         # initMode 1: State init is data with biases zero
         # input = [5, 7, 6, 3]
+        # 5 6 3 7 
         for ni in range(self.N):
+                                    
+            self.ohmArray[ni].InitState(input[ni], self.K, initMode=initMode)                        
             
-            leftInput = input[ni-1] if ni > 0 else input[self.N-1]
-            rightInput = input[ni+1] if ni < self.N-1 else input[0]
-            
-            nodeInputs = [leftInput, input[ni], rightInput]
-            self.ohmArray[ni].InitState(nodeInputs, self.K, initMode=initMode)                        
-            #self.biases[ni].InitState(input[ni], self.K)
             if initMode == 0:
                 self.biases[ni].InitState(input[ni], self.K)
             else:
                 self.biases[ni].InitState(0, self.K)
 
-        self.lastinputs = [ohmArray.Output() for ohmArray in self.ohmArray]            
-
     def Calc(self, bi) -> None:
 
-        #hasOutput = [ohmArray.msb2lsb.GotOutput() for ohmArray in self.ohmArray]
         inputs = [ohmArray.Output() for ohmArray in self.ohmArray]
-        lsbIns = [ohmArray.lsbOut() for ohmArray in self.ohmArray]
+        msbIns = [ohmArray.msbOut() for ohmArray in self.ohmArray]
         biases = [bias.Output() for bias in self.biases]
-        #for i in range(len(hasOutput)):
-        #    if hasOutput[i] == 1:
-        #        inputs[i] = self.ohmArray[i].Output()
 
         for ni in range(self.N):
             leftInput = inputs[ni-1] if ni > 0 else inputs[self.N-1]
-            leftInputMSB = lsbIns[ni-1] if ni > 0 else lsbIns[self.N-1]            
-            leftBias = biases[ni-1] if ni > 0 else biases[self.N-1]            
+            leftInputMSB = msbIns[ni-1] if ni > 0 else msbIns[self.N-1]            
+            #leftBias = biases[ni-1] if ni > 0 else biases[self.N-1]            
             
             rightInput = inputs[ni+1] if ni < self.N-1 else inputs[0]
-            rightInputMSB = lsbIns[ni+1] if ni < self.N-1 else lsbIns[0]            
-            rightBias = biases[ni+1] if ni < self.N-1 else biases[0]            
+            rightInputMSB = msbIns[ni+1] if ni < self.N-1 else msbIns[0]            
+            #rightBias = biases[ni+1] if ni < self.N-1 else biases[0]            
             
             nodeInputs = [leftInput, inputs[ni], rightInput]
-            lsbInputs = [leftInputMSB, lsbIns[ni], rightInputMSB]
-            biasInputs = [leftBias, biases[ni], rightBias]
+            msbInputs = [leftInputMSB, msbIns[ni], rightInputMSB]
+            #biasInputs = [leftBias, biases[ni], rightBias]
+            biasInput = biases[ni]
             
-            self.ohmArray[ni].Calc(nodeInputs, biasInputs, lsbInputs)        
+            self.ohmArray[ni].Calc(nodeInputs, msbInputs, biasInput)        
 
     def Step(self) -> None:
         for ohmArray in self.ohmArray:            
@@ -163,7 +155,7 @@ if __name__ == "__main__":
     N = len(state0)    
 
     print(f"State0({N}): {state0}")
-    ohm = OHM3_ARRAY(N, K, ptf=args.ptf, debugDone=args.debugDone)
+    ohm = OHM1_ARRAY(N, K, ptf=args.ptf, debugDone=args.debugDone)
 
     ohm.InitState(state0, initMode=args.initMode)
     ohm.Run(args.steps, args.v)
