@@ -32,6 +32,16 @@ class lsb2msb:
             #self.state[1-self.mode].pop()
             #self.state[1-self.mode].pop()
     
+    def GetReadState(self):
+        readMode = 1 - self.mode
+        if len(self.state[readMode]) > 0:            
+            state = DeserializeLSBTwos(self.state[readMode])
+            lenn = len(self.state[readMode])
+        else:
+            state = 0
+            lenn = 0        
+        return state, lenn
+
     def GotOutput(self) -> int:
         readMode = 1 - self.mode    
         if len(self.state[readMode]) > 0:

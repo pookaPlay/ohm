@@ -163,7 +163,7 @@ class OHM1:
             print(f"------------------------------------")
 
 
-    def Draw(self, ax=None):        
+    def Draw(self, ax=None, fs=""):        
         x = 0
         y = 0
         w = WINDOW_WIDTH
@@ -179,9 +179,16 @@ class OHM1:
         # Main Node Box
         rect = patches.Rectangle((x, y), w, h, linewidth=2, edgecolor='black', facecolor='none')
         ax.add_patch(rect)
-        ax.text(x + w*0.05, y + h*0.92, f"OHM3 Node {self.debugIndex} (Done:{self.done})", fontsize=10)
-
+        #ax.text(x + w*0.05, y + h*0.92, f"OHM3 Node {self.debugIndex} (Done:{self.done})", fontsize=10)
+            
+        #ax.text(x + w*0.5, y + h*0.8, f"{fs}", fontsize=10)
+        lsbState, lsbLen = self.lsb2msb.GetReadState()
+        msbState, msbLen = self.msb2lsb.GetReadState()
+        fs = f"{msbState} ({msbLen})"
+        #ax.text(x + w*0.48, y + h*0.6, f"{fs}", fontsize=10)
         
+        fs = f"{lsbState} ({lsbLen})"
+        #ax.text(x + w*0.78, y + h*0.6, f"{fs}", fontsize=10)
 
         # Layout parameters
         margin = w * 0.05

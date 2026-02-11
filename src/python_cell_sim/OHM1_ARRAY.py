@@ -1,4 +1,5 @@
 import argparse
+from tabnanny import verbose
 import numpy as np
 from OHM1 import OHM1
 from lsbSource  import lsbSource
@@ -64,17 +65,20 @@ class OHM1_ARRAY:
         for bias in self.biases:
             bias.Step()
 
-    def Draw(self) -> None:
+    def Draw(self, fs) -> None:
         if self.fig is None:
             plt.ion()
             self.fig, self.ax = plt.subplots()
         
         self.ax.clear()
-        self.ax.set_xlim(0, self.WINDOW_WIDTH)
-        self.ax.set_ylim(0, self.WINDOW_WIDTH)
+        self.ax.set_xlim(0, self.WINDOW_WIDTH*2)
+        self.ax.set_ylim(0, self.WINDOW_WIDTH*2)
         self.ax.set_aspect('equal')
         self.ax.axis('off')
-        self.ohmArray[0].Draw(self.ax, 0, 0, self.WINDOW_WIDTH, self.WINDOW_WIDTH)
+        
+        self.ohmArray[0].Draw(self.ax, fs) 
+        
+
         plt.pause(0.1)
 
 
@@ -93,13 +97,30 @@ class OHM1_ARRAY:
         latestStates = list(states)
         latestLength = list(lenn)        
 
+        fs = f""
+        for ni in range(len(latestStates)):                 
+            if switchStep[ni] == 1:
+                fs += f"<{latestStates[ni]}>"
+            else:
+                fs += f"{latestStates[ni]}"  
+            if ni < len(states)-1:
+                fs += f", "
+        
+        print(f"0: [{fs}] from {latestLength}")
+        
+        if verbose > 2:
+            self.Draw(fs)                
+            plt.pause(0.1)
+            plt.waitforbuttonpress()
+
+
         for bi in range(NSteps):
             history.append(states)
             #print(f"= STEP {bi} ======================================")            
             self.Calc(bi)             
 
             if verbose > 2:
-                self.Draw()                
+                self.Draw(fs)                
                 self.Print(f"{bi}:", showInput=1, showOutput=1)
                 
                 plt.pause(0.1)
@@ -142,7 +163,7 @@ class OHM1_ARRAY:
 if __name__ == "__main__":    
     parser = argparse.ArgumentParser(description="OHM3 Array Simulation")
     parser.add_argument("--K", type=int, default=4, help="Number of bits (K)")
-    parser.add_argument("--state0", type=int, nargs='+', default=[7, 1, 5, 2], help="Initial state list")
+    parser.add_argument("--state0", type=int, nargs='+', default=[1, 7, 5, 2], help="Initial state list")
     parser.add_argument("--ptf", type=str, default="max", help="PTF function (min, max, median)")
     parser.add_argument("--debugDone", type=int, default=0, help="Debug done flag")
     parser.add_argument("--initMode", type=int, default=1, help="Init mode: 0 state or 1 for data in state")
