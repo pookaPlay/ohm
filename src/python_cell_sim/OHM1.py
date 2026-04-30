@@ -163,11 +163,11 @@ class OHM1:
             print(f"------------------------------------")
 
 
-    def Draw(self, ax=None, fs=""):        
-        x = 0
-        y = 0
-        w = WINDOW_WIDTH
-        h = WINDOW_WIDTH
+    def Draw(self, ax=None, x=0, y=0, w=None, h=None, fs=""):        
+        if w is None:
+            w = WINDOW_WIDTH
+        if h is None:
+            h = WINDOW_WIDTH
 
         if ax is None:
             fig, ax = plt.subplots()
@@ -181,14 +181,14 @@ class OHM1:
         ax.add_patch(rect)
         #ax.text(x + w*0.05, y + h*0.92, f"OHM3 Node {self.debugIndex} (Done:{self.done})", fontsize=10)
             
-        #ax.text(x + w*0.5, y + h*0.8, f"{fs}", fontsize=10)
+        ax.text(x + w*0.5, y + h*0.8, f"{fs}", fontsize=10)
         lsbState, lsbLen = self.lsb2msb.GetReadState()
         msbState, msbLen = self.msb2lsb.GetReadState()
         fs = f"{msbState} ({msbLen})"
-        #ax.text(x + w*0.48, y + h*0.6, f"{fs}", fontsize=10)
+        ax.text(x + w*0.48, y + h*0.6, f"{fs}", fontsize=10)
         
         fs = f"{lsbState} ({lsbLen})"
-        #ax.text(x + w*0.78, y + h*0.6, f"{fs}", fontsize=10)
+        ax.text(x + w*0.78, y + h*0.6, f"{fs}", fontsize=10)
 
         # Layout parameters
         margin = w * 0.05
@@ -200,21 +200,24 @@ class OHM1:
         ptf_w = w * 0.08                
         
         # Draw Input Paths (Flags and Latch Inputs)
+        scale_x = w / WINDOW_WIDTH
+        scale_y = h / WINDOW_WIDTH
+        
         for i in range(self.d):
             cy = y + h - (i + 1) * comp_h - margin * 2 + 3
             
             # Flags
             flag_color = 'red' if self.flags[i] else 'lightgray'
-            flag_x = x + 7
+            flag_x = x + 7 * scale_x
             flag_y = cy + comp_h * 0.8
             flag_circle = patches.Circle((flag_x, flag_y), w * 0.01, color=flag_color)
             ax.add_patch(flag_circle)
 
             # Latch Input
-            latch_w = 8
-            latch_h = 12
+            latch_w = 8 * scale_x
+            latch_h = 12 * scale_y
 
-            latch_x = x + 3 
+            latch_x = x + 3 * scale_x
             latch_y = cy + comp_h * 0.45
             
             rect_latch = patches.Rectangle((latch_x, latch_y), latch_w, latch_h, linewidth=1, edgecolor='black', facecolor='white')
@@ -229,8 +232,8 @@ class OHM1:
         ax.add_patch(flag_circle)
 
         # PTF
-        ptf_x = flag_x - 4
-        ptf_y = flag_y - 20 
+        ptf_x = flag_x - 4 * scale_x
+        ptf_y = flag_y - 20 * scale_y
         self.pbf.Draw(ax, ptf_x, ptf_y, 0, 0)
 
         # MSB2LSB
@@ -251,68 +254,68 @@ class OHM1:
         self.lsb2msb.Draw(ax, l2m_x, l2m_y, m2l_w, m2l_h)
 
         # Draw some lines for the 3 inputs feeding the PBF
-        x1 = 13
-        y1 = 54         
-        x2 = 40 
-        y2 = 107
+        x1 = x + 13 * scale_x
+        y1_line = y + 54 * scale_y         
+        x2 = x + 40 * scale_x
+        y2_line = y + 107 * scale_y
 
-        line = Line2D([x1, x2], [y1, y2], color='green', linewidth=1)
+        line = Line2D([x1, x2], [y1_line, y2_line], color='green', linewidth=1)
         ax.add_line(line)
 
-        x1 = 13
-        y1 = 107         
-        x2 = 40 
-        y2 = 107
+        x1 = x + 13 * scale_x
+        y1_line = y + 107 * scale_y         
+        x2 = x + 40 * scale_x
+        y2_line = y + 107 * scale_y
 
-        line = Line2D([x1, x2], [y1, y2], color='green', linewidth=1)
+        line = Line2D([x1, x2], [y1_line, y2_line], color='green', linewidth=1)
         ax.add_line(line)
 
-        x1 = 13
-        y1 = 160         
-        x2 = 40 
-        y2 = 107
+        x1 = x + 13 * scale_x
+        y1_line = y + 160 * scale_y         
+        x2 = x + 40 * scale_x
+        y2_line = y + 107 * scale_y
 
-        line = Line2D([x1, x2], [y1, y2], color='green', linewidth=1)
+        line = Line2D([x1, x2], [y1_line, y2_line], color='green', linewidth=1)
         ax.add_line(line)
 
-        x1 = 40
-        y1 = 107         
-        x2 = 55 
-        y2 = 107
+        x1 = x + 40 * scale_x
+        y1_line = y + 107 * scale_y         
+        x2 = x + 55 * scale_x
+        y2_line = y + 107 * scale_y
         # connector
-        line = Line2D([x1, x2], [y1, y2], color='green', linewidth=1)
+        line = Line2D([x1, x2], [y1_line, y2_line], color='green', linewidth=1)
         ax.add_line(line)
 
-        x1 = 65
-        y1 = 107         
-        x2 = 79 
-        y2 = 107
+        x1 = x + 65 * scale_x
+        y1_line = y + 107 * scale_y         
+        x2 = x + 79 * scale_x
+        y2_line = y + 107 * scale_y
         # connector
-        line = Line2D([x1, x2], [y1, y2], color='green', linewidth=1)
+        line = Line2D([x1, x2], [y1_line, y2_line], color='green', linewidth=1)
         ax.add_line(line)
         
-        x1 = 105
-        y1 = 107         
-        x2 = 119
-        y2 = 107
+        x1 = x + 105 * scale_x
+        y1_line = y + 107 * scale_y         
+        x2 = x + 119 * scale_x
+        y2_line = y + 107 * scale_y
         # connector
-        line = Line2D([x1, x2], [y1, y2], color='green', linewidth=1)
+        line = Line2D([x1, x2], [y1_line, y2_line], color='green', linewidth=1)
         ax.add_line(line)
 
-        x1 = 128
-        y1 = 107         
-        x2 = 139
-        y2 = 107
+        x1 = x + 128 * scale_x
+        y1_line = y + 107 * scale_y         
+        x2 = x + 139 * scale_x
+        y2_line = y + 107 * scale_y
         # connector
-        line = Line2D([x1, x2], [y1, y2], color='green', linewidth=1)
+        line = Line2D([x1, x2], [y1_line, y2_line], color='green', linewidth=1)
         ax.add_line(line)
 
-        x1 = 165
-        y1 = 107         
-        x2 = 175
-        y2 = 107
+        x1 = x + 165 * scale_x
+        y1_line = y + 107 * scale_y         
+        x2 = x + 175 * scale_x
+        y2_line = y + 107 * scale_y
         # connector
-        line = Line2D([x1, x2], [y1, y2], color='green', linewidth=1)
+        line = Line2D([x1, x2], [y1_line, y2_line], color='green', linewidth=1)
         ax.add_line(line)
 
 

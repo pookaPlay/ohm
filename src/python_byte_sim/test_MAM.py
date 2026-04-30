@@ -15,83 +15,77 @@ torch.backends.cudnn.benchmark = False
 smallest_int = -sys.maxsize - 1
 largest_int = sys.maxsize - 1
 
-def run_MAM(expName, nx, y):    
+def run_MAM(expName, nx, yx, nxt):    
     D = nx.shape[-1]
     N = len(nx)    
+    NT = len(nxt)
 
-    #print("DATA")
-    #for ni in range(N):
-    #    print(f"{nx[ni].tolist()} -> {y[ni].tolist()}")
+    print("DATA")
+    for ni in range(N):
+        print(f"{nx[ni].tolist()} -> {yx[ni].tolist()}")
+        #print(f"{nx[ni].tolist()}")
 
     #print(f"Processing {N} samples with D={D}")
         
     W = torch.ones([D, D]) * largest_int
     M = torch.ones([D, D]) * smallest_int        
-    imgMatList = []
-    
-    
+
     imgMatList = []
 
     for ni in range(N):            
 
-        imgMat = nx[ni].view(D, 1) - nx[ni].view(1, D)            
+        imgMat = nx[ni].view(D, 1) - yx[ni].view(1, D)            
         W = torch.min(W, imgMat)                
         M = torch.max(M, imgMat)    
-        imgMatList.append(imgMat)
+        #imgMatList.append(imgMat)
 
-    imgMatTensor = torch.stack(imgMatList)        
-    print(f"imgMatTensor: {imgMatTensor.shape}")
+    #imgMatTensor = torch.stack(imgMatList)        
+    #print(f"imgMatTensor: {imgMatTensor.shape}")
             
-    kval = int(N/2)    # 1 is smallest    
-    print(f"Kth value: {kval}")
-    
-    MED, IND = torch.kthvalue(imgMatTensor, k=kval, dim=0)
+    #kval = 1
+    #kval = int(N/2)    # 1 is smallest    
+    #print(f"Kth value: {kval}")    
+    #MED, IND = torch.kthvalue(imgMatTensor, k=kval, dim=0)
     #print(f"MED: {self.MED.shape} and IND: {self.IND.shape}")
     
     print(f"W: {W}")
-    print(f"MED: {MED}")
-
+    print(f"M: {M}")
 
     # Now test
     outputW = torch.zeros([D])
     outputM = torch.zeros([D])
-    outputMED = torch.zeros([D])
-    outputIND = torch.zeros([D])
 
-    imgMatList = []    
-    for ni in range(N):
-        input = nx[ni, :]        
+    for ni in range(len(nxt)):
+        input = nxt[ni, :]        
         for di in range(D):            
             
             diffW = input - W[:, di]                
             outputW[di] = torch.min(diffW)
             
-            diffM = input + M[di,:]                
-            outputM[di] = torch.min(diffM)
+            diffM = input - M[:,di]                
+            outputM[di] = torch.max(diffM)
 
-
-            kval = int(D/2)
-            diffMED = input - MED[:,di]                                
-            outputMED[di], outputIND[di] = torch.kthvalue(diffMED, k=kval)
+            #kval = 1
+            #kval = int(D/2)
+            #diffMED = input - MED[:,di]                                
+            #outputMED[di], outputIND[di] = torch.kthvalue(diffMED, k=kval)
 
         outputW = outputW.int()
         outputM = outputM.int()
-        outputMED = outputMED.int()
+        print(f"{input.tolist()} -> W: {outputW.tolist()} and M: {outputM.tolist()}")
+        
 
-        #print(f"W: {input.tolist()} -> {outputW.tolist()}")
-        #print(f"M: {input.tolist()} -> {outputM.tolist()}")
-        #if (not torch.all(torch.eq(outputW, outputM))):
-        #    print(f"{expName} result difference")
-        #    print(f"{y[ni].tolist()}: {outputW.tolist()} != {outputM.tolist()}")
     
 
 def test_MAM():
     exp = "paper"
-    nx = torch.tensor([[0, 0, 0], [0, -2, -4], [0, -3, 0]])
-    y = torch.tensor([[0, 1, 0], [-1, -1, 0], [0, -2, 0]])    
-    run_MAM(exp, nx, y)
+    nx = torch.tensor([[4, -2, 6, 1], [2, -1, -4, 3], [0, -3, 2, -5], [-1, -2, 4, -3]])
+    yx = torch.tensor([[4, -2, 6, 1], [2, -1, -4, 3], [0, -3, 2, -5], [-1, -2, 4, -3]])
+    #yx = torch.tensor([[-5, -5, -5, -5], [5, 5, 5, 5], [-5, -3, 2, 0], [4, -1, -2, -3]])
+    nxt = torch.tensor([[4, -2, 6, 1], [2, -1, -4, 3], [0, -3, 2, -5], [5, -1, 0, 2], [4, -2, 5, 2], [-1, -2, 4, -3]])    
+    run_MAM(exp, nx, yx, nxt)
 
-    exp = "inc"
+"""     exp = "inc"
     nx = torch.tensor([[2, 1, 3], [0, -2, -4], [-1, 1, 0]])
     y = torch.tensor([[1, 2, 3], [-4, -2, 0], [-1, 0, 1]])    
     run_MAM(exp, nx, y)
@@ -110,7 +104,7 @@ def test_MAM():
     nx = torch.tensor([[2, 1, 3], [0, -2, -4], [-3, 1, 0]])
     y = torch.tensor([[1, 2, 3], [-4, -2, 0], [-3, 0, 1]])    
     run_MAM(exp, nx, y)
-
+ """
 
 
 test_MAM()

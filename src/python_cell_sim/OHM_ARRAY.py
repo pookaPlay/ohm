@@ -6,62 +6,95 @@ import matplotlib.pyplot as plt
 
 class OHM_ARRAY:
 
-    def __init__(self, N, K, ptf="max", debugDone=0):
-        self.D = N
+    def __init__(self, N, K, ptf="max", debugDone=0, verbosity=0) -> None:
+        
+        self.verbosity = verbosity
         self.K = K
         self.N = N                
-        self.WINDOW_WIDTH = 200        
+        self.D = N
+        self.D2 = self.D*2
+        self.DD = self.D2+2                
 
-        self.ohmArray = [OHM(D=self.D, ptf=ptf, debugDone=debugDone, debugIndex=i) for i in range(self.N)]                
+        self.inputs = [lsbSource() for i in range(self.D)]
+        self.inputBiases = [lsbSource() for i in range(self.D2)]
+
+        self.ohmArray = [OHM(ptf=ptf, D=self.D, debugDone=debugDone, debugIndex=i) for i in range(self.D)]                
+        self.stateBiases = [[lsbSource() for i in range(self.D2)] for j in range(self.D)]        
         
         self.fig = None
         self.ax = None
 
     def Reset(self) -> None:                
         [ohmArray.Reset() for ohmArray in self.ohmArray] 
+        [[stateBias.Reset() for stateBias in stateBiases] for stateBiases in self.stateBiases]        
+        [input.Reset() for input in self.inputs]
+        [bias.Reset() for bias in self.inputBiases]
+        
 
+    def InitState(self, inputs) -> None:        
+        assert len(inputs) == self.D
+        
+        for i in range(len(inputs)): 
+            self.inputs[i].InitState(inputs[i], self.K)
 
-    def InitState(self, input, initMode=1) -> None:        
-        assert(len(input) == self.N)
-        # initMode 0: State init is zero with data in biases
-        # initMode 1: State init is data with biases zero
-        # input = [5, 7, 6, 3]
-        for ni in range(self.N):            
-            self.ohmArray[ni].InitState(ni, input, self.K, initMode=initMode)                        
+        for ohmi in self.ohmArray:
+            ohmi.ZeroState(self.K)
 
-        self.lastinputs = [ohmArray.Output() for ohmArray in self.ohmArray]            
+        for bi in range(len(self.inputBiases)):        
+            if bi % 2 == 0:
+                self.inputBiases[bi].ZeroState(self.K)
+            else:
+                self.inputBiases[bi].OneState(self.K)
+
+        for stateBiases in self.stateBiases:
+            for si in range(len(stateBiases)):
+                if si < self.D:
+                    stateBiases[si].ZeroState(self.K)
+                else:
+                    stateBiases[si].OneState(self.K)
+                        
 
     def Calc(self, bi) -> None:
+        # def Calc(self, u, ulsb, x, xlsb, ww) -> None:        
+        states = [ohmArray.Output() for ohmArray in self.ohmArray]
+        stateLsbs = [ohmArray.lsbOut() for ohmArray in self.ohmArray]
+        
+        if self.verbosity > 2:
+            #print(f"Step {bi}: States: {states} -- State LSBs: {stateLsbs}")
+            pass
 
-        inputs = [ohmArray.Output() for ohmArray in self.ohmArray]
-        lsbIns = [ohmArray.lsbOut() for ohmArray in self.ohmArray]        
-
-        for ni in range(self.N):            
-            self.ohmArray[ni].Calc(inputs, lsbIns)        
+        for ni in range(self.D):
+            input = self.inputs[ni].Output()
+            inputLsb = self.inputs[ni].LsbOut()
+            myStateBiases = [stateBias.Output() for stateBias in self.stateBiases[ni]]
+            myInputBiases = [self.inputBiases[ni*2].Output(), self.inputBiases[ni*2+1].Output()]
+            ww = myStateBiases + myInputBiases
+            
+            self.ohmArray[ni].Calc(input, inputLsb, states, stateLsbs, ww)
+                    
 
     def Step(self) -> None:
-        for ohmArray in self.ohmArray:            
-            ohmArray.Step()
+        for ohm in self.ohmArray:            
+            ohm.Step()
 
-    def Draw(self) -> None:
-        if self.fig is None:
-            plt.ion()
-            self.fig, self.ax = plt.subplots()
+        for stateBiases in self.stateBiases:
+            for stateBias in stateBiases:
+                stateBias.Step()
         
-        self.ax.clear()
-        self.ax.set_xlim(0, self.WINDOW_WIDTH)
-        self.ax.set_ylim(0, self.WINDOW_WIDTH)
-        self.ax.set_aspect('equal')
-        self.ax.axis('off')
-        self.ohmArray[0].Draw(self.ax, 0, 0, self.WINDOW_WIDTH, self.WINDOW_WIDTH)
-        plt.pause(0.1)
+        for input in self.inputs:
+            input.Step()
+
+        for bias in self.inputBiases:
+            bias.Step()        
 
 
     def Print(self, prefix="", showInput=1, showOutput=1) -> None:
-        for ohmArray in self.ohmArray:
+
+        for ohmArray, input in zip(self.ohmArray, self.inputs):
+            input.Print(prefix)
             ohmArray.Print(prefix, showInput=showInput, showOutput=showOutput)
 
-    def Run(self, NSteps, verbose=0) -> None:      
+    def Run(self, NSteps) -> None:      
         # self.ohmArray[1].Print()
 
         history = list() 
@@ -74,17 +107,12 @@ class OHM_ARRAY:
             #print(f"= STEP {bi} ======================================")            
             self.Calc(bi)             
 
-            if verbose > 2:
-                self.Draw()                
-                self.Print(f"{bi}:", showInput=1, showOutput=1)
-                
+            if self.verbosity > 2:            
                 plt.pause(0.1)
                 plt.waitforbuttonpress()
-
-            elif verbose > 1:
+            
+            if self.verbosity > 1:
                 self.Print(f"{bi}:", showInput=1, showOutput=1)
-            elif verbose > 0:
-                self.Print(f"{bi}:", showInput=0, showOutput=1)
 
 
             states, lenn, switchStep = zip(*[ohmArray.GetState() for ohmArray in self.ohmArray])            
@@ -131,7 +159,7 @@ if __name__ == "__main__":
     N = len(state0)    
 
     print(f"State0({N}): {state0}")
-    ohm = OHM_ARRAY(N, K, ptf=args.ptf, debugDone=args.debugDone)
+    ohm = OHM_ARRAY(N, K, ptf=args.ptf, debugDone=args.debugDone, verbosity=args.v)
 
-    ohm.InitState(state0, initMode=args.initMode)
-    ohm.Run(args.steps, args.v)
+    ohm.InitState(state0)
+    ohm.Run(args.steps)

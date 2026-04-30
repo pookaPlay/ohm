@@ -66,18 +66,23 @@ class OHM1_ARRAY:
             bias.Step()
 
     def Draw(self, fs) -> None:
+
         if self.fig is None:
             plt.ion()
-            self.fig, self.ax = plt.subplots()
+            self.fig, self.ax = plt.subplots(figsize=(10, 10))
         
         self.ax.clear()
-        self.ax.set_xlim(0, self.WINDOW_WIDTH*2)
-        self.ax.set_ylim(0, self.WINDOW_WIDTH*2)
+        self.ax.set_xlim(0, self.WINDOW_WIDTH*3)
+        self.ax.set_ylim(0, self.WINDOW_WIDTH*3)
         self.ax.set_aspect('equal')
         self.ax.axis('off')
         
-        self.ohmArray[0].Draw(self.ax, fs) 
-        
+        # Draw 3 OHM objects stacked vertically on the left
+        # Object 0: top (y = 2*WINDOW_WIDTH to 3*WINDOW_WIDTH)
+        assert(len(self.ohmArray) >= 3), "Need at least 3 OHM objects to draw"
+        self.ohmArray[0].Draw(self.ax, x=0, y=self.WINDOW_WIDTH*2, w=self.WINDOW_WIDTH, h=self.WINDOW_WIDTH, fs=fs)
+        self.ohmArray[1].Draw(self.ax, x=0, y=self.WINDOW_WIDTH, w=self.WINDOW_WIDTH, h=self.WINDOW_WIDTH, fs=fs)        
+        self.ohmArray[2].Draw(self.ax, x=0, y=0, w=self.WINDOW_WIDTH, h=self.WINDOW_WIDTH, fs=fs)
 
         plt.pause(0.1)
 

@@ -16,9 +16,9 @@ def RUN_EXPERIMENT_test():
 
     param = {
         'numPoints': 2,
-        'inputDim': 2,
-        'numInputs': 1,
-        'numLayers': 1,
+        'inputDim': 100,
+        'numInputs': 100,
+        'numLayers': 10,
         'numIterations' : 1,        
         'numPermutations' : 1,
         'adaptWeights': 1, 
