@@ -30,7 +30,7 @@ def main():
     pyrtl_masks = [pyrtl.Input(bitwidth=1, name=f'ma{i}') for i in range(D)]
 
     # Create the adder tree
-    sum_out = bs_masked_adder_tree(pyrtl_inputs, pyrtl_masks)
+    sum_out = bs_masked_adder_tree(pyrtl_inputs, pyrtl_masks, lsbs, threshold=0)
 
     # Connect sum_out to an output
     sum_output = pyrtl.Output(name='sum_out')
